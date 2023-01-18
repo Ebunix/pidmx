@@ -1,0 +1,4 @@
+build/
+imgui.ini
+js/libv8/*
+!js/libv8/include
