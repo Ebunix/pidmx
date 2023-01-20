@@ -1,5 +1,5 @@
 #include "JsTools.h"
-#include <pidmx_utils.h>
+#include "../src/engine/Console.h"
 
 
 using namespace v8;
@@ -10,7 +10,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::MaybeLocal<v8::Valu
 	if (value.ToLocal(&val)) {
 		return JsValueToImVec4(ctx, val, fallback);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return fallback;
 }
 
@@ -37,7 +37,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &v
 				result.w = (float)temp.As<Number>()->Value();
 			}
 			else {
-				LOG_ERROR("Invalid value");
+				LogMessage(ConsoleMessageType_Error,  "Invalid value");
 			}
 		}
 	}
@@ -57,7 +57,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &v
 		}
 	}
 	else {
-		LOG_ERROR("Value is not an array or object");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array or object");
 		return fallback;
 	}
 	return result;
@@ -69,13 +69,13 @@ std::vector<int> JsValueToIntArray(v8::Local<v8::Context> ctx, const v8::MaybeLo
 	if (value.ToLocal(&val)) {
 		return JsValueToIntArray(ctx, val);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return std::vector<int>();
 }
 
 std::vector<int> JsValueToIntArray(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &value) {
 	if (!value->IsArray()) {
-		LOG_ERROR("Value is not an array");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array");
 		return std::vector<int>();
 	}
 	std::vector<int> result;
@@ -95,14 +95,14 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 	if (value.ToLocal(&val)) {
 		return JsValueToStringArray(ctx, val);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return std::vector<std::string>();
 }
 
 std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &value)
 {
 	if (!value->IsArray()) {
-		LOG_ERROR("Value is not an array");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array");
 		return std::vector<std::string>();
 	}
 	std::vector<std::string> result;

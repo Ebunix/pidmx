@@ -1,13 +1,11 @@
 #include "console.h"
 #include "../jsUtils.h"
 
-extern std::vector<std::string> consolePanelLogBuffer;
-
 namespace js {
 	namespace impl {
 		namespace console {
 
-			void PrintMessage(const char* fmt, const v8::FunctionCallbackInfo<v8::Value>& info) {
+			void PrintMessage(ConsoleMessageType type, const char* fmt, const v8::FunctionCallbackInfo<v8::Value>& info) {
 				std::string str;
 				for (int i = 0; i < info.Length(); ++i) {
 					std::string json;
@@ -20,22 +18,18 @@ namespace js {
 					}
 					str.append(json.c_str());
 					str.append(" ");
-					printf(fmt, json.c_str());
 				}
-				consolePanelLogBuffer.push_back(str);
+				LogMessage(type, str.c_str());
 			}
 
 			void log(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage("%s ", info);
-				printf("\n");
+				PrintMessage(ConsoleMessageType_Info, "%s ", info);
 			}
 			void warn(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage(CON_YELLOW "%s ", info);
-				printf(CON_RESET "\n");
+				PrintMessage(ConsoleMessageType_Warn, "%s ", info);
 			}
 			void error(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage(CON_RED "%s ", info);
-				printf(CON_RESET "\n");
+				PrintMessage(ConsoleMessageType_Error, "%s ", info);
 			}
 		}
 	}

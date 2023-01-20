@@ -7,7 +7,7 @@ using namespace v8;
 void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	if (info.Length() != 2) {
-		LOG_ERROR_FORMAT("Wrong number of arguments. Expected 2, got %i", info.Length());
+		LogMessage(ConsoleMessageType_Error,  "Wrong number of arguments. Expected 2, got %i", info.Length());
 		js::global::isolate->ThrowError(V8StrCheck("Wrong number of arguments."));
 		return;
 	}
@@ -97,7 +97,7 @@ void Modulator::Update()
 	Local<Value> maybe;
 	if (op.Get(iso)->Call(ctx, Undefined(iso), 2, argv).ToLocal(&maybe)) {
 		if (!maybe->IsNumber()) {
-			LOG_ERROR_FORMAT("Operator `%s` returned non-number!", identifier.c_str());
+			LogMessage(ConsoleMessageType_Error,  "Operator `%s` returned non-number!", identifier.c_str());
 			value = 0;
 		}
 		else {

@@ -40,7 +40,7 @@ Fixture::Fixture(uint16_t startSlot, uint16_t slotCount, Universe* universe, Fix
 
 void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 	if (info.Length() < 1) {
-		LOG_ERROR_FORMAT("Wrong number of arguments. Expected 1, got %i", info.Length());
+		LogMessage(ConsoleMessageType_Error,  "Wrong number of arguments. Expected 1, got %i", info.Length());
 		js::global::isolate->ThrowError(V8StrCheck("Wrong number of arguments."));
 		return;
 	}
@@ -60,7 +60,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 			ImVec4 tint;
 			if (Walk(ctx, slotsList, i, &temp)) {
 				if (!JsValueToSlot(ctx, temp, &slot.name, &tint)) {
-					LOG_ERROR_FORMAT("Failed to read slot %i on preset %s", i, preset->name.c_str());
+					LogMessage(ConsoleMessageType_Error,  "Failed to read slot %i on preset %s", i, preset->name.c_str());
 				}
 				else {
 					slot.tint = ImGui::MakeTintPreset(ImGui::sliderTintPresetAssigned, tint);
@@ -142,7 +142,7 @@ void Fixture::Occupy()
 bool Fixture::SetUniverse(Universe *u)
 {
 	if (u && !u->GetSlotRangeAvailable(slot, slotCount)) {
-		LOG_WARN_FORMAT("Tried to occupy slot range %i-%i on %s, which is already (partially) occupied!", slot, slot + slotCount, universe->name.c_str());
+		LogMessage(ConsoleMessageType_Warn,  "Tried to occupy slot range %i-%i on %s, which is already (partially) occupied!", slot, slot + slotCount, universe->name.c_str());
 		return false;
 	}
 	UnOccupy();

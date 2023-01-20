@@ -4,6 +4,7 @@
 #include "Modulator.h"
 #include "Universe.h"
 #include "Fixture.h"
+#include "Console.h"
 
 class Engine {
 public:

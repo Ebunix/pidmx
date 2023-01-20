@@ -1,6 +1,6 @@
 #pragma once
 #include "v8.h"
-#include "../src/pidmx_utils.h"
+#include "../src/engine/Console.h"
 #include "globals.h"
 #include "template.h"
 

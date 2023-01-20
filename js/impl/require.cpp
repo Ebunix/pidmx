@@ -2,14 +2,14 @@
 #include "../jsUtils.h"
 #include "../exec.h"
 
-#include "../../src/pidmx_utils.h"
+#include "../../src/engine/Console.h"
 #include <stdio.h>
 
 namespace js {
 	namespace impl {
 		void require(const v8::FunctionCallbackInfo<v8::Value>& info) {
 			if (!info[0]->IsString()) {
-				LOG_ERROR_FORMAT("%s is not a string", V8CStr(info[0]).c_str());
+				LogMessage(ConsoleMessageType_Error, "%s is not a string", V8CStr(info[0]).c_str());
 				info.GetReturnValue().SetUndefined();
 				return;
 			}
