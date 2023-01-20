@@ -12,9 +12,15 @@
 #include <js.h>
 
 #include <PanelChannelMonitor.h>
+#include <PanelFixtureMap.h>
 #include <PanelChannelEditor.h>
+#include <PanelConsole.h>
 
 GLFWwindow* glfwWindow = nullptr;
+
+ImGuiWindowFlags consoleWindowFlags =
+    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize |
+    ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoDecoration;
 
 void setImGuiStyle(float highDPIscaleFactor)
 {
@@ -66,8 +72,9 @@ void setImGuiStyle(float highDPIscaleFactor)
 
     style.WindowPadding            = ImVec2(5, 5);
     style.WindowRounding           = 5.0f;
-    style.FramePadding             = ImVec2(5, 5);
-    style.FrameRounding            = 5.0f;
+    style.FramePadding             = ImVec2(14, 8);
+    style.CellPadding              = ImVec2(8, 8);
+    //style.FrameRounding            = 5.0f;
     style.ItemSpacing              = ImVec2(5, 5);
     // style.ItemInnerSpacing         = ImVec2(1, 1);
     // style.TouchExtraPadding        = ImVec2(0, 0);
@@ -78,7 +85,7 @@ void setImGuiStyle(float highDPIscaleFactor)
     style.GrabRounding             = 2.0f;
     // style.WindowTitleAlign.x = 0.50f;
     // style.FrameBorderSize = 0.0f;
-    style.WindowBorderSize = 0.0f;
+    style.WindowBorderSize = 1.0f;
 
     style.ScaleAllSizes(highDPIscaleFactor);
 }
@@ -153,9 +160,15 @@ bool initImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.Fonts->AddFontFromFileTTF(
+    ImGui::fontRegular = io.Fonts->AddFontFromFileTTF(
         "resources/Roboto-Regular.ttf",
         32.0f,
+        NULL,
+        NULL
+    );
+    ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
+        "resources/DroidSansMono.ttf",
+        28.0f,
         NULL,
         NULL
     );
@@ -192,15 +205,18 @@ int main(int argc, char* argv[]) {
     v8::HandleScope scope(js::global::isolate);
 
     engine = new Engine();
+    engine->displayScale = 2.0f;
     js::execFile("resources/extern/init.js");
 
-    bool open = true;    
-
-    Universe* universe = new Universe(90, 0);
+    bool open = true;
 
     std::vector<Panel*> panels;
-    panels.push_back(new PanelChannelMonitor(universe));
-    panels.push_back(new PanelChannelEditor(universe));
+    panels.push_back(new PanelChannelMonitor());
+    panels.push_back(new PanelChannelEditor());
+    panels.push_back(new PanelFixtureMap());
+    panels.push_back(new PanelConsole());
+
+    FixturePreset* currentPreset = nullptr;
     
     std::vector<Modulator*> modulators;
     for (int i = 0; i < 20; i++) {
@@ -210,9 +226,8 @@ int main(int argc, char* argv[]) {
     }
 
     while (!glfwWindowShouldClose(glfwWindow)) {
+
         engine->Update();
-        universe->PrepareUpdate();
-        universe->Update();
 
         glClearColor(0.05, 0.05, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -222,7 +237,11 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
 
-        //ImGui::ShowDemoWindow(&open);
+        if (open) {
+            ImGui::ShowDemoWindow(&open);
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::EndMenu();
@@ -235,6 +254,7 @@ int main(int argc, char* argv[]) {
             }
             ImGui::EndMainMenuBar();    
         }
+        ImGui::PopStyleVar(1);
 
         for (const auto& panel : panels) {
             panel->Draw();
@@ -243,11 +263,19 @@ int main(int argc, char* argv[]) {
         if (ImGui::Begin("Debug Tools")) {
             if (ImGui::Button("Assign sine modulators to slots 1-20")) {
                 for (int i = 0; i < modulators.size(); i++) {
-                    universe->SetSlotModulationSource(i, modulators[i]);
+                    engine->universes[0]->SetSlotModulationSource(i, modulators[i]);
                 }
             }
-            ImGui::End();
+            if (ImGui::BeginCombo("Presets", currentPreset ? currentPreset->name.c_str() : nullptr)) {
+                for (const auto& preset : engine->fixturePresets) {
+                    if (ImGui::Selectable(preset->name.c_str())) {
+                        currentPreset = preset;
+                    }
+                }
+                ImGui::EndCombo();
+            } 
         }
+        ImGui::End();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

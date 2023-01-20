@@ -3,13 +3,13 @@
 #include <string>
 #include <vector>
 #include <js.h>
+#include "Object.h"
 
-class Modulator {
+class Modulator: public EngineObject {
 public:
-	std::string name;
 	std::string identifier;
 
-	Modulator(const std::string& identifier, bool root = false): identifier(identifier), isRoot(root) {}
+	Modulator(const std::string& identifier, bool root = false): EngineObject(), identifier(identifier), isRoot(root) {}
 	static void Register(const v8::FunctionCallbackInfo<v8::Value>& info);
 
 	void SetParameter(const std::string& name, float value = 0);

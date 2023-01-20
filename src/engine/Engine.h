@@ -2,16 +2,20 @@
 #include <vector>
 #include <chrono>
 #include "Modulator.h"
+#include "Universe.h"
+#include "Fixture.h"
 
 class Engine {
 public:
 	std::vector<Modulator*> modulators;
-	
+	std::vector<Universe*> universes;
+	std::vector<Fixture*> fixtures;
+	std::vector<FixturePreset*> fixturePresets;
+	float displayScale = 1.0f;
+
 	Engine();
 	void Update();
 	inline const double GetTime() const { return time; }
-
-	void RegisterModulator();
 
 
 private:

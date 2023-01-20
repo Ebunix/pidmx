@@ -3,12 +3,16 @@
 #include <stdio.h>
 #include <engine/Modulator.h>
 
-#define UNIVERSE_SIZE 512
+class Fixture;
 
-class Universe {
+#define UNIVERSE_SIZE 512
+#define UNIVERSE_HISTORY_SIZE 60
+
+class Universe: public EngineObject {
 public:
 	Universe(int numHistoryStates, int id);
 	~Universe();
+	static void Register(const v8::FunctionCallbackInfo<v8::Value>& info);
 
 	const inline int GetHistorySize() const { return historyStates; }
 	uint8_t* GetBufferAtHistory(int history) const;
@@ -18,9 +22,27 @@ public:
 	bool Open(int id);
 	void GetSlotHistory(uint8_t* target, int slot) const;
 	void SetSlotModulationSource(int slot, Modulator* mod);
+	inline const bool GetSlotRangeAvailable(int min, int max) const {
+		for (int i = min; i < max; i++) {
+			if (occupationMap[i] != nullptr) { return false; }
+		}
+		return true;
+	}
+	inline const bool GetSlotAvailable(int slot) const {
+		return occupationMap[slot] == nullptr;
+	}
+	inline void SetSlotRangeOccupied(int min, int max, Fixture* who) {
+		for (int i = min; i < max; i++) {
+			occupationMap[i] = who;
+		}
+	}
+	inline const Fixture* GetOccupant(int slot) {
+		return occupationMap[slot];
+	}
 
 private:
 	uint8_t* slotBuffer = nullptr;
+	Fixture* occupationMap[UNIVERSE_SIZE] = { nullptr };
 	int historyStates = 0;
 	int historyOffset = 0;
 	bool isChanged = false;

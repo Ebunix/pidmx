@@ -1,18 +1,18 @@
 #pragma once
 #include "Panel.h"
 #include <stdio.h>
-#include <Universe.h>
+#include <engine/Universe.h>
 
 class PanelChannelEditor : public Panel {
 public:
-	PanelChannelEditor(Universe* universe): Panel("Channel editor", true), universe(universe) {}
+	PanelChannelEditor(): Panel("Channel editor", true) {}
 	void DrawIntern() override;
 	void DrawMenuBar() override;
 
 private:
-	Universe* universe;
 	Slots slots;
-	
-	const int entrySize = 96;
+
+	Universe* universe = nullptr;	
+	const int entrySize = 112;
 	bool horizontalOverflow = false;
 };

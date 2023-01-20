@@ -30,8 +30,22 @@ inline T* Unwrap(const v8::Local<v8::Object>& obj) {
 	return (T*)wrap->Value();
 }
 template<typename T>
-inline v8::Local<T> Walk(const v8::Local<v8::Value>& obj, const char* name) {
-	return obj.As<v8::Object>()->Get(js::global::context.Get(js::global::isolate), V8StrCheck(name)).ToLocalChecked().As<T>();
+inline bool Walk(v8::Local<v8::Context> ctx, v8::Local<v8::Object> obj, const std::string& name, v8::Local<T>* output) {
+	v8::Local<v8::Value> temp;
+	bool result = obj->Get(ctx, V8StrCheck(name)).ToLocal(&temp);
+	if (result) {
+		*output = temp.As<T>();
+	}
+	return result && !temp->IsUndefined();
+}
+template<typename T>
+inline bool Walk(v8::Local<v8::Context> ctx, v8::Local<v8::Array> obj, int i, v8::Local<T>* output) {
+	v8::Local<v8::Value> temp;
+	bool result = obj->Get(ctx, i).ToLocal(&temp);
+	if (result) {
+		*output = temp.As<T>();
+	}
+	return result && !temp->IsUndefined();
 }
 namespace js {
 	template<typename T>

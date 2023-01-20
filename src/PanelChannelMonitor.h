@@ -1,27 +1,35 @@
 #pragma once
 #include "Panel.h"
 #include <stdio.h>
-#include <Universe.h>
+#include <engine/Universe.h>
 
 class PanelChannelMonitor : public Panel {
 public:
-	PanelChannelMonitor(Universe* universe): Panel("Channel monitor", true), universe(universe) {
-		valueBuffer = new float[universe->GetHistorySize()];
-		slotBuffer = new uint8_t[universe->GetHistorySize()];
-	}
+	PanelChannelMonitor(): Panel("Channel monitor", true) {}
 	~PanelChannelMonitor() {
 		delete[] valueBuffer;
 		delete[] slotBuffer;
 	}
 	void DrawIntern() override;
 	void DrawMenuBar() override;
+	inline void SetUniverse(Universe* universe) {
+		if (valueBuffer) {
+			delete[] valueBuffer;
+		}
+		if (slotBuffer) {
+			delete[] slotBuffer;
+		}
+		valueBuffer = new float[universe->GetHistorySize()];
+		slotBuffer = new uint8_t[universe->GetHistorySize()];
+		this->universe = universe;
+	}
 
 private:
-	Universe* universe;
 	Slots slots;
 
-	float* valueBuffer;
-	uint8_t* slotBuffer;
-	const int entrySize = 96;
+	Universe* universe = nullptr;
+	float* valueBuffer = nullptr;
+	uint8_t* slotBuffer = nullptr;
+	const int entrySize = 112;
 	bool horizontalOverflow = false;
 };

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <imgui.h>
+#include <ImGuiExt.h>
 
 class Panel {
 public:
@@ -15,6 +15,7 @@ public:
 		if (!open) {
 			return;
 		}
+		ImGui::SetNextWindowSize(ImVec2(200, 75), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin(title.c_str(), &open, windowFlags)) {
 			if (menuBar && ImGui::BeginMenuBar()) {
 				DrawMenuBar();
@@ -29,6 +30,7 @@ public:
 	virtual void DrawMenuBar() {};
 
 private:
+	
 	bool menuBar = false;
 };
 

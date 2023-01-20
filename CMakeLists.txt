@@ -53,19 +53,22 @@ target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libpla
 add_executable(pidmx 
 	main.cpp
 
+	src/ImGuiExt.cpp
 	src/pidmx_utils.cpp
-	src/Universe.cpp
 	
+	src/engine/Universe.cpp
 	src/engine/Engine.cpp
 	src/engine/Modulator.cpp
+	src/engine/Parameter.cpp
+	src/engine/Fixture.cpp
+	src/engine/JsTools.cpp
 
+	src/PanelFixtureMap.cpp
 	src/PanelChannelMonitor.cpp
 	src/PanelChannelEditor.cpp
+	src/PanelConsole.cpp
 )
 target_include_directories(pidmx PUBLIC src)
-target_include_directories(pidmx PUBLIC luacpp/Source)
-
-
 
 target_link_libraries(pidmx glfw)
 target_link_libraries(pidmx glad)

@@ -2,3 +2,10 @@ build/
 imgui.ini
 js/libv8/*
 !js/libv8/include
+*.o
+*.cmd
+*.mod
+*.mod.c
+*.ko
+module/modules.order
+module/Module.symvers

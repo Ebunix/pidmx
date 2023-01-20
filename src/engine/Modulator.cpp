@@ -13,22 +13,26 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 	}
 
 	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
+	Local<Value> temp;
 
 	std::string identifier = V8CStr(info[0]);
 	Local<Object> data = info[1].As<Object>();
-	std::string name = V8CStr(Walk<String>(info[1], "name"));
-	Local<Function> op = Walk<Function>(info[1], "operator");
-	Local<Object> parameters = Walk<Object>(info[1], "parameters");
+	Local<Value> name;
+	Local<Function> op;
+	Local<Object> parameters;
+	Walk(ctx, data, "name", &name);
+	Walk(ctx, data, "operator", &op);
+	Walk(ctx, data, "parameters", &parameters);
+
 	Modulator* mod = new Modulator(identifier, true);
 	Local<Array> keys = parameters->GetOwnPropertyNames(ctx).ToLocalChecked();
-	LOG_DEBUG_FORMAT("Modulator `%s` parameters: %s", identifier.c_str(), V8CStr(JSON::Stringify(ctx, keys).ToLocalChecked()).c_str());
 
 	for (int i = 0; i < keys->Length(); i++) {
 		Local<Value> key = keys->Get(ctx, i).ToLocalChecked();
 		float value = (float)parameters->Get(ctx, key).ToLocalChecked().As<Number>()->Value();
 		mod->SetParameter(V8CStr(key), value);
 	}
-	mod->name = name;
+	mod->name = V8CStr(name);
 	mod->op.Reset(info.GetIsolate(), op);
 
 	engine->modulators.push_back(mod);
@@ -36,7 +40,6 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 
 void Modulator::SetParameter(const std::string &name, float value)
 {
-	LOG_DEBUG_FORMAT("Set parameter `%s.%s`: %f", identifier.c_str(), name.c_str(), value);
 	for (auto& pair : parameters) {
 		if (name.compare(pair.first) == 0) {
 			pair.second = value;
