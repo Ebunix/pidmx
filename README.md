@@ -4,12 +4,12 @@ Simple desktop DMX controller
 Not included in this repository is a build of Google's V8 engine. The header files are present, but the binaries are omitted due to their massive size.
 You'll have to build the correct binaries yourself or grab them from a different place. 
 
-TODO: Actually provide a proper build for the V8 binaries.
-
 # Cloning
 Clone the repository using `git clone --recursive https://github.com/Ebunix/pidmx` to take care of the 
 
 # PiDMX
+For compiling PiDMX you'll need a static, monotithic build of Google's V8 Javascript engine. Building V8 is quite lengthy and not that straightforward, so I've provided pre-built binaries for x64 Linux [here](http://static.itsebu.net/v8.tar.gz) that you can download. The included `x64.debug` and `x64.release` folders need to be extracted into `js/libv8`, next to the already present `include` folder.
+
 From the repository root directory:
 ```bash
 mkdir build && cd build
