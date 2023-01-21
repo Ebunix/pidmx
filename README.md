@@ -1,8 +1,9 @@
 # PiDMX
 Simple desktop DMX controller
 
-Not included in this repository is a build of Google's V8 engine. The header files are present, but the binaries are omitted due to their massive size.
-You'll have to build the correct binaries yourself or grab them from a different place. 
+[![Build Release](https://github.com/Ebunix/pidmx/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Ebunix/pidmx/actions/workflows/build.yml)
+
+---
 
 # Cloning
 Clone the repository using `git clone --recursive https://github.com/Ebunix/pidmx` to take care of the 
