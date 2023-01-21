@@ -24,7 +24,13 @@ jobs:
       run: git submodule update --init --recursive
     
     - name: Install packages
-      run: sudo apt-get install -y libglfw3-dev
+      run: sudo apt-get install -y libglfw3-dev wget
+    
+    - name: Grab V8
+      run: wget https://static.itsebu.net/v8.tar.gz
+      
+    - name: Unpack V8
+      run: tar -xvf v8.tar.gz && mv files/x64.debug js/libv8 && mv files/x64.release js/libv8
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
