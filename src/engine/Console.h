@@ -37,16 +37,27 @@
 
 float __logTime();
 
-#define LOG_ERROR_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_RED     "ERROR " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_RED msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
-#define LOG_ERROR(msg)				printf(CON_BLACK "%.3f " CON_RED     "ERROR " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_RED msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__)
-#define LOG_WARN_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_YELLOW  "WARN  " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_YELLOW msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
-#define LOG_WARN(msg)				printf(CON_BLACK "%.3f " CON_YELLOW  "WARN  " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_YELLOW msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__)
-#define LOG_FORMAT(msg, ...)		printf(CON_BLACK "%.3f " CON_BLACK   "MSG   " CON_BLACK __FILE__ ":%i: " CON_RESET msg "\n", __logTime(), __LINE__, __VA_ARGS__)
-#define LOG(msg)					printf(CON_BLACK "%.3f " CON_BLACK   "MSG   " CON_BLACK __FILE__ ":%i: " CON_RESET msg "\n", __logTime(), __LINE__)
-#define LOG_INFO_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_GREEN   "INFO  " CON_BLACK __FILE__ ":%i: " CON_GREEN msg "\n" CON_RESET, __logTime(), __LINE__, __VA_ARGS__)
-#define LOG_INFO(msg)				printf(CON_BLACK "%.3f " CON_GREEN   "INFO  " CON_BLACK __FILE__ ":%i: " CON_GREEN msg "\n" CON_RESET, __logTime(), __LINE__)
-#define LOG_DEBUG_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_MAGENTA "DEBUG " CON_BLACK __FILE__ ":%i: " CON_MAGENTA msg "\n" CON_RESET, __logTime(), __LINE__, __VA_ARGS__)
-#define LOG_DEBUG(msg)				printf(CON_BLACK "%.3f " CON_MAGENTA "DEBUG " CON_BLACK __FILE__ ":%i: " CON_MAGENTA msg "\n" CON_RESET, __logTime(), __LINE__)
+// #define LOG_ERROR_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_RED     "ERROR " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_RED msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
+// #define LOG_ERROR(msg)				printf(CON_BLACK "%.3f " CON_RED     "ERROR " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_RED msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__)
+// #define LOG_WARN_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_YELLOW  "WARN  " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_YELLOW msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
+// #define LOG_WARN(msg)				printf(CON_BLACK "%.3f " CON_YELLOW  "WARN  " CON_BLACK __FILE__ ":%i in " CON_BRIGHT_BLACK "%s" CON_BLACK ": " CON_BRIGHT_YELLOW msg "\n" CON_RESET, __logTime(), __LINE__, __PRETTY_FUNCTION__)
+// #define LOG_FORMAT(msg, ...)		printf(CON_BLACK "%.3f " CON_BLACK   "MSG   " CON_BLACK __FILE__ ":%i: " CON_RESET msg "\n", __logTime(), __LINE__, __VA_ARGS__)
+// #define LOG(msg)					printf(CON_BLACK "%.3f " CON_BLACK   "MSG   " CON_BLACK __FILE__ ":%i: " CON_RESET msg "\n", __logTime(), __LINE__)
+// #define LOG_INFO_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_GREEN   "INFO  " CON_BLACK __FILE__ ":%i: " CON_GREEN msg "\n" CON_RESET, __logTime(), __LINE__, __VA_ARGS__)
+// #define LOG_INFO(msg)				printf(CON_BLACK "%.3f " CON_GREEN   "INFO  " CON_BLACK __FILE__ ":%i: " CON_GREEN msg "\n" CON_RESET, __logTime(), __LINE__)
+// #define LOG_DEBUG_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_MAGENTA "DEBUG " CON_BLACK __FILE__ ":%i: " CON_MAGENTA msg "\n" CON_RESET, __logTime(), __LINE__, __VA_ARGS__)
+// #define LOG_DEBUG(msg)				printf(CON_BLACK "%.3f " CON_MAGENTA "DEBUG " CON_BLACK __FILE__ ":%i: " CON_MAGENTA msg "\n" CON_RESET, __logTime(), __LINE__)
+
+#define LOG_ERROR_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_BRIGHT_RED     "ERROR " msg "\n" CON_RESET, __logTime(), __VA_ARGS__)
+#define LOG_ERROR(msg)				printf(CON_BLACK "%.3f " CON_BRIGHT_RED     "ERROR " msg "\n" CON_RESET, __logTime())
+#define LOG_WARN_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_BRIGHT_YELLOW  "WARN  " msg "\n" CON_RESET, __logTime(), __VA_ARGS__)
+#define LOG_WARN(msg)				printf(CON_BLACK "%.3f " CON_BRIGHT_YELLOW  "WARN  " msg "\n" CON_RESET, __logTime())
+#define LOG_FORMAT(msg, ...)		printf(CON_BLACK "%.3f " CON_BLACK   		"MSG   " msg "\n" CON_RESET, __logTime(), __VA_ARGS__)
+#define LOG(msg)					printf(CON_BLACK "%.3f " CON_BLACK   		"MSG   " msg "\n" CON_RESET, __logTime())
+#define LOG_INFO_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_GREEN   		"INFO  " msg "\n" CON_RESET, __logTime(), __VA_ARGS__)
+#define LOG_INFO(msg)				printf(CON_BLACK "%.3f " CON_GREEN   		"INFO  " msg "\n" CON_RESET, __logTime())
+#define LOG_DEBUG_FORMAT(msg, ...)	printf(CON_BLACK "%.3f " CON_MAGENTA 		"DEBUG " msg "\n" CON_RESET, __logTime(), __VA_ARGS__)
+#define LOG_DEBUG(msg)				printf(CON_BLACK "%.3f " CON_MAGENTA 		"DEBUG " msg "\n" CON_RESET, __logTime())
 
 #define LOG_ERROR_ISNULL(var)		LOG_ERROR_FORMAT("`%s` is null", #var)
 

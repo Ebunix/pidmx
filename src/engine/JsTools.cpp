@@ -110,7 +110,7 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 	Local<Array> array = value.As<Array>();
 	for (int i = 0; i < array->Length() && i < 4; i++) {
 		if (array->Get(ctx, i).ToLocal(&temp) && temp->IsString()) {
-			result.push_back(V8CStr(temp));
+			result.push_back(V8CStr(ctx, temp));
 		}
 	}
 	return result;
@@ -118,7 +118,7 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 
 bool JsValueToSlot(v8::Local<v8::Context> ctx, v8::Local<v8::Value> &value, std::string *name, ImVec4 *tint) {
 	if (value->IsString()) {
-		*name = V8CStr(value);
+		*name = V8CStr(ctx, value);
 		*tint = ImVec4(1, 1, 1, 1);
 		return true;
 	}
@@ -130,7 +130,7 @@ bool JsValueToSlot(v8::Local<v8::Context> ctx, v8::Local<v8::Value> &value, std:
 	Local<Object> obj = value.As<Object>();
 
 	if (obj->Get(ctx, V8StrCheck("name")).ToLocal(&temp)) {
-		*name = V8CStr(temp);
+		*name = V8CStr(ctx, temp);
 	}
 	*tint = JsValueToImVec4(ctx, obj->Get(ctx, V8StrCheck("tint")), ImVec4(1, 1, 1, 1));
 	return true;

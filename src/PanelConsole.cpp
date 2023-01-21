@@ -78,12 +78,13 @@ void PanelConsole::DrawIntern()
 			commandHistory.push_back(commandBuffer);
 			historyPos = commandHistory.size();
 			LogMessage(ConsoleMessageType_Info, "%s", commandBuffer);
+			v8::Local<v8::Context> ctx = js::global::context.Get(js::global::isolate);
 			v8::Local<v8::Value> result = js::exec(commandBuffer);
 			if (result->IsString()) {
-				LogMessage(ConsoleMessageType_Info, "=> '%s'", V8CStr(result).c_str());
+				LogMessage(ConsoleMessageType_Info, "=> '%s'", V8CStr(ctx, result).c_str());
 			}
 			else {
-				LogMessage(ConsoleMessageType_Info, "=> %s", V8CStr(result).c_str());
+				LogMessage(ConsoleMessageType_Info, "=> %s", V8CStr(ctx, result).c_str());
 			}
 			commandBuffer[0] = 0;
 		}

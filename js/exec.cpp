@@ -27,16 +27,17 @@ namespace js {
 			if (scriptMaybe.ToLocal(&script)) {
 				v8::MaybeLocal<v8::Value> result = script->Run(ctx);
 				if (tryCatch.HasCaught()) {
-					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(tryCatch.Message()->Get()).c_str());
+					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(ctx, tryCatch.Message()->Get()).c_str());
 				}
-				if (result.IsEmpty()) {
-					return handleScope.Escape(v8::Undefined(iso));
+				v8::Local<v8::Value> temp;
+				if (result.ToLocal(&temp)) {
+					return handleScope.Escape(temp);
 				}
-				return handleScope.Escape(result.ToLocalChecked());
+				return handleScope.Escape(v8::Undefined(iso));
 			}
 			else {
 				if (tryCatch.HasCaught()) {
-					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(tryCatch.Message()->Get()).c_str());
+					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(ctx, tryCatch.Message()->Get()).c_str());
 				}
 				LogMessage(ConsoleMessageType_Error, "Failed to compile script");
 			}

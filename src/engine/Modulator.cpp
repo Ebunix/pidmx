@@ -15,7 +15,7 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
 	Local<Value> temp;
 
-	std::string identifier = V8CStr(info[0]);
+	std::string identifier = V8CStr(ctx, info[0]);
 	Local<Object> data = info[1].As<Object>();
 	Local<Value> name;
 	Local<Function> op;
@@ -30,9 +30,9 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 	for (int i = 0; i < keys->Length(); i++) {
 		Local<Value> key = keys->Get(ctx, i).ToLocalChecked();
 		float value = (float)parameters->Get(ctx, key).ToLocalChecked().As<Number>()->Value();
-		mod->SetParameter(V8CStr(key), value);
+		mod->SetParameter(V8CStr(ctx, key), value);
 	}
-	mod->name = V8CStr(name);
+	mod->name = V8CStr(ctx, name);
 	mod->op.Reset(info.GetIsolate(), op);
 
 	engine->modulators.push_back(mod);

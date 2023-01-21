@@ -24,7 +24,7 @@ void Universe::Register(const v8::FunctionCallbackInfo<v8::Value>& info) {
 
 	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
 
-	std::string name = V8CStr(info[0]);
+	std::string name = V8CStr(ctx, info[0]);
 	Local<Number> data = info[1].As<Number>();
 	int id = (int)data->Value();
 

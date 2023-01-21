@@ -51,7 +51,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 	Local<Object> data = info[0].As<Object>();
 	Local<Value> temp;
 	
-	preset->name = V8CStr(data->Get(ctx, V8StrCheck("name")).ToLocalChecked());
+	preset->name = V8CStr(ctx, data->Get(ctx, V8StrCheck("name")).ToLocalChecked());
 	
 	Local<Array> slotsList;
 	if (Walk(ctx, data, "slots", &slotsList)) {;
@@ -82,12 +82,12 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 				ctrl.slots = JsValueToIntArray(ctx, temp);
 			}
 			if (Walk(ctx, ctrlData, "type", &temp)) {
-				ctrl.type = ControlTypeFromName(V8CStr(temp));
+				ctrl.type = ControlTypeFromName(V8CStr(ctx, temp));
 			}
 			switch (ctrl.type) {
 				case FixtureControlType::Color: {
 					if (Walk(ctx, ctrlData, "order", &temp)) {
-						ctrl.colorOrder = V8CStr(temp);
+						ctrl.colorOrder = V8CStr(ctx, temp);
 					}
 					break;
 				}
@@ -105,7 +105,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 									fcr.to = (int)v.As<Number>()->Value();
 								}
 								if (Walk(ctx, temp.As<Object>(), "label", &v) && v->IsString()) {
-									fcr.label = V8CStr(v);
+									fcr.label = V8CStr(ctx, v);
 								}
 							}
 							ctrl.selects.push_back(fcr);
