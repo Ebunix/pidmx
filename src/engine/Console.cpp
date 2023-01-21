@@ -1,6 +1,7 @@
 #include "Console.h"
 #include <stdio.h>
 #include <pidmx_utils.h>
+#include <stdarg.h>
 
 int64_t __logStartTime = 0;
 bool __logInitialized = false;
