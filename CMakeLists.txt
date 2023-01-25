@@ -6,7 +6,7 @@ find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 
-add_library(imgui STATIC)
+add_library(imgui SHARED)
 target_sources(imgui PRIVATE
 	imgui/imgui.cpp
 	imgui/imgui_demo.cpp
@@ -22,7 +22,7 @@ target_include_directories(imgui PUBLIC
 )
 
 
-add_library(glad STATIC)
+add_library(glad SHARED)
 target_sources(glad PRIVATE
 	glad/src/glad.c
 )
@@ -31,7 +31,7 @@ target_include_directories(glad PUBLIC
 )
 
 
-add_library(js STATIC)
+add_library(js SHARED)
 target_sources(js PRIVATE
 	js/exec.cpp
 	js/globals.cpp
@@ -45,9 +45,21 @@ target_include_directories(js PUBLIC
 	js
 	js/libv8/include
 )
-target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_monolith.a)
-target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libbase.a)
-target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libplatform.a)
+
+add_library(libv8_base IMPORTED SHARED)
+set_property(TARGET libv8_base PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libbase.so)
+add_library(libv8_platform IMPORTED SHARED)
+set_property(TARGET libv8_platform PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libplatform.so)
+add_library(libv8 IMPORTED SHARED)
+set_property(TARGET libv8 PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8.so)
+
+target_link_libraries(js libv8_base)
+target_link_libraries(js libv8_platform)
+target_link_libraries(js libv8)
+
+# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_monolith.a)
+# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libbase.a)
+# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libplatform.a)
 
 
 add_executable(pidmx 
