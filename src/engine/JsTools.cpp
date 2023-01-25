@@ -1,5 +1,5 @@
 #include "JsTools.h"
-#include <pidmx_utils.h>
+#include "../src/engine/Console.h"
 
 
 using namespace v8;
@@ -10,7 +10,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::MaybeLocal<v8::Valu
 	if (value.ToLocal(&val)) {
 		return JsValueToImVec4(ctx, val, fallback);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return fallback;
 }
 
@@ -37,7 +37,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &v
 				result.w = (float)temp.As<Number>()->Value();
 			}
 			else {
-				LOG_ERROR("Invalid value");
+				LogMessage(ConsoleMessageType_Error,  "Invalid value");
 			}
 		}
 	}
@@ -57,7 +57,7 @@ ImVec4 JsValueToImVec4(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &v
 		}
 	}
 	else {
-		LOG_ERROR("Value is not an array or object");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array or object");
 		return fallback;
 	}
 	return result;
@@ -69,13 +69,13 @@ std::vector<int> JsValueToIntArray(v8::Local<v8::Context> ctx, const v8::MaybeLo
 	if (value.ToLocal(&val)) {
 		return JsValueToIntArray(ctx, val);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return std::vector<int>();
 }
 
 std::vector<int> JsValueToIntArray(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &value) {
 	if (!value->IsArray()) {
-		LOG_ERROR("Value is not an array");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array");
 		return std::vector<int>();
 	}
 	std::vector<int> result;
@@ -95,14 +95,14 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 	if (value.ToLocal(&val)) {
 		return JsValueToStringArray(ctx, val);
 	}
-	LOG_ERROR("Empty value");
+	LogMessage(ConsoleMessageType_Error,  "Empty value");
 	return std::vector<std::string>();
 }
 
 std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const v8::Local<v8::Value> &value)
 {
 	if (!value->IsArray()) {
-		LOG_ERROR("Value is not an array");
+		LogMessage(ConsoleMessageType_Error,  "Value is not an array");
 		return std::vector<std::string>();
 	}
 	std::vector<std::string> result;
@@ -110,7 +110,7 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 	Local<Array> array = value.As<Array>();
 	for (int i = 0; i < array->Length() && i < 4; i++) {
 		if (array->Get(ctx, i).ToLocal(&temp) && temp->IsString()) {
-			result.push_back(V8CStr(temp));
+			result.push_back(V8CStr(ctx, temp));
 		}
 	}
 	return result;
@@ -118,7 +118,7 @@ std::vector<std::string> JsValueToStringArray(v8::Local<v8::Context> ctx, const 
 
 bool JsValueToSlot(v8::Local<v8::Context> ctx, v8::Local<v8::Value> &value, std::string *name, ImVec4 *tint) {
 	if (value->IsString()) {
-		*name = V8CStr(value);
+		*name = V8CStr(ctx, value);
 		*tint = ImVec4(1, 1, 1, 1);
 		return true;
 	}
@@ -130,7 +130,7 @@ bool JsValueToSlot(v8::Local<v8::Context> ctx, v8::Local<v8::Value> &value, std:
 	Local<Object> obj = value.As<Object>();
 
 	if (obj->Get(ctx, V8StrCheck("name")).ToLocal(&temp)) {
-		*name = V8CStr(temp);
+		*name = V8CStr(ctx, temp);
 	}
 	*tint = JsValueToImVec4(ctx, obj->Get(ctx, V8StrCheck("tint")), ImVec4(1, 1, 1, 1));
 	return true;

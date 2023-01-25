@@ -1,41 +1,36 @@
 #include "console.h"
 #include "../jsUtils.h"
 
-extern std::vector<std::string> consolePanelLogBuffer;
-
 namespace js {
 	namespace impl {
 		namespace console {
 
-			void PrintMessage(const char* fmt, const v8::FunctionCallbackInfo<v8::Value>& info) {
+			void PrintMessage(ConsoleMessageType type, const char* fmt, const v8::FunctionCallbackInfo<v8::Value>& info) {
+				v8::Local<v8::Context> ctx = info.GetIsolate()->GetCurrentContext();
 				std::string str;
 				for (int i = 0; i < info.Length(); ++i) {
 					std::string json;
 					if (info[i]->IsString()) {
-						json = V8CStr(info[i]);
+						json = V8CStr(ctx, info[i]);
 					}
 					else {
-						json = V8CStr(v8::JSON::Stringify(info.GetIsolate()->GetCurrentContext(), info[i]).ToLocalChecked());
+						json = V8CStr(ctx, v8::JSON::Stringify(ctx, info[i]).ToLocalChecked());
 
 					}
 					str.append(json.c_str());
 					str.append(" ");
-					printf(fmt, json.c_str());
 				}
-				consolePanelLogBuffer.push_back(str);
+				LogMessage(type, str.c_str());
 			}
 
 			void log(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage("%s ", info);
-				printf("\n");
+				PrintMessage(ConsoleMessageType_Info, "%s ", info);
 			}
 			void warn(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage(CON_YELLOW "%s ", info);
-				printf(CON_RESET "\n");
+				PrintMessage(ConsoleMessageType_Warn, "%s ", info);
 			}
 			void error(const v8::FunctionCallbackInfo<v8::Value>& info) {
-				PrintMessage(CON_RED "%s ", info);
-				printf(CON_RESET "\n");
+				PrintMessage(ConsoleMessageType_Error, "%s ", info);
 			}
 		}
 	}

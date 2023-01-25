@@ -74,6 +74,7 @@ add_executable(pidmx
 	src/engine/Parameter.cpp
 	src/engine/Fixture.cpp
 	src/engine/JsTools.cpp
+	src/engine/Console.cpp
 
 	src/PanelFixtureMap.cpp
 	src/PanelChannelMonitor.cpp

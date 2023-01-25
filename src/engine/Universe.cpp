@@ -17,14 +17,14 @@ Universe::~Universe() {
 
 void Universe::Register(const v8::FunctionCallbackInfo<v8::Value>& info) {
 	if (info.Length() != 2) {
-		LOG_ERROR_FORMAT("Wrong number of arguments. Expected 2, got %i", info.Length());
+		LogMessage(ConsoleMessageType_Error,  "Wrong number of arguments. Expected 2, got %i", info.Length());
 		js::global::isolate->ThrowError(V8StrCheck("Wrong number of arguments."));
 		return;
 	}
 
 	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
 
-	std::string name = V8CStr(info[0]);
+	std::string name = V8CStr(ctx, info[0]);
 	Local<Number> data = info[1].As<Number>();
 	int id = (int)data->Value();
 

@@ -40,7 +40,7 @@ Fixture::Fixture(uint16_t startSlot, uint16_t slotCount, Universe* universe, Fix
 
 void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 	if (info.Length() < 1) {
-		LOG_ERROR_FORMAT("Wrong number of arguments. Expected 1, got %i", info.Length());
+		LogMessage(ConsoleMessageType_Error,  "Wrong number of arguments. Expected 1, got %i", info.Length());
 		js::global::isolate->ThrowError(V8StrCheck("Wrong number of arguments."));
 		return;
 	}
@@ -51,7 +51,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 	Local<Object> data = info[0].As<Object>();
 	Local<Value> temp;
 	
-	preset->name = V8CStr(data->Get(ctx, V8StrCheck("name")).ToLocalChecked());
+	preset->name = V8CStr(ctx, data->Get(ctx, V8StrCheck("name")).ToLocalChecked());
 	
 	Local<Array> slotsList;
 	if (Walk(ctx, data, "slots", &slotsList)) {;
@@ -60,7 +60,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 			ImVec4 tint;
 			if (Walk(ctx, slotsList, i, &temp)) {
 				if (!JsValueToSlot(ctx, temp, &slot.name, &tint)) {
-					LOG_ERROR_FORMAT("Failed to read slot %i on preset %s", i, preset->name.c_str());
+					LogMessage(ConsoleMessageType_Error,  "Failed to read slot %i on preset %s", i, preset->name.c_str());
 				}
 				else {
 					slot.tint = ImGui::MakeTintPreset(ImGui::sliderTintPresetAssigned, tint);
@@ -82,12 +82,12 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 				ctrl.slots = JsValueToIntArray(ctx, temp);
 			}
 			if (Walk(ctx, ctrlData, "type", &temp)) {
-				ctrl.type = ControlTypeFromName(V8CStr(temp));
+				ctrl.type = ControlTypeFromName(V8CStr(ctx, temp));
 			}
 			switch (ctrl.type) {
 				case FixtureControlType::Color: {
 					if (Walk(ctx, ctrlData, "order", &temp)) {
-						ctrl.colorOrder = V8CStr(temp);
+						ctrl.colorOrder = V8CStr(ctx, temp);
 					}
 					break;
 				}
@@ -105,7 +105,7 @@ void Fixture::RegisterPreset(const v8::FunctionCallbackInfo<v8::Value> &info) {
 									fcr.to = (int)v.As<Number>()->Value();
 								}
 								if (Walk(ctx, temp.As<Object>(), "label", &v) && v->IsString()) {
-									fcr.label = V8CStr(v);
+									fcr.label = V8CStr(ctx, v);
 								}
 							}
 							ctrl.selects.push_back(fcr);
@@ -142,7 +142,7 @@ void Fixture::Occupy()
 bool Fixture::SetUniverse(Universe *u)
 {
 	if (u && !u->GetSlotRangeAvailable(slot, slotCount)) {
-		LOG_WARN_FORMAT("Tried to occupy slot range %i-%i on %s, which is already (partially) occupied!", slot, slot + slotCount, universe->name.c_str());
+		LogMessage(ConsoleMessageType_Warn,  "Tried to occupy slot range %i-%i on %s, which is already (partially) occupied!", slot, slot + slotCount, universe->name.c_str());
 		return false;
 	}
 	UnOccupy();

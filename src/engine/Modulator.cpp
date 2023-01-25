@@ -7,7 +7,7 @@ using namespace v8;
 void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 {
 	if (info.Length() != 2) {
-		LOG_ERROR_FORMAT("Wrong number of arguments. Expected 2, got %i", info.Length());
+		LogMessage(ConsoleMessageType_Error,  "Wrong number of arguments. Expected 2, got %i", info.Length());
 		js::global::isolate->ThrowError(V8StrCheck("Wrong number of arguments."));
 		return;
 	}
@@ -15,7 +15,7 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
 	Local<Value> temp;
 
-	std::string identifier = V8CStr(info[0]);
+	std::string identifier = V8CStr(ctx, info[0]);
 	Local<Object> data = info[1].As<Object>();
 	Local<Value> name;
 	Local<Function> op;
@@ -30,9 +30,9 @@ void Modulator::Register(const v8::FunctionCallbackInfo<v8::Value>& info)
 	for (int i = 0; i < keys->Length(); i++) {
 		Local<Value> key = keys->Get(ctx, i).ToLocalChecked();
 		float value = (float)parameters->Get(ctx, key).ToLocalChecked().As<Number>()->Value();
-		mod->SetParameter(V8CStr(key), value);
+		mod->SetParameter(V8CStr(ctx, key), value);
 	}
-	mod->name = V8CStr(name);
+	mod->name = V8CStr(ctx, name);
 	mod->op.Reset(info.GetIsolate(), op);
 
 	engine->modulators.push_back(mod);
@@ -97,7 +97,7 @@ void Modulator::Update()
 	Local<Value> maybe;
 	if (op.Get(iso)->Call(ctx, Undefined(iso), 2, argv).ToLocal(&maybe)) {
 		if (!maybe->IsNumber()) {
-			LOG_ERROR_FORMAT("Operator `%s` returned non-number!", identifier.c_str());
+			LogMessage(ConsoleMessageType_Error,  "Operator `%s` returned non-number!", identifier.c_str());
 			value = 0;
 		}
 		else {

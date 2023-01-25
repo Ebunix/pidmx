@@ -1,6 +1,6 @@
 #pragma once
 #include "v8.h"
-#include "../src/pidmx_utils.h"
+#include "../src/engine/Console.h"
 #include "globals.h"
 #include "template.h"
 
@@ -10,16 +10,16 @@ inline v8::MaybeLocal<v8::String> V8Str(const std::string& str) {
 inline v8::Local<v8::String> V8StrCheck(const std::string& str) {
 	return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), str.c_str()).ToLocalChecked();
 }
-inline v8::Local<v8::String> ValueToString(const v8::Local<v8::Value>& val) {
+inline v8::Local<v8::String> ValueToString(const v8::Local<v8::Context>& ctx, const v8::Local<v8::Value>& val) {
 	v8::Local<v8::String> result;
-	if (val->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocal(&result)) {
+	if (val->ToString(ctx).ToLocal(&result)) {
 		return result;
 	}
 	return V8StrCheck("<unknown>");
 }
-inline std::string V8CStr(const v8::Local<v8::Value>& val) {
+inline std::string V8CStr(const v8::Local<v8::Context>& ctx, const v8::Local<v8::Value>& val) {
 	v8::Isolate* isolate = v8::Isolate::GetCurrent();
-	v8::String::Utf8Value result(isolate, ValueToString(val));
+	v8::String::Utf8Value result(isolate, ValueToString(ctx, val));
 	std::string cppStr(*result);
 	return cppStr;
 }

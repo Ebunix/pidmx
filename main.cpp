@@ -87,6 +87,20 @@ void setImGuiStyle(float highDPIscaleFactor)
     // style.FrameBorderSize = 0.0f;
     style.WindowBorderSize = 1.0f;
 
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::fontRegular = io.Fonts->AddFontFromFileTTF(
+        "resources/Roboto-Regular.ttf",
+        16.0f * engine->displayScale,
+        NULL,
+        NULL
+    );
+    ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
+        "resources/JetBrainsMono-Regular.ttf",
+        16.0f * engine->displayScale,
+        NULL,
+        NULL
+    );
+
     style.ScaleAllSizes(highDPIscaleFactor);
 }
 
@@ -103,7 +117,7 @@ static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 bool initGLFW(const char* title, bool fullscreen) {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) {
-        LOG_ERROR("Couldn't initialize GLFW");
+        LogMessage(ConsoleMessageType_Error, "Couldn't initialize GLFW");
         return false;
     }
 
@@ -129,7 +143,7 @@ bool initGLFW(const char* title, bool fullscreen) {
         glfwWindow = glfwCreateWindow(displayWidth / 2, displayHeight / 2, title, NULL, NULL);
     }
     if (!glfwWindow) {
-        LOG_ERROR("Couldn't create a GLFW window");
+        LogMessage(ConsoleMessageType_Error, "Couldn't create a GLFW window");
         return false;
     }
 
@@ -137,7 +151,7 @@ bool initGLFW(const char* title, bool fullscreen) {
     glfwMakeContextCurrent(glfwWindow);
     glfwSwapInterval(1);
 
-    LOG_INFO_FORMAT("OpenGL from GLFW %i.%i",
+    LogMessage(ConsoleMessageType_Info, "OpenGL from GLFW %i.%i",
         glfwGetWindowAttrib(glfwWindow, GLFW_CONTEXT_VERSION_MAJOR),
         glfwGetWindowAttrib(glfwWindow, GLFW_CONTEXT_VERSION_MINOR));
 
@@ -146,12 +160,12 @@ bool initGLFW(const char* title, bool fullscreen) {
 
 bool initGLAD() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LOG_ERROR("Couldn't initialize GLAD");
+        LogMessage(ConsoleMessageType_Error, "Couldn't initialize GLAD");
         return false;
     }
 
-    LOG_INFO_FORMAT("OpenGL renderer: %s", glGetString(GL_RENDERER));
-    LOG_INFO_FORMAT("OpenGL from glad %i.%i", GLVersion.major, GLVersion.minor);
+    LogMessage(ConsoleMessageType_Info, "OpenGL renderer: %s", glGetString(GL_RENDERER));
+    LogMessage(ConsoleMessageType_Info, "OpenGL from glad %i.%i", GLVersion.major, GLVersion.minor);
 
     return true;
 }
@@ -160,36 +174,22 @@ bool initImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::fontRegular = io.Fonts->AddFontFromFileTTF(
-        "resources/Roboto-Regular.ttf",
-        32.0f,
-        NULL,
-        NULL
-    );
-    ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
-        "resources/DroidSansMono.ttf",
-        28.0f,
-        NULL,
-        NULL
-    );
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 //	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-    setImGuiStyle(2.0f);
-
     if (!ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true)) {
-        LOG_ERROR("Couldn't initialize ImGui for GLFW");
+        LogMessage(ConsoleMessageType_Error, "Couldn't initialize ImGui for GLFW");
         return false;
     }
     if (!ImGui_ImplOpenGL3_Init()) {
-        LOG_ERROR("Couldn't initialize ImGui for OpenGL3");
+        LogMessage(ConsoleMessageType_Error, "Couldn't initialize ImGui for OpenGL3");
         return false;
     }
     return true;
 }
 
 int main(int argc, char* argv[]) {
-    if (!initGLFW("PiDMX", false)) {
+    if (!initGLFW("PiDMX", true)) {
         return -1;
     }
     if (!initGLAD()) {
@@ -205,7 +205,9 @@ int main(int argc, char* argv[]) {
     v8::HandleScope scope(js::global::isolate);
 
     engine = new Engine();
-    engine->displayScale = 2.0f;
+    engine->displayScale = 1.0f;
+    setImGuiStyle(engine->displayScale);
+
     js::execFile("resources/extern/init.js");
 
     bool open = true;

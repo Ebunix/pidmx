@@ -1,52 +1,60 @@
 #include "exec.h"
-#include "../src/pidmx_utils.h"
+#include "../src/engine/Console.h"
 #include "globals.h"
 #include "jsUtils.h"
 
 namespace js {
-	v8::Local<v8::Value> exec(const char* code) {
+	v8::Local<v8::Value> exec(const char* code, const std::string& context) {
 		if (code == nullptr) {
-			LOG_ERROR("Passed nullptr as JavaScript source");
-			exit(-1);
+			LogMessage(ConsoleMessageType_Error, "Passed nullptr as JavaScript source");
+			return v8::Undefined(js::global::isolate);
 		}
 
 		v8::Isolate* iso = v8::Isolate::GetCurrent();
 		v8::Isolate::Scope isolateScope(iso);
 		v8::EscapableHandleScope handleScope(iso);
-		v8::Local<v8::Context> context = iso->GetCurrentContext();
-		if (context.IsEmpty()) {
-			context = js::global::context.Get(iso);
+		v8::Local<v8::Context> ctx = iso->GetCurrentContext();
+		if (ctx.IsEmpty()) {
+			ctx = js::global::context.Get(iso);
 		}
-		v8::Context::Scope contextScope(context);
+		v8::Context::Scope contextScope(ctx);
 		{
-			v8::ScriptOrigin origin(iso, V8StrCheck("undefined context"));
+			v8::TryCatch tryCatch(iso);
+			v8::ScriptOrigin origin(iso, V8StrCheck(context));
 			v8::Local<v8::String> source = v8::String::NewFromUtf8(iso, code).ToLocalChecked();
-			v8::MaybeLocal<v8::Script> scriptMaybe = v8::Script::Compile(context, source, &origin);
+			v8::MaybeLocal<v8::Script> scriptMaybe = v8::Script::Compile(ctx, source, &origin);
 			v8::Local<v8::Script> script;
 			if (scriptMaybe.ToLocal(&script)) {
-				v8::MaybeLocal<v8::Value> result = script->Run(context);
-				if (result.IsEmpty()) {
-					return handleScope.Escape(v8::Undefined(iso));
+				v8::MaybeLocal<v8::Value> result = script->Run(ctx);
+				if (tryCatch.HasCaught()) {
+					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(ctx, tryCatch.Message()->Get()).c_str());
 				}
-				return handleScope.Escape(result.ToLocalChecked());
+				v8::Local<v8::Value> temp;
+				if (result.ToLocal(&temp)) {
+					return handleScope.Escape(temp);
+				}
+				return handleScope.Escape(v8::Undefined(iso));
 			}
 			else {
-				LOG_ERROR("Failed to compile script");
-				exit(-1);
+				if (tryCatch.HasCaught()) {
+					LogMessage(ConsoleMessageType_Error, "%s", V8CStr(ctx, tryCatch.Message()->Get()).c_str());
+				}
+				LogMessage(ConsoleMessageType_Error, "Failed to compile script");
 			}
 		}
+		return handleScope.Escape(v8::Undefined(iso));
 	}
 	v8::Local<v8::Value> execFile(const char* path) {
 		FILE* f = fopen(path, "rb");
 		if (!f) {
-			LOG_ERROR_FORMAT("%s was not found", path);
+			LogMessage(ConsoleMessageType_Error, "%s was not found", path);
 			return v8::Undefined(js::global::isolate);
 		}
 		fseeko(f, 0, SEEK_END);
 		off_t len = ftello(f);
 		fseeko(f, 0, SEEK_SET);
 		if (len > 0x2000000) { // 32 MB
-			LOG_ERROR_FORMAT("%s exceeds 32 MB script limit", path);
+			LogMessage(ConsoleMessageType_Error, "%s exceeds 32 MB script limit", path);
 			fclose(f);
 			return v8::Undefined(js::global::isolate);
 		}
@@ -57,11 +65,11 @@ namespace js {
 		fclose(f);
 
 		if (read != len) {
-			LOG_ERROR_FORMAT("Invalid byte count read from %s: expected %lu, got %lu", path, len, read);
+			LogMessage(ConsoleMessageType_Error, "Invalid byte count read from %s: expected %lu, got %lu", path, len, read);
 			return v8::Undefined(js::global::isolate);
 		}
 
-		LOG_INFO_FORMAT("require %s", path);
+		LogMessage(ConsoleMessageType_Info, "require %s", path);
 		v8::Local<v8::Value> result = js::exec(data);
 		free(data);
 		return result;
