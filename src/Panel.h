@@ -15,7 +15,7 @@ public:
 		if (!open) {
 			return;
 		}
-		ImGui::SetNextWindowSize(ImVec2(200, 75), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(200, 75), ImGuiCond_Once);
 		if (ImGui::Begin(title.c_str(), &open, windowFlags)) {
 			if (menuBar && ImGui::BeginMenuBar()) {
 				DrawMenuBar();

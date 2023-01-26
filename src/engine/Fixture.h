@@ -4,6 +4,7 @@
 #include "Parameter.h"
 #include <js.h>
 #include <ImGuiExt.h>
+#include "EngineCereal.h"
 
 enum class FixtureControlType {
 	Simple,
@@ -57,3 +58,58 @@ private:
 	void UnOccupy();
 	void Occupy();
 };
+
+
+
+struct FixturePatch {
+	std::string name;
+	int fixtureId = 0;
+	int universe = 0;
+	int channel = 0;
+
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(
+			cereal::make_nvp("name", name), 
+			cereal::make_nvp("fixId", fixtureId),
+			cereal::make_nvp("universe", universe),
+			cereal::make_nvp("channel", channel));
+	}
+};
+
+class FixtureNew : public EngineObject {
+public:
+	FixturePatch patch;
+
+	static bool RedoPatch(FixturePatch* patch);
+	static bool UndoPatch(FixturePatch* patch);
+	static void PatchFixture(const v8::FunctionCallbackInfo<v8::Value>& info);
+
+	FixtureNew(const FixturePatch& patch): patch(patch) {}
+	FixtureNew() {}
+
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(
+			cereal::make_nvp("patch", patch));
+	}
+
+	inline void SetFootprint(int count) {
+		dmxFootprint = count;
+		if (channelValues) {
+			delete[] channelValues;
+		}
+		channelValues = new float[count];
+	}
+	inline int GetFootprint() const { return dmxFootprint; }
+
+private:
+	int dmxFootprint = 0;
+	float* channelValues = nullptr;
+};
+
+bool FixturePatchStringToUniverseChannel(char* text, size_t len, int* universe, int* channel);
+
+

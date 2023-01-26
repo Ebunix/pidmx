@@ -1,9 +1,9 @@
 #pragma once
 #include "Panel.h"
 
-class PanelFixtureMap : public Panel {
+class PanelPatch : public Panel {
 public:
-	PanelFixtureMap(): Panel("Fixture map", true) {}
+	PanelPatch(): Panel("Patch", true) {}
 
 	void DrawIntern() override;
 	void DrawMenuBar() override;

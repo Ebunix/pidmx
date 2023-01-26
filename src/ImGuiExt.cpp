@@ -57,6 +57,7 @@ ImGui::SliderTintPreset ImGui::sliderTintPresetAssigned {
 
 ImFont* ImGui::fontRegular;
 ImFont* ImGui::fontMonospace;
+ImFont* ImGui::fontBackgroundMassive;
 
 void ImGui::PushColorPreset(ColorPreset preset) {
 	switch (preset) {

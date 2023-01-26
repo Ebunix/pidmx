@@ -11,6 +11,9 @@ inline v8::Local<v8::String> V8StrCheck(const std::string& str) {
 	return v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), str.c_str()).ToLocalChecked();
 }
 inline v8::Local<v8::String> ValueToString(const v8::Local<v8::Context>& ctx, const v8::Local<v8::Value>& val) {
+	if (val->IsString()) {
+		return val.As<v8::String>();
+	}
 	v8::Local<v8::String> result;
 	if (val->ToString(ctx).ToLocal(&result)) {
 		return result;

@@ -18,6 +18,7 @@ namespace ImGui {
 	};
 
 	extern ImFont* fontRegular;
+	extern ImFont* fontBackgroundMassive;
 	extern ImFont* fontMonospace;
 
 	extern SliderTintPreset sliderTintPresetUnassigned;

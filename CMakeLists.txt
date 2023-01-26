@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
+add_subdirectory(rewind)
+option(SKIP_PERFORMANCE_COMPARISON "" ON)
+add_subdirectory(cereal)
 
 add_library(imgui SHARED)
 target_sources(imgui PRIVATE
@@ -46,20 +49,20 @@ target_include_directories(js PUBLIC
 	js/libv8/include
 )
 
-add_library(libv8_base IMPORTED SHARED)
-set_property(TARGET libv8_base PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libbase.so)
-add_library(libv8_platform IMPORTED SHARED)
-set_property(TARGET libv8_platform PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libplatform.so)
-add_library(libv8 IMPORTED SHARED)
-set_property(TARGET libv8 PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8.so)
+# add_library(libv8_base IMPORTED SHARED)
+# set_property(TARGET libv8_base PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libbase.so)
+# add_library(libv8_platform IMPORTED SHARED)
+# set_property(TARGET libv8_platform PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8_libplatform.so)
+# add_library(libv8 IMPORTED SHARED)
+# set_property(TARGET libv8 PROPERTY IMPORTED_LOCATION ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.release/libv8.so)
+# 
+# target_link_libraries(js libv8_base)
+# target_link_libraries(js libv8_platform)
+# target_link_libraries(js libv8)
 
-target_link_libraries(js libv8_base)
-target_link_libraries(js libv8_platform)
-target_link_libraries(js libv8)
-
-# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_monolith.a)
-# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libbase.a)
-# target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libplatform.a)
+target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_monolith.a)
+target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libbase.a)
+target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/js/libv8/x64.debug/libv8_libplatform.a)
 
 
 add_executable(pidmx 
@@ -76,7 +79,7 @@ add_executable(pidmx
 	src/engine/JsTools.cpp
 	src/engine/Console.cpp
 
-	src/PanelFixtureMap.cpp
+	src/PanelPatch.cpp
 	src/PanelChannelMonitor.cpp
 	src/PanelChannelEditor.cpp
 	src/PanelConsole.cpp
@@ -88,3 +91,5 @@ target_link_libraries(pidmx glad)
 target_link_libraries(pidmx js)
 target_link_libraries(pidmx imgui)
 target_link_libraries(pidmx OpenGL::GL)
+target_link_libraries(pidmx rewind)
+target_link_libraries(pidmx cereal)

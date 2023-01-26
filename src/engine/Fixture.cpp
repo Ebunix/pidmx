@@ -29,9 +29,6 @@ const std::string NameFromControlType(FixtureControlType param)
 }
 #undef PARAM
 
-
-
-
 Fixture::Fixture(uint16_t startSlot, uint16_t slotCount, Universe* universe, FixturePreset* preset):
 	slot(startSlot), slotCount(slotCount), sourcePreset(preset)
 {
@@ -151,3 +148,95 @@ bool Fixture::SetUniverse(Universe *u)
 
 	return true;
 }
+
+
+
+bool FixturePatchStringToUniverseChannel(char *text, size_t len, int *universe, int *channel)
+{
+	char data[6];
+	if (len > sizeof(data) || strlen(text) == 0) {
+		return false;
+	}
+	for (int i = 0; i < len; i++) {
+		if ((text[i] < '0' || text[i] > '9') && text[i] != '.' && text[i] != 0) {
+			return false;
+		}
+	}
+	strncpy(data, text, sizeof(data));
+
+	char* channelText = nullptr;
+	char* universeText = nullptr;
+
+	char* separator = strchr(data, '.');
+	if (separator) {
+		*separator = 0;
+		channelText = separator + 1;
+		universeText = data;
+	}
+	else {
+		channelText = data;
+	}
+
+	if (universeText) {
+		*universe = atoi(universeText);
+	}
+	else {
+		*universe = 0;
+	}
+	if (channelText) {
+		*channel = atoi(channelText);
+	}
+	else {
+		*channel = 0;
+	}
+
+	return *channel >= 1 && *channel <= 512;
+}
+
+bool FixtureNew::RedoPatch(FixturePatch* patch)
+{
+	if (!engine->GetFixture(patch->fixtureId)) {
+		engine->showFile->fixtures.push_back(std::make_shared<FixtureNew>(*patch));
+	}
+	return true;
+}
+
+bool FixtureNew::UndoPatch(FixturePatch* patch)
+{
+	for (auto iter = engine->showFile->fixtures.begin(); iter < engine->showFile->fixtures.end(); iter++) {
+		if ((*iter)->patch.fixtureId == patch->fixtureId) {
+			engine->showFile->fixtures.erase(iter);
+			return true;
+		}
+	}
+	return false;
+}
+
+void FixtureNew::PatchFixture(const v8::FunctionCallbackInfo<v8::Value> &info)
+{
+	Local<Value> temp;
+	Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
+	Local<Object> data = info[0].As<Object>();
+	FixturePatch* patch = new FixturePatch();
+
+	Local<String> v8Name;
+	if (Walk(ctx, data, "name", &v8Name)) {
+		patch->name = V8CStr(ctx, v8Name);
+	}
+	Local<Number> v8Channel;
+	if (Walk(ctx, data, "channel", &v8Channel)) {
+		patch->channel = (int)v8Channel->Value();
+	}
+	Local<Number> v8Universe;
+	if (Walk(ctx, data, "universe", &v8Universe)) {
+		patch->universe = (int)v8Universe->Value();
+	}
+	Local<Number> v8FixtureId;
+	if (Walk(ctx, data, "id", &v8FixtureId)) {
+		patch->fixtureId = (int)v8FixtureId->Value();
+	}
+
+	Rewind::AddDeallocResource(patch);
+	Rewind::RecordStep((Rewind::Step)FixtureNew::UndoPatch, (Rewind::Step)FixtureNew::RedoPatch, patch);
+}
+

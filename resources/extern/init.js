@@ -11,7 +11,7 @@ engine.addModulator("sine", {
 });
 
 engine.addFixturePreset({
-	name: "Cheap ass RGB fixture",
+	name: "Simple 7 channel fixture",
 	slots: [
 		{ name: "Brightness" },
 		{ name: "Red", tint: [1, 0.5, 0.5, 1.0] },
@@ -28,6 +28,17 @@ engine.addFixturePreset({
 			{ from: 11, to: 60, label: "Color select" },
 		]},
 	]
+});
+
+
+engine.addFixturePreset({
+	name: "Simple 3 channel fixture",
+	slots: [
+		{ name: "Red", tint: [1, 0.5, 0.5, 1.0] },
+		{ name: "Green", tint: [0.5, 1, 0.5, 1.0] },
+		{ name: "Blue", tint: [0.5, 0.5, 1, 1.0] },
+	],
+	constrols: []
 });
 
 engine.addUniverse("Universe 1", 0);

@@ -12,9 +12,10 @@
 #include <js.h>
 
 #include <PanelChannelMonitor.h>
-#include <PanelFixtureMap.h>
+#include <PanelPatch.h>
 #include <PanelChannelEditor.h>
 #include <PanelConsole.h>
+#include <rewind.h>
 
 GLFWwindow* glfwWindow = nullptr;
 
@@ -97,6 +98,12 @@ void setImGuiStyle(float highDPIscaleFactor)
     ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
         "resources/JetBrainsMono-Regular.ttf",
         16.0f * engine->displayScale,
+        NULL,
+        NULL
+    );
+    ImGui::fontBackgroundMassive = io.Fonts->AddFontFromFileTTF(
+        "resources/JetBrainsMono-Regular.ttf",
+        96.0f * engine->displayScale,
         NULL,
         NULL
     );
@@ -198,14 +205,14 @@ int main(int argc, char* argv[]) {
     if (!initImGui()) {
         return -1;
     }
-    if (!jsInitRuntime(argv[0])) {
+    if (!jsInitRuntime("snapshot_blob.bin")) {
         return -1;
     }
 
     v8::HandleScope scope(js::global::isolate);
 
     engine = new Engine();
-    engine->displayScale = 1.0f;
+    engine->displayScale = 2.5f;
     setImGuiStyle(engine->displayScale);
 
     js::execFile("resources/extern/init.js");
@@ -215,7 +222,7 @@ int main(int argc, char* argv[]) {
     std::vector<Panel*> panels;
     panels.push_back(new PanelChannelMonitor());
     panels.push_back(new PanelChannelEditor());
-    panels.push_back(new PanelFixtureMap());
+    panels.push_back(new PanelPatch());
     panels.push_back(new PanelConsole());
 
     FixturePreset* currentPreset = nullptr;
@@ -231,13 +238,13 @@ int main(int argc, char* argv[]) {
 
         engine->Update();
 
-        glClearColor(0.05, 0.05, 0.1, 1.0);
+        glClearColor(0.025, 0.025, 0.05, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport();
+        ImGui::DockSpaceOverViewport(NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
         if (open) {
             ImGui::ShowDemoWindow(&open);
@@ -246,6 +253,15 @@ int main(int argc, char* argv[]) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("Save")) {
+                    engine->SaveShowFile("showfile.xml");
+                }
+                if (ImGui::MenuItem("Load")) {
+                    engine->LoadShowFile("showfile.xml");
+                }
+                if (ImGui::MenuItem("Quit")) {
+                    exit(0);
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Panels")) {
@@ -275,7 +291,14 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 ImGui::EndCombo();
-            } 
+            }
+            if (ImGui::Button("Undo")) {
+                Rewind::Undo(1);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Redo")) {
+                Rewind::Redo(1);
+            }
         }
         ImGui::End();
 
