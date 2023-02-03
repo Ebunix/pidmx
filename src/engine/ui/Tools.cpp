@@ -6,6 +6,13 @@
 #include <string>
 #include <cmath>
 
+UI::ColorPreset UI::ColorPresets[ColorPresetType_Count_] = {
+    { ImVec4(1.00f, 1.00f, 1.00f, 0.10f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // Button
+    { ImVec4(1.00f, 0.25f, 0.25f, 0.10f), ImVec4(1.00f, 0.25f, 0.25f, 0.27f), ImVec4(0.75f, 0.00f, 0.00f, 0.27f) }, // ButtonRed
+    { ImVec4(0.18f, 0.40f, 0.79f, 1.00f), ImVec4(0.22f, 0.56f, 0.94f, 1.00f), ImVec4(0.13f, 0.22f, 0.55f, 1.00f) }, // PanelItemMain
+};
+
+
 bool UI::BeginPopupDialog(bool openNow, const char* title)
 {
 	if (openNow) {
@@ -135,56 +142,26 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
     return extent;
 }
 
-void UI::DrawOutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &frameBgColor, const ImVec2 &tl, const ImVec2 &br) {
-    dl->AddRectFilled(tl, br, frameBgColor, BlackboardPanelButtonRounding * DPI_SCALE);
-    DrawOutlinedPanelBorder(dl, borderColor, tl, br);
-}
-void UI::DrawOutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br) {
-    dl->AddRect(tl, br, borderColor, BlackboardPanelButtonRounding * DPI_SCALE, 0, 1 * DPI_SCALE);
-}
+bool UI::OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &bgColor, const ImVec2 &tl, const ImVec2 &br) {
+    ImGuiID id = ImGui::GetCurrentWindow()->IDStack.back();
+    ImRect rect(tl, br);
+    ImGui::ItemAdd(rect, id);
 
-bool UI::BlackboardPanelButton(const char *label, const ImVec2 &tl, const ImVec2 &br, ImGuiButtonFlags flags) {
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
-    if (window->SkipItems)
-        return false;
+    bool hovering;
+    bool holding;
+    bool clicked = ImGui::ButtonBehavior(rect, id, &hovering, &holding);
 
-    ImGuiContext& g = *GImGui;
-    const ImGuiStyle& style = g.Style;
-    const ImGuiID id = window->GetID(label);
-    const ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+    ImColor bg = holding ? bgColor.active : (hovering ? bgColor.hovered : bgColor.regular);
 
-    ImVec2 pos = window->DC.CursorPos;
-    if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
-        pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+    OutlinedPanel(dl, borderColor, bg, tl, br);
 
-    const ImRect bb(tl, br);
-    if (!ImGui::ItemAdd(bb, id))
-        return false;
-
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1 * DPI_SCALE);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, BlackboardPanelButtonRounding * DPI_SCALE);
-
-    if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat)
-        flags |= ImGuiButtonFlags_Repeat;
-
-    bool hovered, held;
-    bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
-
-    // Render
-    const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-    ImGui::RenderNavHighlight(bb, id);
-    ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
-
-    if (g.LogEnabled)
-        ImGui::LogSetNextTextDecoration("[", "]");
-    ImGui::RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
-
-    // Automatically close popups
-    //if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
-    //    CloseCurrentPopup();
-
-    IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
-    ImGui::PopStyleVar(2);
-    return pressed;
+    return clicked;
 }
 
+void UI::OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br) {
+    dl->AddRectFilled(tl, br, bgColor, BlackboardPanelButtonRounding * DPI_SCALE);
+    OutlinedPanelBorder(dl, borderColor, tl, br);
+}
+void UI::OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br) {
+    dl->AddRect(tl, br, borderColor, BlackboardPanelButtonRounding * DPI_SCALE, 0, 2 * DPI_SCALE);
+}

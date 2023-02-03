@@ -13,7 +13,7 @@ namespace UI {
 
     class BlackboardPanel : public Panel {
     public:
-        BlackboardPanel() : Panel("Blackboard", PanelType_Blackboard) {}
+        BlackboardPanel() : Panel("Blackboard", PanelType_Blackboard, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse) {}
 
         void Draw() override;
 

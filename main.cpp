@@ -88,8 +88,8 @@ void setImGuiStyle(float highDPIscaleFactor) {
     style.WindowPadding = ImVec2(8, 8);
     style.WindowRounding = 5.0f;
     style.FramePadding = ImVec2(14, 8);
-    style.CellPadding = ImVec2(8, 8);
-    style.FrameRounding = 5.0f / DPI_SCALE;
+    style.CellPadding = ImVec2(6, 2);
+    style.FrameRounding = 5.0f;
     style.ItemSpacing = ImVec2(5, 5);
     // style.ItemInnerSpacing         = ImVec2(1, 1);
     // style.TouchExtraPadding        = ImVec2(0, 0);
@@ -100,7 +100,7 @@ void setImGuiStyle(float highDPIscaleFactor) {
     style.GrabRounding = 2.0f;
     // style.WindowTitleAlign.x = 0.50f;
     // style.FrameBorderSize = 0.0f;
-    style.WindowBorderSize = 5.0f;
+    style.WindowBorderSize = DPI_SCALE;
 
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
     }
 
     bool openDemoWindow = true;
-    setImGuiStyle(2.0f);
+    setImGuiStyle(DPI_SCALE);
 
     v8::HandleScope scope(js::global::isolate);
 

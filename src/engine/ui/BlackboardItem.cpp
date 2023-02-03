@@ -23,36 +23,25 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
     if (std::isnan(itemWidth) || std::isnan(itemHeight)) {
         return;
     }
+    ImGui::PushID((int) id);
 
-    ImColor borderColor = UI::BlackboardPanelItemColor;
+    ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
     ImColor frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
     ImVec2 windowPos = ImGui::GetWindowPos();
 
-    UI::DrawOutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
+    UI::OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
 
-    ImGui::PushID((int) id);
     for (int itemY = 0; itemY < height; itemY++) {
         for (int itemX = 0; itemX < width; itemX++) {
             ImVec2 itemTL = ImVec2(topLeft.x + itemWidth * itemX, topLeft.y + itemHeight * itemY);
             ImVec2 itemBR = ImVec2(itemTL.x + itemWidth, itemTL.y + itemHeight);
             //list->PushClipRect(itemTL, itemBR);
             if (itemY == 0 && itemX == 0) {
-                ImGuiCol color = UI::BlackboardPanelItemColor;
                 BlackboardItemInstance editing = parent->EditingItem();
-                bool open = ImGui::IsPopupOpen(0u, ImGuiPopupFlags_AnyPopupId) || (editing && editing->id == id);
-                bool hovering = ImGui::IsMouseHoveringRect(itemTL, itemBR);
-                bool clicked = false;
-                if (open) {
-                    color = UI::BlackboardPanelItemColorActive;
-                }
-                else if (hovering) {
-                    color = UI::BlackboardPanelItemColorHovered;
-                    clicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
-                }
+                bool clicked = UI::OutlinedButton(list, 0, ColorPresets[ColorPresetType_PanelItemMain], itemTL, itemBR);
                 if (clicked) {
                     ImGui::OpenPopup("Options");
                 }
-                UI::DrawOutlinedPanel(list, 0, color, itemTL, itemBR);
 
                 ImGui::PushFont(ImGui::fontSmallRegular);
                 UI::CenterTextWrap(name.c_str(), itemWidth, itemHeight);
@@ -67,7 +56,7 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
         }
     }
 
-    UI::DrawOutlinedPanel(list, borderColor, 0, topLeft, bottomRight);
+    UI::OutlinedPanelBorder(list, borderColor, topLeft, bottomRight);
 
     if (ImGui::BeginPopup("Options")) {
         if (ImGui::MenuItem("Move")) {

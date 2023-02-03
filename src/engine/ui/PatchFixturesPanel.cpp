@@ -92,6 +92,8 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableHeadersRow();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::PushFont(ImGui::fontMonospace);
@@ -102,6 +104,7 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
     ImGui::PopFont();
     ImGui::TableSetColumnIndex(1);
     ImGui::Text("All fixtures");
+
 
     for (const auto &collection: currentShow->fixtureCollections.items) {
         ImGui::TableNextRow();
@@ -136,6 +139,8 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
         ImGui::Text("%s", collection->name.c_str());
     }
 
+    ImGui::PopStyleVar();
+
     ImGui::EndTable();
 }
 
@@ -149,6 +154,8 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
     ImGui::TableHeadersRow();
 
     static char buffer[16];
+
+    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
     const auto& fixtureSrc = selectedCollectionIds.empty() ? currentShow->fixtures.items : filteredFixtures;
     for (const auto &fixture: fixtureSrc) {
@@ -194,6 +201,9 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
         }
         ImGui::PopFont();
     }
+
+    ImGui::PopStyleVar();
+
     ImGui::EndTable();
 }
 

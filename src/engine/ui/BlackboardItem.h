@@ -13,12 +13,6 @@ namespace UI {
         BlackboardItemType_Collections,
     };
 
-    const ImGuiCol BlackboardPanelItemColor = ImGuiCol(0xffff7733);
-    const ImGuiCol BlackboardPanelItemColorHovered = ImGuiCol(0xffff8844);
-    const ImGuiCol BlackboardPanelItemColorActive = ImGuiCol(0xffff6622);
-
-    const ImGuiCol BlackboardPanelItemColorOccupied = ImGuiCol(0xff2266ff);
-
     class BlackboardItem : public ISerializable {
     public:
         int x = 0, y = 0;

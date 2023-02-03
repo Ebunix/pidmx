@@ -42,7 +42,7 @@ void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec
     }
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_FrameBg]);
-    UI::BlackboardPanelButton("", topLeft, bottomRight);
+    UI::OutlinedButton(list, ColorPresets[ColorPresetType_PanelItemMain].regular, ColorPresets[ColorPresetType_Button], topLeft, bottomRight);
     ImGui::PopStyleColor();
 
     float halfHeight = size.y / 2.0f;
@@ -55,10 +55,10 @@ void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec
 void UI::CollectionsBlackboardItem::DrawButtonUnassigned(const ImVec2 &tl, const ImVec2 &br, int index) {
     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
     ImGui::PushID(index);
-    if (UI::BlackboardPanelButton("<none>", tl, br)) {
+/*    if (UI::BlackboardPanelButton("<none>", tl, br)) {
         startChoosingCollectionIndex = true;
         choosingCollectionIndex = index;
-    }
+    }*/
     ImGui::PopID();
     ImGui::PopStyleColor();
 }
