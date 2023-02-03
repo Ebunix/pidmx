@@ -95,6 +95,12 @@
 		"queue": "cpp",
 		"stack": "cpp",
 		"*.def": "cpp",
-		"*.inc": "cpp"
+		"*.inc": "cpp",
+		"__availability": "cpp",
+		"hash_set": "cpp",
+		"complex": "cpp",
+		"regex": "cpp",
+		"shared_mutex": "cpp",
+		"__std_stream": "cpp"
 	}
 }

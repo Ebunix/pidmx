@@ -61,18 +61,18 @@ float __logTime();
 
 #define LOG_ERROR_ISNULL(var)		LOG_ERROR_FORMAT("`%s` is null", #var)
 
-enum ConsoleMessageType {
-	ConsoleMessageType_Info,
-	ConsoleMessageType_Debug,
-	ConsoleMessageType_Warn,
-	ConsoleMessageType_Error,
+enum LogMessageType {
+	LogMessageType_Info,
+	LogMessageType_Debug,
+	LogMessageType_Warn,
+	LogMessageType_Error,
 };
 
 struct ConsoleMessage {
 	const char* message;
-	ConsoleMessageType type;
+	LogMessageType type;
 };
 
 extern std::vector<ConsoleMessage> consolePanelLogBuffer;
 
-void LogMessage(ConsoleMessageType type, const char* fmt, ...);
+void LogMessage(LogMessageType type, const char* fmt, ...);

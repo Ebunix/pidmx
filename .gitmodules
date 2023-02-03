@@ -1,6 +1,6 @@
 [submodule "imgui"]
 	path = imgui
 	url = https://github.com/ocornut/imgui
-[submodule "cereal"]
-	path = cereal
-	url = https://github.com/USCiLab/cereal
+[submodule "libnbtplusplus"]
+	path = libnbtplusplus
+	url = https://github.com/ljfa-ag/libnbtplusplus

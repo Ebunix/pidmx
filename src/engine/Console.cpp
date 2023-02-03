@@ -12,7 +12,7 @@ using namespace std::chrono;
 void logInit() {
 	__logInitialized = true;
 	__logStartTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-	LogMessage(ConsoleMessageType_Info, "Log start");
+	LogMessage(LogMessageType_Info, "Log start");
 }
 
 float __logTime() {
@@ -23,7 +23,7 @@ float __logTime() {
 	return since / 1000.0f;
 }
 
-void LogMessage(ConsoleMessageType type, const char *fmt, ...)
+void LogMessage(LogMessageType type, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -34,9 +34,9 @@ void LogMessage(ConsoleMessageType type, const char *fmt, ...)
     consolePanelLogBuffer.push_back(ConsoleMessage { buffer, type });
 
     switch (type) {
-        case ConsoleMessageType_Debug: LOG_DEBUG_FORMAT("%s", buffer); break;
-        case ConsoleMessageType_Warn: LOG_WARN_FORMAT("%s", buffer); break;
-        case ConsoleMessageType_Error: LOG_ERROR_FORMAT("%s", buffer); break;
+        case LogMessageType_Debug: LOG_DEBUG_FORMAT("%s", buffer); break;
+        case LogMessageType_Warn: LOG_WARN_FORMAT("%s", buffer); break;
+        case LogMessageType_Error: LOG_ERROR_FORMAT("%s", buffer); break;
         default: LOG_INFO_FORMAT("%s", buffer); break;
     }
 }
