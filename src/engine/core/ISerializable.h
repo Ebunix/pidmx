@@ -6,10 +6,13 @@
 #include <memory>
 #include <fstream>
 #include "engine/Console.h"
+#include <filesystem>
 #ifdef NBT_USE_ZLIB
 #include "io/izlibstream.h"
 #include "io/ozlibstream.h"
 #endif
+
+namespace fs = std::filesystem;
 
 class ISerializable {
 public:
@@ -58,6 +61,10 @@ public:
 
 namespace nbt {
     inline std::unique_ptr<tag_compound> LoadFromFile(const std::string &path) {
+        if (!fs::exists(path)) {
+            LogMessage(LogMessageType_Error, "File %s not found while loading NBT data", path.c_str());
+            return std::make_unique<nbt::tag_compound>();
+        }
         LogMessage(LogMessageType_Info, "Loading %s", path.c_str());
         std::ifstream in(path);
         if (in.peek() == 0x0a)
