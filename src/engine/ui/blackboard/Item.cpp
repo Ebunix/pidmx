@@ -11,6 +11,7 @@
 #include "ItemCollection.h"
 #include "engine/ui/ImGuiExt.h"
 #include "ItemGroups.h"
+#include "ItemFixtureSheet.h"
 
 using namespace UI;
 
@@ -22,17 +23,40 @@ Blackboard::Item::Item(std::string name, ItemType type) : ISerializable(), type(
 void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
     ImGui::PushID((int) id);
 
-    ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
     ImColor frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
-    ImVec2 windowPos = ImGui::GetWindowPos();
 
     OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
+
+    if (UseGridLayout()) {
+        RenderGrid(list, topLeft, bottomRight, cellWidth, cellHeight);
+    }
+    else {
+        RenderWindow(list, topLeft, bottomRight);
+    }
+
+    ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
+    UI::OutlinedPanelBorder(list, borderColor, topLeft, bottomRight);
+
+    if (ImGui::BeginPopup("Options")) {
+        if (ImGui::MenuItem("Move")) {
+            parent->EditItem(currentShow->blackboardItems.Get(id), BlackboardItemEditType_Move);
+        }
+        if (ImGui::MenuItem("Delete")) {
+            currentShow->commandHistory.Push("Delete blackboard item", CommandBlackboardRemoveItem::New(id));
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::PopID();
+}
+
+void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
 
     float totalWidth = cellWidth * width;
     float totalHeight = cellHeight * height;
     ImVec2 padding = ItemOuterPadding * globalEngine->dpiScale;
     ImVec2 itemSize((totalWidth - ((width + 1) * padding.x)) / width, (totalHeight - ((height + 1) * padding.y)) / height);
-    
 
     for (int itemY = 0; itemY < height; itemY++) {
         for (int itemX = 0; itemX < width; itemX++) {
@@ -69,20 +93,33 @@ void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRig
             //list->PopClipRect();
         }
     }
+}
 
-    UI::OutlinedPanelBorder(list, borderColor, topLeft, bottomRight);
+void Blackboard::Item::RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight) {
+    ImVec2 windowPos = ImGui::GetWindowPos();
+    static ImVec2 innerPadding = ItemInnerPadding * globalEngine->dpiScale;
+    topLeft += innerPadding;
+    bottomRight -= innerPadding;
+    ImVec2 topLeftLocal = topLeft - windowPos;
+    ImVec2 headerBottomRight(bottomRight.x, topLeft.y + 32.0f * globalEngine->dpiScale);
+    ImVec2 headerSize = headerBottomRight - topLeft;
 
-    if (ImGui::BeginPopup("Options")) {
-        if (ImGui::MenuItem("Move")) {
-            parent->EditItem(currentShow->blackboardItems.Get(id), BlackboardItemEditType_Move);
-        }
-        if (ImGui::MenuItem("Delete")) {
-            currentShow->commandHistory.Push("Delete blackboard item", CommandBlackboardRemoveItem::New(id));
-        }
-        ImGui::EndPopup();
+    if (OutlinedButton(list, 0, ColorPresets[ColorPresetType_PanelItemMain], topLeft, headerBottomRight)) {
+        ImGui::OpenPopup("Options");
     }
-    ImGui::PopID();
+    ImGui::SetCursorPos(topLeftLocal);
+    CenterTextWrap(name.c_str(), headerSize.x, headerSize.y);
+    topLeft.y += headerSize.y + innerPadding.y;
+    ImVec2 contentSize = bottomRight - topLeft;
+    topLeftLocal = topLeft - windowPos;
+    ImGui::SetCursorPos(topLeftLocal);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
+    ImGui::BeginChildFrame(ImGui::GetID("Content"), contentSize);
+    Draw(list, topLeft, bottomRight, 0);
+    ImGui::EndChildFrame();
+
+    ImGui::PopStyleVar();
 }
 
 nbt::tag_compound Blackboard::Item::save() {
@@ -127,12 +164,16 @@ void Blackboard::Item::Resize(int newW, int newH) {
     OnResize(width, height);
 }
 
+
+
 Blackboard::ItemInstance Blackboard::CreateItem(ItemType type) {
     switch (type) {
         case ItemType_Collections:
             return std::make_shared<ItemCollection<ISerializable>>();
         case ItemType_Groups:
             return std::make_shared<ItemGroups>();
+        case ItemType_FixtureSheet:
+            return std::make_shared<ItemFixtureSheet>();
         case ItemType_None:
         default:
             LogMessage(LogMessageType_Error, "Unknown type %i in %s", type, __FUNCTION__);

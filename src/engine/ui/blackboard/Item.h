@@ -14,6 +14,7 @@ namespace Blackboard {
         ItemType_None,
         ItemType_Collections,
         ItemType_Groups,
+        ItemType_FixtureSheet,
         ItemType_Count_,
     };
 
@@ -38,6 +39,14 @@ namespace Blackboard {
         virtual void Draw(ImDrawList *list, ImVec2 screenTL, ImVec2 screenBR, int itemIndex) {}
         virtual void OnResize(int newW, int newH) {}
         virtual void OnMove(int newX, int newY) {}
+
+    private:
+        void RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
+        void RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight);
+
+        inline bool UseGridLayout() {
+            return type == ItemType_Collections || type == ItemType_Groups;
+        }
     };
 
 

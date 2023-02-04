@@ -57,12 +57,7 @@ void UI::DrawMainPanel(Engine &engine)
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Windows")) {
-            if (ImGui::Checkbox("Blackboard", 0)) {
 
-            }
-            if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
-                currentShow->commandHistory.Redo();
-            }
             ImGui::EndMenu();
         }
 		UI::EndMainMenuBar();

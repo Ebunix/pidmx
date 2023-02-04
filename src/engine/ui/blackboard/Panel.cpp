@@ -185,6 +185,7 @@ void Blackboard::Panel::Draw() {
                 ImGui::Text("Create panel");
                 if (ImGui::Button("Collections")) { currentPlacingItem = ItemType_Collections; }
                 if (ImGui::Button("Fixture Groups")) { currentPlacingItem = ItemType_Groups; }
+                if (ImGui::Button("Fixture Sheet")) { currentPlacingItem = ItemType_FixtureSheet; }
                 if (currentPlacingItem != ItemType_None) {
                     ImGui::CloseCurrentPopup();
                     currentPlacingItemX = x;
