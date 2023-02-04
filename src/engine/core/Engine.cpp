@@ -112,7 +112,7 @@ void Engine::DrawPanels() {
 
 void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
     for (const auto & entry : fs::directory_iterator(dir)) {
-        auto root = nbt::LoadFromFile(entry.path());
+        auto root = nbt::LoadFromFile(entry.path().string());
         auto vec = nbt::Load(*root, "fixturePresets", std::vector<FixturePreset>{});
         fixturePresets.insert(fixturePresets.end(), vec.begin(), vec.end());
     }

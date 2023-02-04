@@ -10,7 +10,7 @@
 #include <pidmx_utils.h>
 #include <map>
 #include <type_traits>
-#include <functional>
+#include <algorithm>
 
 template<class T>
 struct ShowCollection {

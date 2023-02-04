@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <stdarg.h>
 
 #define CON_BLACK "\u001b[30m"
 #define CON_RED "\u001b[31m"
@@ -76,3 +77,9 @@ struct ConsoleMessage {
 extern std::vector<ConsoleMessage> consolePanelLogBuffer;
 
 void LogMessage(LogMessageType type, const char* fmt, ...);
+
+
+// vasprintf implementation for Windows, since MS doesn't seem to have one for some reason... 
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+	int vasprintf(char** ptr, const char* format, va_list ap);
+#endif

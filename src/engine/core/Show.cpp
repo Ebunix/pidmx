@@ -1,7 +1,5 @@
 #include "Show.h"
-#include <io/ozlibstream.h>
-#include <io/izlibstream.h>
-#include <nbt_tags.h>
+#include "ISerializable.h"
 #include <fstream>
 #include "engine/ui/blackboard/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
@@ -66,9 +64,6 @@ Show::Show() {
 
 void Show::Save(const std::string &path)
 {
-    LogMessage(LogMessageType_Info, "Saving show file %s", path.c_str());
-	std::ofstream out(path);
-	zlib::ozlibstream ogzs(out, -1, true);
 	nbt::tag_compound rootCompound;
 	rootCompound.insert("VERSION", SHOW_VERSION);
 
@@ -77,16 +72,12 @@ void Show::Save(const std::string &path)
     SerializeCollectionTyped(rootCompound, "blackboardItems", blackboardItems);
     rootCompound.insert("blackboard", panelBlackboard->save());
 
-	nbt::io::write_tag("", rootCompound, ogzs);
-	ogzs.close();
+    nbt::SaveToFile(rootCompound, path, true);
 }
 
 void Show::Load(const std::string &path)
 {
-    LogMessage(LogMessageType_Info, "Loading show file %s", path.c_str());
-	std::ifstream in(path);
-	zlib::izlibstream igzs(in);
-	auto rootCompound = nbt::io::read_compound(igzs).second;
+    auto rootCompound = nbt::LoadFromFile(path);
 
     DeserializeCollection(*rootCompound, "fixtures", fixtures, std::make_shared<Fixture>);
     DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections, std::make_shared<FixtureCollection>);

@@ -11,7 +11,7 @@ option(PIDMX_ENABLE_JAVASCRIPT "Enbale the V8 Javascript engine" OFF)
 add_subdirectory(libnbtplusplus)
 add_subdirectory(glfw)
 
-add_library(imgui SHARED)
+add_library(imgui STATIC)
 target_sources(imgui PRIVATE
 	imgui/imgui.cpp
 	imgui/imgui_demo.cpp
@@ -26,9 +26,10 @@ target_include_directories(imgui PUBLIC
 	imgui/backends
 )
 target_compile_definitions(imgui PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
+target_link_libraries(imgui glfw)
 
 
-add_library(glad SHARED)
+add_library(glad STATIC)
 target_sources(glad PRIVATE
 	src/glad/src/glad.c
 )

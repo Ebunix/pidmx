@@ -41,6 +41,6 @@ void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int it
 }
 
 Blackboard::ItemGroups::ItemGroups(): ItemCollection<ItemGroupsStorage>("Fixture Groups", ItemType_Groups) {
-    collection.push_back(std::make_shared<ItemGroupsStorage>(ItemGroupsStorage { "Fixture 1", std::vector<FixtureInstance>{ currentShow->fixtures.items[0], currentShow->fixtures.items[1], currentShow->fixtures.items[2] }}));
-    AssignAt(7, std::make_shared<ItemGroupsStorage>(ItemGroupsStorage { "Fixture group 2", std::vector<FixtureInstance>{ currentShow->fixtures.items[0], currentShow->fixtures.items[1], currentShow->fixtures.items[2] }}));
+//    collection.push_back(std::make_shared<ItemGroupsStorage>(ItemGroupsStorage { "Fixture 1", std::vector<FixtureInstance>{ currentShow->fixtures.items[0], currentShow->fixtures.items[1], currentShow->fixtures.items[2] }}));
+//    AssignAt(7, std::make_shared<ItemGroupsStorage>(ItemGroupsStorage { "Fixture group 2", std::vector<FixtureInstance>{ currentShow->fixtures.items[0], currentShow->fixtures.items[1], currentShow->fixtures.items[2] }}));
 }
