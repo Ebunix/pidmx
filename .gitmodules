@@ -4,3 +4,6 @@
 [submodule "libnbtplusplus"]
 	path = libnbtplusplus
 	url = https://github.com/ljfa-ag/libnbtplusplus
+[submodule "glfw"]
+	path = glfw
+	url = https://github.com/glfw/glfw
