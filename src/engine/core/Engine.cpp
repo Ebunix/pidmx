@@ -9,7 +9,9 @@
 #include <filesystem>
 
 namespace fs = std::filesystem;
+#if PIDMX_ENABLE_JAVASCRIPT
 using namespace v8;
+#endif
 
 Engine* globalEngine;
 
@@ -45,6 +47,7 @@ Engine::Engine(int argc, char* argv[])
     }
     globalEngine = this;
 
+#if PIDMX_ENABLE_JAVASCRIPT
     js::ObjectTemplate fixtures;
     Local<ObjectTemplate> fixturesTemplate = fixtures.Begin()
         ->Function("patch", Fixture::Patch)
@@ -54,6 +57,7 @@ Engine::Engine(int argc, char* argv[])
     engine.Begin()
         ->Object("fixtures", fixturesTemplate)
         ->BuildGlobal("engine");
+#endif
 
     LoadFixturePresetsFromDirectory("resources/fixtures");
 }

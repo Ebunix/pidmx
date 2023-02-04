@@ -1,3 +1,5 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
+
 #include "globals.h"
 
 namespace js {
@@ -7,3 +9,5 @@ namespace js {
 		v8::Global<v8::Context> context;
 	}
 }
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#ifdef PIDMX_ENABLE_JAVASCRIPT
+
 #include <memory>
 #include "v8.h"
 
@@ -10,3 +12,4 @@ namespace js {
 	}
 }
 
+#endif

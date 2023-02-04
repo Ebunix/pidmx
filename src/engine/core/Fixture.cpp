@@ -3,7 +3,9 @@
 #include "Show.h"
 #include <engine/command/CommandFixture.h>
 
+#if PIDMX_ENABLE_JAVASCRIPT
 using namespace v8;
+#endif
 
 FixtureInstance Fixture::New(const FixtureData &data) {
     auto fix = std::make_shared<Fixture>();
@@ -30,6 +32,7 @@ nbt::tag_compound Fixture::save() {
     return comp;
 }
 
+#if PIDMX_ENABLE_JAVASCRIPT
 void Fixture::Patch(const v8::FunctionCallbackInfo<v8::Value> &info) {
     std::vector<FixtureData> data;
     Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
@@ -48,3 +51,4 @@ void Fixture::Patch(const v8::FunctionCallbackInfo<v8::Value> &info) {
 
     currentShow->commandHistory.Push("Patch fixtures", CommandFixtureAdd::New(data));
 }
+#endif

@@ -1,10 +1,10 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "init.h"
 #include "v8.h"
 #include "globals.h"
 #include "jsUtils.h"
 #include "template.h"
 #include "impl/impl.h"
-
 
 using namespace v8;
 
@@ -52,3 +52,6 @@ bool jsInitRuntime(const char* argv0) {
 	LogMessage(LogMessageType_Info, "V8 initialized");
 	return true;
 }
+
+
+#endif

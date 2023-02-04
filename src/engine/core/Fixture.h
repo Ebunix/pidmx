@@ -2,7 +2,7 @@
 #include <pidmx_utils.h>
 #include <memory>
 #include "ISerializable.h"
-#include <v8ObjectInterface.h>
+#include <js/js.h>
 
 struct FixtureData {
 	std::string name;
@@ -12,6 +12,7 @@ struct FixtureData {
 	int channel = 0;
 };
 
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 V8_INTEROP_CONVERT_FUNC(FixtureData, ObjectToFixtureData) {
 	V8_INTEROP_CONVERT_FUNC_PREAMBLE(FixtureData);
 	V8_INTEROP_CONVERT_FUNC_MEMBER_STRING(name)
@@ -21,6 +22,7 @@ V8_INTEROP_CONVERT_FUNC(FixtureData, ObjectToFixtureData) {
 	V8_INTEROP_CONVERT_FUNC_MEMBER_NUMBER(int, channel)
 	return result;
 }
+#endif
 
 class Fixture : public ISerializable {
 public:
@@ -28,7 +30,10 @@ public:
 	int universe = 0;
 	int channel = 0;
 
+#ifdef PIDMX_ENABLE_JAVASCRIPT
     static void Patch(const v8::FunctionCallbackInfo<v8::Value> &info);
+#endif
+
 	static std::shared_ptr<Fixture> New(const FixtureData& data);
 
 	void load(const nbt::tag_compound& pack) override;

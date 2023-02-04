@@ -233,25 +233,28 @@ int main(int argc, char *argv[]) {
     if (!initImGui()) {
         return -1;
     }
+#ifdef PIDMX_ENABLE_JAVASCRIPT
     if (!jsInitRuntime("snapshot_blob.bin")) {
         return -1;
     }
-
+    v8::HandleScope scope(js::global::isolate);
+#endif
     bool openDemoWindow = true;
 //    ImGui::ScaleWindowsInViewport(, globalEngine->dpiScale);
 
-    v8::HandleScope scope(js::global::isolate);
 
     Engine engine(argc, argv);
     currentShow = new Show();
-    Hash number = 1;
 
     setImGuiStyle(globalEngine->dpiScale);
-
+#ifdef PIDMX_ENABLE_JAVASCRIPT
     js::exec("let fixtures = [];"
              "for (let i = 0; i < 30; i++) fixtures.push({name: 'Fixture A', fixtureId: 201 + i, channel: 0, universe: 0});"
              "for (let i = 0; i < 30; i++) fixtures.push({name: 'Fixture B', fixtureId: 101 + i, channel: 0, universe: 0});"
              "engine.fixtures.patch(fixtures);");
+#else
+    LogMessage(LogMessageType_Warn, "This build does not include Javascript support");
+#endif
 
     while (!glfwWindowShouldClose(glfwWindow)) {
         glClearColor(0.025, 0.025, 0.025, 1.0);

@@ -1,4 +1,6 @@
 #pragma once
+#ifdef PIDMX_ENABLE_JAVASCRIPT
+
 #include "globals.h"
 #include "v8.h"
 #include <map>
@@ -39,3 +41,5 @@ namespace js {
 		void BuildGlobal(const char* name);
 	};
 }
+
+#endif

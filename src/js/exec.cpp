@@ -1,3 +1,4 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "exec.h"
 #include "../engine/Console.h"
 #include "globals.h"
@@ -75,4 +76,5 @@ namespace js {
 		return result;
 	}
 }
-	
+
+#endif

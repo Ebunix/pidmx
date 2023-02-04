@@ -1,7 +1,7 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include <chrono>
 
 #define VERSION(major, minor, rev) (((major) << 24) | ((minor) << 16) | (rev))

@@ -1,3 +1,4 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "require.h"
 #include "../jsUtils.h"
 #include "../exec.h"
@@ -22,4 +23,6 @@ namespace js {
 			info.GetReturnValue().Set(result);
 		}
 	}
-} 
+}
+
+#endif

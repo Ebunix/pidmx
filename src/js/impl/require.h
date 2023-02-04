@@ -1,4 +1,5 @@
 #pragma once
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "../v8.h"
 
 namespace js {
@@ -6,3 +7,5 @@ namespace js {
 		void require(const v8::FunctionCallbackInfo<v8::Value>& info);
 	}
 }
+
+#endif

@@ -1,6 +1,5 @@
 #include "pidmx_utils.h"
-#include "engine/Console.h"
-#include <string.h>
+#include <cstring>
 
 bool FixturePatchStringToUniverseChannel(char *text, size_t len, int *universe, int *channel)
 {

@@ -81,10 +81,10 @@ void UI::DrawConsolePanel() {
             ImGui::SetKeyboardFocusHere();
         }
         float startPos = ImGui::GetCursorPosY();
+#ifdef PIDMX_ENABLE_JAVASCRIPT
         ImGui::InputTextWithHint("##v", "Command...", commandBuffer, sizeof(commandBuffer),
                                  ImGuiInputTextFlags_EscapeClearsAll | ImGuiInputTextFlags_CallbackHistory,
                                  HandleHistoryCallback);
-        commandLineHeight = ImGui::GetCursorPosY() - startPos;
         bool active = ImGui::IsItemActive();
         if (lastActive && ImGui::IsKeyDown(ImGuiKey_Enter)) {
             commandSent = true;
@@ -103,6 +103,8 @@ void UI::DrawConsolePanel() {
             }
         }
         lastActive = active;
+#endif
+        commandLineHeight = ImGui::GetCursorPosY() - startPos;
         ImGui::PopID();
 
         ImGui::PopFont();

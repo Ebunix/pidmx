@@ -1,3 +1,4 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "console.h"
 #include "../jsUtils.h"
 
@@ -35,3 +36,5 @@ namespace js {
 		}
 	}
 }
+
+#endif

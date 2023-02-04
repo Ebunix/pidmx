@@ -1,4 +1,6 @@
 #pragma once
+#ifdef PIDMX_ENABLE_JAVASCRIPT
+
 #include "v8.h"
 #include "../engine/Console.h"
 #include "globals.h"
@@ -57,3 +59,5 @@ namespace js {
 		v8::Persistent<v8::Private> backing;
 	};
 }
+#endif
+

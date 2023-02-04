@@ -1,4 +1,5 @@
 #pragma once
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "v8.h"
 #include "jsUtils.h"
 
@@ -32,3 +33,5 @@ V8_INTEROP_CONVERT_FUNC(foo, ObjectToFoo) {
 	return result;
 }
 */
+
+#endif

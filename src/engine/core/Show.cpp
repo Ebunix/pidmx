@@ -5,7 +5,7 @@
 #include <fstream>
 #include "engine/ui/blackboard/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
-#include "v8ObjectInterface.h"
+#include <js/js.h>
 
 const int32_t SHOW_VERSION = VERSION(0, 1, 0);
 Show* currentShow = nullptr;

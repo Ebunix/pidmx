@@ -1,3 +1,4 @@
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 #include "template.h"
 #include "globals.h"
 #include "jsUtils.h"
@@ -62,3 +63,5 @@ void js::ObjectTemplate::BuildGlobal(const char *name)
 		context->Global()->Set(context, V8StrCheck(name), instance).Check();
 	}
 }
+
+#endif
