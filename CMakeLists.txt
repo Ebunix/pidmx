@@ -83,7 +83,7 @@ add_executable(pidmx
 	src/engine/ui/PanelConsole.cpp
 
 	src/engine/Console.cpp
-	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/BlackboardPanel.cpp src/engine/ui/BlackboardPanel.h src/engine/ui/BlackboardItem.cpp src/engine/ui/BlackboardItem.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/BlackboardItemCollection.cpp src/engine/ui/BlackboardItemCollection.h src/engine/core/FixturePreset.cpp)
+	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h)
 
 target_include_directories(pidmx PUBLIC src)
 

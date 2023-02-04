@@ -3,7 +3,7 @@
 #include <io/izlibstream.h>
 #include <nbt_tags.h>
 #include <fstream>
-#include "engine/ui/BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
 #include "v8ObjectInterface.h"
 
@@ -43,13 +43,13 @@ void DeserializeCollection(nbt::tag_compound& container, const std::string& tag,
         item->afterLoad();
     }
 }
-template<typename T>
-void DeserializeCollectionTyped(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection, std::shared_ptr<T> (*creator)(int type)) {
+template<typename T, typename V>
+void DeserializeCollectionTyped(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection, std::shared_ptr<T> (*creator)(V type)) {
     LogMessage(LogMessageType_Debug, "Deserialize typed %s", tag.c_str());
     nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
     for (auto& item : list) {
         auto comp = item.as<nbt::tag_compound>();
-        std::shared_ptr<T> instance = creator(comp.at("TYPE").as<nbt::tag_int>().get());
+        std::shared_ptr<T> instance = creator((V)comp.at("TYPE").as<nbt::tag_int>().get());
         instance->load(comp);
         collection.Add(instance);
     }
@@ -60,7 +60,7 @@ void DeserializeCollectionTyped(nbt::tag_compound& container, const std::string&
 
 
 Show::Show() {
-    panelBlackboard = std::make_shared<UI::BlackboardPanel>();
+    panelBlackboard = std::make_shared<Blackboard::Panel>();
     panelPatchFixtures = std::make_shared<UI::PatchFixturesPanel>();
 }
 
@@ -90,7 +90,7 @@ void Show::Load(const std::string &path)
 
     DeserializeCollection(*rootCompound, "fixtures", fixtures, std::make_shared<Fixture>);
     DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections, std::make_shared<FixtureCollection>);
-    DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, UI::CreateBlackboardItem);
+    DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, Blackboard::CreateItem);
     panelBlackboard->load(rootCompound->at("blackboard").as<nbt::tag_compound>());
 }
 

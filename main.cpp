@@ -16,7 +16,7 @@
 #include "engine/core/Engine.h"
 #include "engine/ui/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
-#include "engine/ui/BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 
 GLFWwindow *glfwWindow = nullptr;
 
@@ -110,7 +110,7 @@ void setImGuiStyle(float highDPIscaleFactor) {
             NULL,
             NULL
     );
-    ImGui::fontSmallRegular = io.Fonts->AddFontFromFileTTF(
+    ImGui::fontRegularSmall = io.Fonts->AddFontFromFileTTF(
             "resources/Roboto-Regular.ttf",
             14.0f * globalEngine->dpiScale /* engine->displayScale */,
             NULL,
@@ -119,6 +119,12 @@ void setImGuiStyle(float highDPIscaleFactor) {
     ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
             "resources/JetBrainsMono-Regular.ttf",
             17.0f * globalEngine->dpiScale,
+            NULL,
+            NULL
+    );
+    ImGui::fontMonospaceSmall = io.Fonts->AddFontFromFileTTF(
+            "resources/ponderosa.regular.ttf",
+            9.0f * globalEngine->dpiScale,
             NULL,
             NULL
     );

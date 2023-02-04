@@ -2,7 +2,7 @@
 #include <imgui.h>
 #include <set>
 #include "imgui_internal.h"
-#include "BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 
 extern ImVec2 buttonSmall;
 extern ImVec2 buttonLarge;
@@ -29,7 +29,8 @@ namespace UI {
 	};
 
 	extern ColorPreset ColorPresets[ColorPresetType_Count_];
-	const ImVec4 ColorOutlineHint(1.0f, 1.0f, 1.0f, 0.08f);
+    const ImVec4 ColorOutlineHint(1.0f, 1.0f, 1.0f, 0.08f);
+    const ImVec4 ColorTextTransparentLight(1.0f, 1.0f, 1.0f, 0.17f);
 
 	bool BeginMenuBar();
 	bool BeginMainMenuBar();

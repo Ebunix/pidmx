@@ -1,28 +1,30 @@
 #pragma once
 
-#include <imgui.h>
+#include "imgui.h"
 #include <string>
 #include "engine/core/ISerializable.h"
 
-namespace UI {
-    class BlackboardPanel;
+namespace Blackboard {
+    class Panel;
 
     const ImVec2 blackboardItemPadding(1.5f, 1.5f);
 
-    enum BlackboardItemType {
-        BlackboardItemType_None,
-        BlackboardItemType_Test,
-        BlackboardItemType_Collections,
+    enum ItemType {
+        ItemType_None,
+        ItemType_Test,
+        ItemType_Collections,
+        ItemType_Groups,
+        ItemType_Count_,
     };
 
-    class BlackboardItem : public ISerializable {
+    class Item : public ISerializable {
     public:
         int x = 0, y = 0;
         int width = 1, height = 1;
-        BlackboardItemType type = BlackboardItemType_None;
-        std::shared_ptr<BlackboardPanel> parent;
+        ItemType type = ItemType_None;
+        std::shared_ptr<Panel> parent;
 
-        BlackboardItem(std::string name, BlackboardItemType type);
+        Item(std::string name, ItemType type);
 
         void load(const nbt::tag_compound& pack) override;
         nbt::tag_compound save() override;
@@ -37,14 +39,15 @@ namespace UI {
         virtual void OnResize(int newW, int newH) {}
         virtual void OnMove(int newX, int newY) {}
     };
-    typedef std::shared_ptr<BlackboardItem> BlackboardItemInstance;
 
-    class TestBlackboardItem : public BlackboardItem {
+    class TestBlackboardItem : public Item {
     public:
-        explicit TestBlackboardItem() : BlackboardItem("Test item", BlackboardItemType_Test) {}
+        explicit TestBlackboardItem() : Item("Test item", ItemType_Test) {}
 
         void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override;
     };
 
-    BlackboardItemInstance CreateBlackboardItem(int type);
+
+    typedef std::shared_ptr<Item> ItemInstance;
+    ItemInstance CreateItem(ItemType type);
 }

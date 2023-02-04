@@ -4,7 +4,7 @@
 #include "FixturePreset.h"
 #include "FixtureCollection.h"
 #include "../Console.h"
-#include "engine/ui/BlackboardItem.h"
+#include "engine/ui/blackboard/Item.h"
 #include "engine/ui/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
 #include <pidmx_utils.h>
@@ -40,9 +40,9 @@ public:
 	ShowCollection<FixtureCollectionInstance> fixtureCollections;
 
     // UI elements
-    ShowCollection<UI::BlackboardItemInstance> blackboardItems;
+    ShowCollection<Blackboard::ItemInstance> blackboardItems;
 
-    std::shared_ptr<UI::BlackboardPanel> panelBlackboard;
+    std::shared_ptr<Blackboard::Panel> panelBlackboard;
     std::shared_ptr<UI::PatchFixturesPanel> panelPatchFixtures;
 
     Show();

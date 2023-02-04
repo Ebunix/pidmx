@@ -3,28 +3,30 @@
 //
 
 #include <cmath>
-#include "BlackboardItem.h"
-#include "BlackboardPanel.h"
+#include "Item.h"
+#include "Panel.h"
 #include "engine/core/Show.h"
 #include "engine/core/Engine.h"
 #include "engine/command/CommandBlackboard.h"
-#include "BlackboardItemCollection.h"
-#include "ImGuiExt.h"
+#include "ItemCollection.h"
+#include "engine/ui/ImGuiExt.h"
+#include "ItemGroups.h"
 
+using namespace UI;
 
-UI::BlackboardItem::BlackboardItem(std::string name, BlackboardItemType type) : ISerializable(), type(type) {
+Blackboard::Item::Item(std::string name, ItemType type) : ISerializable(), type(type) {
     this->name = std::move(name);
     id = currentShow->blackboardItems.GetAvailableID();
 }
 
-void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
+void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
     ImGui::PushID((int) id);
 
     ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
     ImColor frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
     ImVec2 windowPos = ImGui::GetWindowPos();
 
-    UI::OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
+    OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
 
     float totalWidth = cellWidth * width;
     float totalHeight = cellHeight * height;
@@ -42,18 +44,25 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
             
             //list->PushClipRect(itemTL, itemBR);
             if (itemY == 0 && itemX == 0) {
-                BlackboardItemInstance editing = parent->EditingItem();
-                bool clicked = UI::OutlinedButton(list, 0, ColorPresets[ColorPresetType_PanelItemMain], itemTL, itemBR);
+                ItemInstance editing = parent->EditingItem();
+                bool clicked = OutlinedButton(list, 0, ColorPresets[ColorPresetType_PanelItemMain], itemTL, itemBR);
                 if (clicked) {
                     ImGui::OpenPopup("Options");
                 }
 
-                ImGui::PushFont(ImGui::fontSmallRegular);
-                UI::CenterTextWrap(name.c_str(), itemSize.x, itemSize.y);
+                ImGui::PushFont(ImGui::fontRegularSmall);
+                CenterTextWrap(name.c_str(), itemSize.x, itemSize.y);
                 ImGui::PopFont();
 
             } else {
-                Draw(list, itemTL, itemBR, itemX + itemY * width - 1);
+                int index = itemX + itemY * width - 1;
+                Draw(list, itemTL, itemBR, index);
+                ImGui::PushFont(ImGui::fontMonospaceSmall);
+                ImGui::SetCursorPos(itemTLLocal + ImVec2(4, 4) * globalEngine->dpiScale);
+                ImGui::PushStyleColor(ImGuiCol_Text, ColorTextTransparentLight);
+                ImGui::Text("%d", index + 1);
+                ImGui::PopStyleColor();
+                ImGui::PopFont();
             }
             //list->PopClipRect();
         }
@@ -74,7 +83,7 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
 
 }
 
-nbt::tag_compound UI::BlackboardItem::save() {
+nbt::tag_compound Blackboard::Item::save() {
     nbt::tag_compound cmp = ISerializable::save();
     cmp.insert("pos", nbt::tag_compound{
             {"x", x},
@@ -87,7 +96,7 @@ nbt::tag_compound UI::BlackboardItem::save() {
 
 }
 
-void UI::BlackboardItem::load(const nbt::tag_compound &pack) {
+void Blackboard::Item::load(const nbt::tag_compound &pack) {
     ISerializable::load(pack);
     Hash blackboard = pack.at("blackboard").as<nbt::tag_long>().get();
     x = pack.at("pos").as<nbt::tag_compound>().at("x").as<nbt::tag_int>().get();
@@ -97,11 +106,11 @@ void UI::BlackboardItem::load(const nbt::tag_compound &pack) {
     parent = currentShow->panelBlackboard;
 }
 
-void UI::BlackboardItem::afterLoad() {
+void Blackboard::Item::afterLoad() {
     parent->PlaceInstance(currentShow->blackboardItems.Get(id), x, y, width, height, true);
 }
 
-void UI::BlackboardItem::Move(int newX, int newY) {
+void Blackboard::Item::Move(int newX, int newY) {
     parent->FreeInstanceArea(id);
     x = newX;
     y = newY;
@@ -109,7 +118,7 @@ void UI::BlackboardItem::Move(int newX, int newY) {
     OnMove(x, y);
 }
 
-void UI::BlackboardItem::Resize(int newW, int newH) {
+void Blackboard::Item::Resize(int newW, int newH) {
     parent->FreeInstanceArea(id);
     width = newW;
     height = newH;
@@ -117,19 +126,21 @@ void UI::BlackboardItem::Resize(int newW, int newH) {
     OnResize(width, height);
 }
 
-void UI::TestBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) {
+void Blackboard::TestBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) {
     static char format[10];
     snprintf(format, sizeof(format), "%i", itemIndex);
     UI::CenterTextWrap(format, bottomRight.x - topLeft.x);
 }
 
-UI::BlackboardItemInstance UI::CreateBlackboardItem(int type) {
+Blackboard::ItemInstance Blackboard::CreateItem(ItemType type) {
     switch (type) {
-        case BlackboardItemType_Test:
-            return std::make_shared<UI::TestBlackboardItem>();
-        case BlackboardItemType_Collections:
-            return std::make_shared<UI::CollectionsBlackboardItem>();
-        case BlackboardItemType_None:
+        case ItemType_Test:
+            return std::make_shared<TestBlackboardItem>();
+        case ItemType_Collections:
+            return std::make_shared<ItemCollection<ISerializable>>();
+        case ItemType_Groups:
+            return std::make_shared<ItemGroups>();
+        case ItemType_None:
         default:
             LogMessage(LogMessageType_Error, "Unknown type %i in %s", type, __FUNCTION__);
             return {};

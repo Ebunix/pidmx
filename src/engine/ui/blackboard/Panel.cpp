@@ -2,22 +2,23 @@
 // Created by ebu on 30.01.23.
 //
 
-#include "BlackboardPanel.h"
+#include "Panel.h"
 #include "engine/core/Show.h"
-#include "ImGuiExt.h"
+#include "engine/ui/ImGuiExt.h"
 #include "engine/command/CommandBlackboard.h"
-#include "Tools.h"
+#include "engine/ui/Tools.h"
 #include "engine/core/Engine.h"
 
 #define PLACEMENT_HASH(x, y) (((int64_t)x << 32) | (int64_t)y)
+using namespace UI;
 
-void UI::BlackboardPanel::Draw() {
-    if (UI::BeginMenuBar()) {
+void Blackboard::Panel::Draw() {
+    if (BeginMenuBar()) {
         if (ImGui::BeginMenu("Options")) {
             ImGui::Checkbox("Exact fit", &exactFit);
             ImGui::EndMenu();
         }
-        UI::EndMenuBar();
+        EndMenuBar();
     }
 
     static char idBuffer[16];
@@ -58,7 +59,7 @@ void UI::BlackboardPanel::Draw() {
     if (isEditing) {
         if (ImGui::IsKeyDown(ImGuiKey_Escape)) {
             currentPlacingSelectSize = false;
-            currentPlacingItem = BlackboardItemType_None;
+            currentPlacingItem = ItemType_None;
             if (editingItem) {
                 OccupyInstanceArea(editingItem);
             }
@@ -157,7 +158,7 @@ void UI::BlackboardPanel::Draw() {
                         currentPlacingSelectSize = false;
                         currentShow->commandHistory.Push("Add blackboard item",
                                                          CommandBlackboardAddItem::New(currentPlacingItem, this, targetX, targetY, targetWidth + 1, targetHeight + 1));
-                        currentPlacingItem = BlackboardItemType_None;
+                        currentPlacingItem = ItemType_None;
                     } else if (editingType == BlackboardItemEditType_Move) {
                         currentShow->commandHistory.Push("Move blackboard item",
                                                          CommandBlackboardMoveItem::New(editingItem->id, targetX, targetY));
@@ -182,9 +183,10 @@ void UI::BlackboardPanel::Draw() {
 
             if (ImGui::BeginPopup(idBuffer)) {
                 ImGui::Text("Create panel");
-                if (ImGui::Button("Test panel")) { currentPlacingItem = BlackboardItemType_Test; }
-                if (ImGui::Button("Collections")) { currentPlacingItem = BlackboardItemType_Collections; }
-                if (currentPlacingItem != BlackboardItemType_None) {
+                if (ImGui::Button("Test panel")) { currentPlacingItem = ItemType_Test; }
+                if (ImGui::Button("Collections")) { currentPlacingItem = ItemType_Collections; }
+                if (ImGui::Button("Fixture Groups")) { currentPlacingItem = ItemType_Groups; }
+                if (currentPlacingItem != ItemType_None) {
                     ImGui::CloseCurrentPopup();
                     currentPlacingItemX = x;
                     currentPlacingItemY = y;
@@ -215,7 +217,7 @@ void UI::BlackboardPanel::Draw() {
 
 }
 
-void UI::BlackboardPanel::PlaceInstance(const UI::BlackboardItemInstance &instance, int x, int y, int width, int height, bool skipAddToShow) {
+void Blackboard::Panel::PlaceInstance(const Blackboard::ItemInstance &instance, int x, int y, int width, int height, bool skipAddToShow) {
     instance->parent = currentShow->panelBlackboard;
     if (!skipAddToShow) {
         currentShow->blackboardItems.Add(instance);
@@ -224,11 +226,11 @@ void UI::BlackboardPanel::PlaceInstance(const UI::BlackboardItemInstance &instan
     instance->Resize(width, height);
 }
 
-void UI::BlackboardPanel::OccupyInstanceArea(Hash id) {
+void Blackboard::Panel::OccupyInstanceArea(Hash id) {
     OccupyInstanceArea(currentShow->blackboardItems.Get(id));
 }
 
-void UI::BlackboardPanel::OccupyInstanceArea(BlackboardItemInstance instance) {
+void Blackboard::Panel::OccupyInstanceArea(ItemInstance instance) {
     if (!instance) {
         return;
     }
@@ -239,7 +241,7 @@ void UI::BlackboardPanel::OccupyInstanceArea(BlackboardItemInstance instance) {
     }
 }
 
-void UI::BlackboardPanel::FreeInstanceArea(Hash id) {
+void Blackboard::Panel::FreeInstanceArea(Hash id) {
     const auto &instance = currentShow->blackboardItems.Get(id);
     if (!instance) {
         return;
@@ -251,11 +253,11 @@ void UI::BlackboardPanel::FreeInstanceArea(Hash id) {
     }
 }
 
-bool UI::BlackboardPanel::IsOccupied(int64_t x, int64_t y) {
+bool Blackboard::Panel::IsOccupied(int64_t x, int64_t y) {
     return placedInstances.find(PLACEMENT_HASH(x, y)) != placedInstances.end();
 }
 
-void UI::BlackboardPanel::EditItem(const UI::BlackboardItemInstance &item, UI::BlackboardItemEditType editType) {
+void Blackboard::Panel::EditItem(const ItemInstance &item, ItemEditType editType) {
     editingItem = item;
     editingType = editType;
     if (editType == BlackboardItemEditType_Move) {

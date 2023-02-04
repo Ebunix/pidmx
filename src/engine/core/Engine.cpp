@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "Show.h"
 #include <js/js.h>
-#include "engine/ui/BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 #include <string>
 #include <iostream>
 #include <filesystem>

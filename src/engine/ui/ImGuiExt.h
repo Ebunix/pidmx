@@ -7,6 +7,7 @@
 
 namespace ImGui {
     extern ImFont* fontMonospace;
+    extern ImFont* fontMonospaceSmall;
     extern ImFont* fontRegular;
-    extern ImFont* fontSmallRegular;
+    extern ImFont* fontRegularSmall;
 };

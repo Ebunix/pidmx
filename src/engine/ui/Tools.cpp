@@ -1,7 +1,7 @@
 #include "engine/command/CommandBlackboard.h"
 #include "ImGuiExt.h"
 #include "engine/core/Show.h"
-#include "BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 #include "Tools.h"
 #include <string>
 #include <cmath>
@@ -12,7 +12,7 @@ UI::ColorPreset UI::ColorPresets[ColorPresetType_Count_] = {
     { ImVec4(1.00f, 0.25f, 0.25f, 0.10f), ImVec4(1.00f, 0.25f, 0.25f, 0.27f), ImVec4(0.75f, 0.00f, 0.00f, 0.27f) }, // ButtonRed
     { ImVec4(0.18f, 0.40f, 0.79f, 1.00f), ImVec4(0.22f, 0.56f, 0.94f, 1.00f), ImVec4(0.13f, 0.22f, 0.55f, 1.00f) }, // PanelItemMain
 
-    { ImVec4(1.00f, 1.00f, 1.00f, 0.04f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // ButtonBlackboardItemEmpty
+    { ImVec4(1.00f, 1.00f, 1.00f, 0.04f), ImVec4(1.00f, 1.00f, 1.00f, 0.08f), ImVec4(0.00f, 0.00f, 0.00f, 0.08f) }, // ButtonBlackboardItemEmpty
     { ImVec4(1.00f, 1.00f, 1.00f, 0.12f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // ButtonBlackboardItemFull
 };
 
@@ -180,9 +180,9 @@ bool UI::OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorP
 }
 
 void UI::OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
-    dl->AddRectFilled(tl, br, bgColor, BlackboardPanelButtonRounding * globalEngine->dpiScale);
+    dl->AddRectFilled(tl, br, bgColor, Blackboard::PanelButtonRounding * globalEngine->dpiScale);
     OutlinedPanelBorder(dl, borderColor, tl, br, thickness);
 }
 void UI::OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
-    dl->AddRect(tl, br, borderColor, BlackboardPanelButtonRounding * globalEngine->dpiScale, 0, thickness * globalEngine->dpiScale);
+    dl->AddRect(tl, br, borderColor, Blackboard::PanelButtonRounding * globalEngine->dpiScale, 0, thickness * globalEngine->dpiScale);
 }

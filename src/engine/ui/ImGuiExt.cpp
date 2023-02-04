@@ -4,10 +4,11 @@
 
 #include "ImGuiExt.h"
 #include "imgui_internal.h"
-#include "BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 #include "Tools.h"
 
 ImFont* ImGui::fontMonospace;
+ImFont* ImGui::fontMonospaceSmall;
 ImFont* ImGui::fontRegular;
-ImFont* ImGui::fontSmallRegular;
+ImFont* ImGui::fontRegularSmall;
 

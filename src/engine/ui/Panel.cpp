@@ -2,7 +2,7 @@
 // Created by ebu on 31.01.23.
 //
 #include "Panel.h"
-#include "BlackboardPanel.h"
+#include "engine/ui/blackboard/Panel.h"
 #include "PatchFixturesPanel.h"
 
 UI::Panel::Panel(std::string title, PanelType type, ImGuiWindowFlags flags): flags(flags), type(type) {
@@ -12,7 +12,7 @@ UI::Panel::Panel(std::string title, PanelType type, ImGuiWindowFlags flags): fla
 
 UI::PanelInstance UI::CreatePanel(int type) {
     switch (type) {
-        case PanelType_Blackboard: return std::make_shared<BlackboardPanel>();
+        case PanelType_Blackboard: return std::make_shared<Blackboard::Panel>();
         case PanelType_FixturePatch: return std::make_shared<PatchFixturesPanel>();
         case PanelType_None:
         default:
