@@ -128,7 +128,7 @@ void Blackboard::Panel::Draw() {
                 continue;
             }
 
-            ImGui::SetCursorPos(tl + blackboardItemPadding - windowPos);
+            ImGui::SetCursorPos(tl + ItemOuterPadding - windowPos);
             ImGui::PushID(id++);
             snprintf(idBuffer, sizeof(idBuffer), "%i:%i", x, y);
 
@@ -153,7 +153,7 @@ void Blackboard::Panel::Draw() {
                 }
 
 
-                if (ImGui::Button("##v", br - tl - blackboardItemPadding * 2) && !isIntersecting) {
+                if (ImGui::Button("##v", br - tl - ItemOuterPadding * 2) && !isIntersecting) {
                     if (currentPlacingSelectSize) {
                         currentPlacingSelectSize = false;
                         currentShow->commandHistory.Push("Add blackboard item",
@@ -175,7 +175,7 @@ void Blackboard::Panel::Draw() {
                 ImGui::PushStyleColor(ImGuiCol_Button, 0);
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.07f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.07f));
-                if (ImGui::Button("##v", br - tl - blackboardItemPadding * 2) && !isIntersecting) {
+                if (ImGui::Button("##v", br - tl - ItemOuterPadding * 2) && !isIntersecting) {
                     ImGui::OpenPopup(idBuffer);
                 }
                 ImGui::PopStyleColor(3);
@@ -183,7 +183,6 @@ void Blackboard::Panel::Draw() {
 
             if (ImGui::BeginPopup(idBuffer)) {
                 ImGui::Text("Create panel");
-                if (ImGui::Button("Test panel")) { currentPlacingItem = ItemType_Test; }
                 if (ImGui::Button("Collections")) { currentPlacingItem = ItemType_Collections; }
                 if (ImGui::Button("Fixture Groups")) { currentPlacingItem = ItemType_Groups; }
                 if (currentPlacingItem != ItemType_None) {

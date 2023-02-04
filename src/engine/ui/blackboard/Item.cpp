@@ -30,7 +30,7 @@ void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRig
 
     float totalWidth = cellWidth * width;
     float totalHeight = cellHeight * height;
-    ImVec2 padding = blackboardItemPadding * globalEngine->dpiScale;
+    ImVec2 padding = ItemOuterPadding * globalEngine->dpiScale;
     ImVec2 itemSize((totalWidth - ((width + 1) * padding.x)) / width, (totalHeight - ((height + 1) * padding.y)) / height);
     
 
@@ -56,9 +56,11 @@ void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRig
 
             } else {
                 int index = itemX + itemY * width - 1;
+                ImGui::PushFont(ImGui::fontRegularSmall);
                 Draw(list, itemTL, itemBR, index);
+                ImGui::PopFont();
                 ImGui::PushFont(ImGui::fontMonospaceSmall);
-                ImGui::SetCursorPos(itemTLLocal + ImVec2(4, 4) * globalEngine->dpiScale);
+                ImGui::SetCursorPos(itemTLLocal + ItemInnerPadding * globalEngine->dpiScale);
                 ImGui::PushStyleColor(ImGuiCol_Text, ColorTextTransparentLight);
                 ImGui::Text("%d", index + 1);
                 ImGui::PopStyleColor();
@@ -93,7 +95,6 @@ nbt::tag_compound Blackboard::Item::save() {
     });
     cmp.insert("blackboard", parent->id);
     return cmp;
-
 }
 
 void Blackboard::Item::load(const nbt::tag_compound &pack) {
@@ -126,16 +127,8 @@ void Blackboard::Item::Resize(int newW, int newH) {
     OnResize(width, height);
 }
 
-void Blackboard::TestBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) {
-    static char format[10];
-    snprintf(format, sizeof(format), "%i", itemIndex);
-    UI::CenterTextWrap(format, bottomRight.x - topLeft.x);
-}
-
 Blackboard::ItemInstance Blackboard::CreateItem(ItemType type) {
     switch (type) {
-        case ItemType_Test:
-            return std::make_shared<TestBlackboardItem>();
         case ItemType_Collections:
             return std::make_shared<ItemCollection<ISerializable>>();
         case ItemType_Groups:

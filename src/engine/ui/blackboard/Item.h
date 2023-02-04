@@ -7,11 +7,11 @@
 namespace Blackboard {
     class Panel;
 
-    const ImVec2 blackboardItemPadding(1.5f, 1.5f);
+    const ImVec2 ItemOuterPadding(1.5f, 1.5f);
+    const ImVec2 ItemInnerPadding(4.0f, 4.0f);
 
     enum ItemType {
         ItemType_None,
-        ItemType_Test,
         ItemType_Collections,
         ItemType_Groups,
         ItemType_Count_,
@@ -38,13 +38,6 @@ namespace Blackboard {
         virtual void Draw(ImDrawList *list, ImVec2 screenTL, ImVec2 screenBR, int itemIndex) {}
         virtual void OnResize(int newW, int newH) {}
         virtual void OnMove(int newX, int newY) {}
-    };
-
-    class TestBlackboardItem : public Item {
-    public:
-        explicit TestBlackboardItem() : Item("Test item", ItemType_Test) {}
-
-        void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override;
     };
 
 

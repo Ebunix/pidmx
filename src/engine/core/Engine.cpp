@@ -121,5 +121,5 @@ void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
 
     nbt::tag_compound root;
     nbt::Save(root, "fixturePresets", fixturePresets);
-    nbt::SaveToFile(root, "resources/fixtures/fixtures.bundle1");
+    nbt::SaveToFile(root, "resources/fixtures/fixtures.bundle1", true);
 }
