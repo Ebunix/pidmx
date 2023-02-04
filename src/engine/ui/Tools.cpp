@@ -94,6 +94,7 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
     char* source = (char*)str;
     ImVec2 extent;
     int segments = 1;
+    bool newLine = true;
 
     while (source) {
         char* chr = strchr(source, ' ');
@@ -106,10 +107,11 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
         }
 
         if (available - size.x > 0) {
-            if (!built.empty())
+            if (!newLine)
             {
                 built.append(" ");
             }
+            newLine = false;
             built.append(source, chr ? chr - source : strlen(source));
             ImVec2 bounds = ImGui::CalcTextSize(built.c_str());
             available = maxWidth - bounds.x;
@@ -127,8 +129,8 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
                 }
                 else {
                     built.append(source);
+                    segments = 0;
                 }
-                source = chr;
             }
             ImVec2 actualSize = ImGui::CalcTextSize(built.c_str());
             extent.y += actualSize.y;
@@ -136,23 +138,26 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
             available = maxWidth;
             segments++;
             built.append("\0", 1);
+            newLine = true;
         }
     }
 
-    char* finalStr = (char*)built.c_str();
-    float yStartOffset = (maxHeight - extent.y) / 2;
-    if (yStartOffset > 0) {
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + yStartOffset);
+    const char* finalStr = built.c_str();
+    float yOffset = (maxHeight - extent.y) / 2;
+    if (yOffset > 0) {
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + yOffset);
     }
 
     for (int i = 0; i < segments; i++) {
         ImVec2 actualSize = ImGui::CalcTextSize(finalStr);
         ImVec2 drawPos((maxWidth - actualSize.x) / 2, cursorPos.y);
         ImGui::SetCursorPosX(cursorPos.x + drawPos.x);
-        ImGui::Text("%s", built.c_str());
+        ImGui::SetCursorPosY(cursorPos.y + (yOffset > 0 ? yOffset : 0));
+        ImGui::Text("%s", finalStr);
         ImGui::SetCursorPosX(cursorPos.x);
+
+        finalStr += strlen(finalStr) + 1;
         cursorPos.y += actualSize.y;
-        ImGui::SetCursorPosY(cursorPos.y);
     }
 
     return extent;
