@@ -100,25 +100,25 @@ void setImGuiStyle(float highDPIscaleFactor) {
     style.GrabRounding = 2.0f;
     // style.WindowTitleAlign.x = 0.50f;
     // style.FrameBorderSize = 0.0f;
-    style.WindowBorderSize = DPI_SCALE;
+    style.WindowBorderSize = globalEngine->dpiScale;
 
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
     ImGui::fontRegular = io.Fonts->AddFontFromFileTTF(
             "resources/Roboto-Regular.ttf",
-            17.0f * DPI_SCALE /* engine->displayScale */,
+            17.0f * globalEngine->dpiScale /* engine->displayScale */,
             NULL,
             NULL
     );
     ImGui::fontSmallRegular = io.Fonts->AddFontFromFileTTF(
             "resources/Roboto-Regular.ttf",
-            14.0f * DPI_SCALE /* engine->displayScale */,
+            14.0f * globalEngine->dpiScale /* engine->displayScale */,
             NULL,
             NULL
     );
     ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
             "resources/JetBrainsMono-Regular.ttf",
-            17.0f * DPI_SCALE,
+            17.0f * globalEngine->dpiScale,
             NULL,
             NULL
     );
@@ -232,13 +232,15 @@ int main(int argc, char *argv[]) {
     }
 
     bool openDemoWindow = true;
-    setImGuiStyle(DPI_SCALE);
+//    ImGui::ScaleWindowsInViewport(, globalEngine->dpiScale);
 
     v8::HandleScope scope(js::global::isolate);
 
-    Engine engine;
+    Engine engine(argc, argv);
     currentShow = new Show();
     Hash number = 1;
+
+    setImGuiStyle(globalEngine->dpiScale);
 
     js::exec("let fixtures = [];"
              "for (let i = 0; i < 30; i++) fixtures.push({name: 'Fixture A', fixtureId: 201 + i, channel: 0, universe: 0});"

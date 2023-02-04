@@ -7,6 +7,7 @@
 #include "ImGuiExt.h"
 #include <imgui_internal.h>
 #include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 
 void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) {
 
@@ -27,7 +28,7 @@ void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec
                 }
                 ImGui::EndCombo();
             }
-            if (UI::EndPopupDialog(DialogOption_OK | DialogOption_Cancel) != DialogOption_None) {
+            if (UI::EndPopupDialog(DialogOption_OK | DialogOption_Cancel) == DialogOption_OK) {
                 if (selectedCollection) {
                     assignedCollections[choosingCollectionIndex] = selectedCollection;
                     choosingCollectionIndex = -1;
@@ -37,13 +38,11 @@ void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec
     }
 
     if (itemIndex >= assignedCollections.size() || assignedCollections[itemIndex] == INVALID_HASH) {
-        DrawButtonUnassigned(topLeft, bottomRight, itemIndex);
+        DrawButtonUnassigned(list, topLeft, bottomRight, itemIndex);
         return;
     }
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_FrameBg]);
-    UI::OutlinedButton(list, ColorPresets[ColorPresetType_PanelItemMain].regular, ColorPresets[ColorPresetType_Button], topLeft, bottomRight);
-    ImGui::PopStyleColor();
+    UI::OutlinedButton(list, 0, ColorPresets[ColorPresetType_ButtonBlackboardItemFull], topLeft, bottomRight);
 
     float halfHeight = size.y / 2.0f;
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + halfHeight);
@@ -52,13 +51,14 @@ void UI::CollectionsBlackboardItem::Draw(ImDrawList *list, ImVec2 topLeft, ImVec
     UI::CenterTextWrap(collection->name.c_str(), size.x, halfHeight);
 }
 
-void UI::CollectionsBlackboardItem::DrawButtonUnassigned(const ImVec2 &tl, const ImVec2 &br, int index) {
+void UI::CollectionsBlackboardItem::DrawButtonUnassigned(ImDrawList* list, const ImVec2 &tl, const ImVec2 &br, int index) {
     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
     ImGui::PushID(index);
-/*    if (UI::BlackboardPanelButton("<none>", tl, br)) {
+    if (UI::OutlinedButton(list, ColorOutlineHint, ColorPresets[ColorPresetType_ButtonBlackboardItemEmpty], tl, br)
+    ) {
         startChoosingCollectionIndex = true;
         choosingCollectionIndex = index;
-    }*/
+    }
     ImGui::PopID();
     ImGui::PopStyleColor();
 }

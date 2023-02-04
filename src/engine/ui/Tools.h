@@ -23,22 +23,16 @@ namespace UI {
 		ColorPresetType_Button,
 		ColorPresetType_ButtonRed,
 		ColorPresetType_PanelItemMain,
+		ColorPresetType_ButtonBlackboardItemEmpty,
+		ColorPresetType_ButtonBlackboardItemFull,
 		ColorPresetType_Count_
 	};
 
 	extern ColorPreset ColorPresets[ColorPresetType_Count_];
+	const ImVec4 ColorOutlineHint(1.0f, 1.0f, 1.0f, 0.08f);
 
-	inline bool BeginMenuBar() {
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * DPI_SCALE, 8 * DPI_SCALE));
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(16 * DPI_SCALE, 16 * DPI_SCALE));
-		return ImGui::BeginMenuBar();
-	}
-	inline bool BeginMainMenuBar() {
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * DPI_SCALE, 8 * DPI_SCALE));
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(16 * DPI_SCALE, 16 * DPI_SCALE));
-		return ImGui::BeginMainMenuBar();
-	}
+	bool BeginMenuBar();
+	bool BeginMainMenuBar();
 	inline void EndMenuBar() {
 		ImGui::PopStyleVar(2);
 		ImGui::EndMenuBar();
@@ -53,7 +47,7 @@ namespace UI {
     DialogOption ShowMessagePopup(bool openNow, int options, const char* message, const char* title = "Message");
 
     ImVec2 CenterTextWrap(const char* str, float maxWidth, float maxHeight = 0);
-    bool OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &frameBgColor, const ImVec2 &tl, const ImVec2 &br);
-    void OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br);
-    void OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br);
+    bool OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &frameBgColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
+    void OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
+    void OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
 }

@@ -6,8 +6,13 @@
 class Engine {
 public:
     std::set<Hash> activeFixtures;
+    float dpiScale = 1.0;
 
-	Engine();
+    std::vector<FixturePreset> fixturePresets;
+
+	Engine(int argc, char* argv[]);
+
+    void LoadFixturePresetsFromDirectory(const std::string& dir);
 
     static void ProcessHotkeys();
     static void NewShow();
@@ -18,3 +23,5 @@ public:
 
     static void DrawPanels();
 };
+
+extern Engine* globalEngine;

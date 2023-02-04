@@ -13,15 +13,17 @@ namespace UI {
 
     class BlackboardPanel : public Panel {
     public:
-        BlackboardPanel() : Panel("Blackboard", PanelType_Blackboard, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse) {}
+        BlackboardPanel() : Panel("Blackboard", PanelType_Blackboard, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollWithMouse) {}
 
         void Draw() override;
 
         void load(const nbt::tag_compound& pack) override {
             ISerializable::load(pack);
+            exactFit = nbt::Load(pack, "exactFit", false);
         }
         nbt::tag_compound save() override {
             nbt::tag_compound cmp = ISerializable::save();
+            nbt::Save(cmp, "exactFit", exactFit);
             return cmp;
         }
 
@@ -38,6 +40,8 @@ namespace UI {
     private:
         std::map<int64_t, BlackboardItemInstance> placedInstances;
 
+        const float cellSize = 60.0f;
+        bool exactFit = false;
         bool currentPlacingSelectSize = false;
         int currentPlacingItemX = 0, currentPlacingItemY = 0;
         BlackboardItemType currentPlacingItem = BlackboardItemType_None;

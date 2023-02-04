@@ -2,9 +2,6 @@
 #include "v8.h"
 #include "jsUtils.h"
 
-#define V8_INTEROP_STRUCT(name) struct name
-#define V8_INTEROP_STRUCT_MEMBER(type, name) type name
-
 #define V8_INTEROP_CONVERT_FUNC(type, func) inline type v8Interop ## func(v8::Local<v8::Context> ctx, v8::Local<v8::Value> value)
 #define V8_INTEROP_CONVERT_FUNC_PREAMBLE(structType) structType result
 #define V8_INTEROP_CONVERT_FUNC_MEMBER_NUMBER(type, name) v8::Local<v8::Value> name ## Temp; \

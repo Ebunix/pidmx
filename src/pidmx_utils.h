@@ -9,10 +9,6 @@
 #define VERSION_MINOR(ver) (((ver) >> 16) & 0xff)
 #define VERSION_REV(ver) ((ver) & 0xffff)
 
-#ifndef DPI_SCALE
-#define DPI_SCALE 1
-#endif
-
 #define INVALID_HASH 0
 typedef int64_t Hash;
 inline const Hash HashString(const std::string& str) {

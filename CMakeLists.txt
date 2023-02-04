@@ -83,7 +83,7 @@ add_executable(pidmx
 	src/engine/ui/PanelConsole.cpp
 
 	src/engine/Console.cpp
-	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/BlackboardPanel.cpp src/engine/ui/BlackboardPanel.h src/engine/ui/BlackboardItem.cpp src/engine/ui/BlackboardItem.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/BlackboardItemCollection.cpp src/engine/ui/BlackboardItemCollection.h)
+	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/BlackboardPanel.cpp src/engine/ui/BlackboardPanel.h src/engine/ui/BlackboardItem.cpp src/engine/ui/BlackboardItem.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/BlackboardItemCollection.cpp src/engine/ui/BlackboardItemCollection.h src/engine/core/FixturePreset.cpp)
 
 target_include_directories(pidmx PUBLIC src)
 
@@ -93,4 +93,3 @@ target_link_libraries(pidmx js)
 target_link_libraries(pidmx imgui)
 target_link_libraries(pidmx OpenGL::GL)
 target_link_libraries(pidmx nbt++)
-target_compile_definitions(pidmx PUBLIC DPI_SCALE=1.0f)

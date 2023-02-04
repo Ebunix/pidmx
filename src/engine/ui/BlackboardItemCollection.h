@@ -22,6 +22,6 @@ namespace UI {
         int choosingCollectionIndex = -1;
         bool startChoosingCollectionIndex = false;
 
-        void DrawButtonUnassigned(const ImVec2 &tl, const ImVec2 &br, int index);
+        void DrawButtonUnassigned(ImDrawList* list, const ImVec2 &tl, const ImVec2 &br, int index);
     };
 }

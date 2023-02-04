@@ -6,6 +6,7 @@
 #include "BlackboardItem.h"
 #include "BlackboardPanel.h"
 #include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 #include "engine/command/CommandBlackboard.h"
 #include "BlackboardItemCollection.h"
 #include "ImGuiExt.h"
@@ -16,13 +17,7 @@ UI::BlackboardItem::BlackboardItem(std::string name, BlackboardItemType type) : 
     id = currentShow->blackboardItems.GetAvailableID();
 }
 
-void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight) {
-    float itemWidth = (bottomRight.x - topLeft.x) / width;
-    float itemHeight = (bottomRight.y - topLeft.y) / height;
-
-    if (std::isnan(itemWidth) || std::isnan(itemHeight)) {
-        return;
-    }
+void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
     ImGui::PushID((int) id);
 
     ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
@@ -31,10 +26,20 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
 
     UI::OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
 
+    float totalWidth = cellWidth * width;
+    float totalHeight = cellHeight * height;
+    ImVec2 padding = blackboardItemPadding * globalEngine->dpiScale;
+    ImVec2 itemSize((totalWidth - ((width + 1) * padding.x)) / width, (totalHeight - ((height + 1) * padding.y)) / height);
+    
+
     for (int itemY = 0; itemY < height; itemY++) {
         for (int itemX = 0; itemX < width; itemX++) {
-            ImVec2 itemTL = ImVec2(topLeft.x + itemWidth * itemX, topLeft.y + itemHeight * itemY);
-            ImVec2 itemBR = ImVec2(itemTL.x + itemWidth, itemTL.y + itemHeight);
+            ImVec2 itemTL = ImVec2(topLeft.x + itemSize.x * itemX + ((itemX + 1) * padding.x), topLeft.y + itemSize.y * itemY + ((itemY + 1) * padding.y));
+            ImVec2 itemBR = itemTL + itemSize;
+           
+            ImVec2 itemTLLocal = itemTL - windowPos;
+            ImGui::SetCursorPos(itemTLLocal);
+            
             //list->PushClipRect(itemTL, itemBR);
             if (itemY == 0 && itemX == 0) {
                 BlackboardItemInstance editing = parent->EditingItem();
@@ -44,12 +49,10 @@ void UI::BlackboardItem::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomR
                 }
 
                 ImGui::PushFont(ImGui::fontSmallRegular);
-                UI::CenterTextWrap(name.c_str(), itemWidth, itemHeight);
+                UI::CenterTextWrap(name.c_str(), itemSize.x, itemSize.y);
                 ImGui::PopFont();
 
             } else {
-                ImVec2 itemTLLocal = ImVec2(topLeft.x + itemWidth * itemX - windowPos.x, topLeft.y + itemHeight * itemY - windowPos.y);
-                ImGui::SetCursorPos(itemTLLocal);
                 Draw(list, itemTL, itemBR, itemX + itemY * width - 1);
             }
             //list->PopClipRect();

@@ -4,12 +4,12 @@
 #include "ISerializable.h"
 #include <v8ObjectInterface.h>
 
-V8_INTEROP_STRUCT(FixtureData) {
-	V8_INTEROP_STRUCT_MEMBER(std::string, name);
-	V8_INTEROP_STRUCT_MEMBER(Hash, fixtureId) = 0;
-	V8_INTEROP_STRUCT_MEMBER(Hash, presetId) = 0;
-	V8_INTEROP_STRUCT_MEMBER(int, universe) = 0;
-	V8_INTEROP_STRUCT_MEMBER(int, channel) = 0;
+struct FixtureData {
+	std::string name;
+	Hash fixtureId = 0;
+	Hash presetId = 0;
+	int universe = 0;
+	int channel = 0;
 };
 
 V8_INTEROP_CONVERT_FUNC(FixtureData, ObjectToFixtureData) {

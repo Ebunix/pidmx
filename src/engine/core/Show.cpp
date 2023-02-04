@@ -74,8 +74,8 @@ void Show::Save(const std::string &path)
 
     SerializeCollection(rootCompound, "fixtures", fixtures);
     SerializeCollection(rootCompound, "fixtureCollections", fixtureCollections);
-//    SerializeCollectionTyped(rootCompound, "panels", panels);
     SerializeCollectionTyped(rootCompound, "blackboardItems", blackboardItems);
+    rootCompound.insert("blackboard", panelBlackboard->save());
 
 	nbt::io::write_tag("", rootCompound, ogzs);
 	ogzs.close();
@@ -90,7 +90,7 @@ void Show::Load(const std::string &path)
 
     DeserializeCollection(*rootCompound, "fixtures", fixtures, std::make_shared<Fixture>);
     DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections, std::make_shared<FixtureCollection>);
-//    DeserializeCollectionTyped(*rootCompound, "panels", panels, UI::CreatePanel);
     DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, UI::CreateBlackboardItem);
+    panelBlackboard->load(rootCompound->at("blackboard").as<nbt::tag_compound>());
 }
 

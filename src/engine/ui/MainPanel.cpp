@@ -11,15 +11,15 @@ enum class MainPanelMode {
 };
 
 MainPanelMode mainPanelMode = MainPanelMode::MainMenu;
-ImVec2 buttonSmall(100 * DPI_SCALE, 32 * DPI_SCALE);
-ImVec2 buttonLarge(230 * DPI_SCALE, 48 * DPI_SCALE);
+ImVec2 buttonSmall(100, 32);
+ImVec2 buttonLarge(230, 48);
 
 void DrawMainMenuPanel()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 		
 	ImGui::Text("Patch setup");
-	if (ImGui::Button("Fixtures & Patch", buttonLarge)) {
+	if (ImGui::Button("Fixtures & Patch", buttonLarge * globalEngine->dpiScale)) {
 		mainPanelMode = MainPanelMode::FixturesPatch;
 	}
 
@@ -75,7 +75,7 @@ void UI::DrawMainPanel(Engine &engine)
     ImVec2 workPos = vp->WorkPos;
 
 
-	float leftPanelWidth = 75 * DPI_SCALE;
+	float leftPanelWidth = 75 * globalEngine->dpiScale;
 	// ImVec2 sideAreaPos = ImVec2(0, vp->WorkPos.y);
     // ImVec2 mainAreaPos = ImVec2(vp->WorkPos.x + leftPanelWidth, vp->WorkPos.y);
     // ImVec2 mainAreaSize = ImVec2(workArea.x - leftPanelWidth, workArea.y);
@@ -89,10 +89,10 @@ void UI::DrawMainPanel(Engine &engine)
 
     /*
 	ImGui::SetNextWindowPos(sideAreaPos, ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(leftPanelWidth - DPI_SCALE, workArea.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(leftPanelWidth - globalEngine->dpiScale, workArea.y), ImGuiCond_Always);
 	ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-	if (ImGui::Button("Setup", ImVec2(leftPanelWidth - DPI_SCALE, 48 * DPI_SCALE))) {
+	if (ImGui::Button("Setup", ImVec2(leftPanelWidth - globalEngine->dpiScale, 48 * globalEngine->dpiScale))) {
 		windowSetup = !windowSetup;
 	}
 
@@ -119,7 +119,7 @@ void UI::DrawMainPanel(Engine &engine)
     ImGui::PopStyleVar(3);
 
 	if (windowSetup) {
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16 * DPI_SCALE, 16 * DPI_SCALE));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16 * globalEngine->dpiScale, 16 * globalEngine->dpiScale));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 		ImGui::SetNextWindowPos(mainAreaPos);

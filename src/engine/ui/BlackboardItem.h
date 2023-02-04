@@ -7,6 +7,8 @@
 namespace UI {
     class BlackboardPanel;
 
+    const ImVec2 blackboardItemPadding(1.5f, 1.5f);
+
     enum BlackboardItemType {
         BlackboardItemType_None,
         BlackboardItemType_Test,
@@ -26,7 +28,7 @@ namespace UI {
         nbt::tag_compound save() override;
         void afterLoad() override;
 
-        void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight);
+        void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
 
         void Move(int x, int y);
         void Resize(int w, int h);

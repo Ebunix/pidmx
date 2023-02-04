@@ -7,13 +7,20 @@
 #include "ImGuiExt.h"
 #include "engine/command/CommandBlackboard.h"
 #include "Tools.h"
+#include "engine/core/Engine.h"
 
 #define PLACEMENT_HASH(x, y) (((int64_t)x << 32) | (int64_t)y)
 
 void UI::BlackboardPanel::Draw() {
-    static char idBuffer[16];
+    if (UI::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Options")) {
+            ImGui::Checkbox("Exact fit", &exactFit);
+            ImGui::EndMenu();
+        }
+        UI::EndMenuBar();
+    }
 
-    const bool useFixedElementSize = true;
+    static char idBuffer[16];
 
     ImGui::PushID((int) id);
     ImDrawList *dl = ImGui::GetWindowDrawList();
@@ -21,12 +28,11 @@ void UI::BlackboardPanel::Draw() {
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 avail = ImGui::GetContentRegionAvail();
 
-
-    float elementSpacing = 75 * DPI_SCALE;
+    float elementSpacing = cellSize * globalEngine->dpiScale;
     int elementsHorizontal = (int) (avail.x / elementSpacing);
-    float elementWidth = useFixedElementSize ? elementSpacing : avail.x / elementsHorizontal;
+    float elementWidth = !exactFit ? elementSpacing : avail.x / elementsHorizontal;
     int elementsVertical = (int) (avail.y / elementSpacing);
-    float elementHeight = useFixedElementSize ? elementSpacing : avail.y / elementsVertical;
+    float elementHeight = !exactFit ? elementSpacing : avail.y / elementsVertical;
 
     ImVec2 topLeft(startPos.x, startPos.y);
 
@@ -46,7 +52,6 @@ void UI::BlackboardPanel::Draw() {
     int targetHeight = -1;
     bool isIntersecting = false;
     bool isEditing = currentPlacingSelectSize || editingItem != nullptr;
-    const ImVec2 elementPadding(2, 2);
 
     ImDrawList* draw = ImGui::GetWindowDrawList();
 
@@ -112,17 +117,17 @@ void UI::BlackboardPanel::Draw() {
             ImVec2 br = tl + ImVec2(elementWidth, elementHeight);
 
             if (x == 0 || y == 0) {
-                draw->AddCircleFilled(tl, 4, ImColor(0x0bffffff), 8);
-                draw->AddCircleFilled(tl, 2, ImColor(0x10ffffff), 8);
+                draw->AddCircleFilled(tl, 4 * globalEngine->dpiScale, ImColor(0x0bffffff), 8);
+                draw->AddCircleFilled(tl, 2 * globalEngine->dpiScale, ImColor(0x10ffffff), 8);
             }
-            draw->AddCircleFilled(br, 4, ImColor(0x0bffffff), 8);
-            draw->AddCircleFilled(br, 2, ImColor(0x10ffffff), 8);
+            draw->AddCircleFilled(br, 4 * globalEngine->dpiScale, ImColor(0x0bffffff), 8);
+            draw->AddCircleFilled(br, 2 * globalEngine->dpiScale, ImColor(0x10ffffff), 8);
 
             if (IsOccupied(x, y) || x >= elementsHorizontal || y >= elementsVertical) {
                 continue;
             }
 
-            ImGui::SetCursorPos(tl + elementPadding - windowPos);
+            ImGui::SetCursorPos(tl + blackboardItemPadding - windowPos);
             ImGui::PushID(id++);
             snprintf(idBuffer, sizeof(idBuffer), "%i:%i", x, y);
 
@@ -147,7 +152,7 @@ void UI::BlackboardPanel::Draw() {
                 }
 
 
-                if (ImGui::Button("##v", br - tl - elementPadding * 2) && !isIntersecting) {
+                if (ImGui::Button("##v", br - tl - blackboardItemPadding * 2) && !isIntersecting) {
                     if (currentPlacingSelectSize) {
                         currentPlacingSelectSize = false;
                         currentShow->commandHistory.Push("Add blackboard item",
@@ -169,7 +174,7 @@ void UI::BlackboardPanel::Draw() {
                 ImGui::PushStyleColor(ImGuiCol_Button, 0);
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.07f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.07f));
-                if (ImGui::Button("##v", br - tl - elementPadding * 2) && !isIntersecting) {
+                if (ImGui::Button("##v", br - tl - blackboardItemPadding * 2) && !isIntersecting) {
                     ImGui::OpenPopup(idBuffer);
                 }
                 ImGui::PopStyleColor(3);
@@ -201,12 +206,13 @@ void UI::BlackboardPanel::Draw() {
         ImVec2 brScreenSpace(tlScreenSpace.x + elementWidth * item->width, tlScreenSpace.y + elementHeight * item->height);
         //dl->PushClipRect(tlScreenSpace, brScreenSpace, true);
         ImGui::SetCursorPos(tlLocalSpace);
-        item->Render(dl, tlScreenSpace, brScreenSpace);
+        item->Render(dl, tlScreenSpace, brScreenSpace, elementWidth, elementHeight);
         //dl->PopClipRect();
     }
     //dl->PopClipRect();
 
     ImGui::PopID();
+
 }
 
 void UI::BlackboardPanel::PlaceInstance(const UI::BlackboardItemInstance &instance, int x, int y, int width, int height, bool skipAddToShow) {

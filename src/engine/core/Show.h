@@ -36,7 +36,7 @@ public:
 
     // Show data structure
 	ShowCollection<FixtureInstance> fixtures;
-	ShowCollection<FixturePresetInstance> fixturePresets;
+	ShowCollection<FixturePreset> fixturePresets;
 	ShowCollection<FixtureCollectionInstance> fixtureCollections;
 
     // UI elements

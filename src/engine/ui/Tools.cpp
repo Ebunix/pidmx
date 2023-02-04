@@ -5,21 +5,37 @@
 #include "Tools.h"
 #include <string>
 #include <cmath>
+#include "engine/core/Engine.h"
 
 UI::ColorPreset UI::ColorPresets[ColorPresetType_Count_] = {
     { ImVec4(1.00f, 1.00f, 1.00f, 0.10f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // Button
     { ImVec4(1.00f, 0.25f, 0.25f, 0.10f), ImVec4(1.00f, 0.25f, 0.25f, 0.27f), ImVec4(0.75f, 0.00f, 0.00f, 0.27f) }, // ButtonRed
     { ImVec4(0.18f, 0.40f, 0.79f, 1.00f), ImVec4(0.22f, 0.56f, 0.94f, 1.00f), ImVec4(0.13f, 0.22f, 0.55f, 1.00f) }, // PanelItemMain
+
+    { ImVec4(1.00f, 1.00f, 1.00f, 0.04f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // ButtonBlackboardItemEmpty
+    { ImVec4(1.00f, 1.00f, 1.00f, 0.12f), ImVec4(1.00f, 1.00f, 1.00f, 0.27f), ImVec4(0.00f, 0.00f, 0.00f, 0.27f) }, // ButtonBlackboardItemFull
 };
 
+bool UI::BeginMenuBar() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * globalEngine->dpiScale, 8 * globalEngine->dpiScale));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(16 * globalEngine->dpiScale, 16 * globalEngine->dpiScale));
+    return ImGui::BeginMenuBar();
+}
 
-bool UI::BeginPopupDialog(bool openNow, const char* title)
+bool UI::BeginMainMenuBar() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * globalEngine->dpiScale, 8 * globalEngine->dpiScale));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(16 * globalEngine->dpiScale, 16 * globalEngine->dpiScale));
+    return ImGui::BeginMainMenuBar();
+}
+
+bool UI::BeginPopupDialog(bool openNow, const char *title)
 {
 	if (openNow) {
 		ImGui::OpenPopup(title);
 	}
-	ImGui::SetNextWindowSizeConstraints(ImVec2(300 * DPI_SCALE, 100 * DPI_SCALE), ImVec2(50000, 50000));
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * DPI_SCALE, 8 * DPI_SCALE));
+	ImGui::SetNextWindowSizeConstraints(ImVec2(300 * globalEngine->dpiScale, 100 * globalEngine->dpiScale), ImVec2(50000, 50000));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8 * globalEngine->dpiScale, 8 * globalEngine->dpiScale));
 	bool result = ImGui::BeginPopupModal(title, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 	if (!result) {
 		ImGui::PopStyleVar();
@@ -33,7 +49,7 @@ bool UI::BeginPopupDialog(bool openNow, const char* title)
 static inline int DrawButton(const char* title, int options, int compare, int disableMask, int result) {
     if (options & compare) {
         ImGui::BeginDisabled(compare & disableMask);
-        if (ImGui::Button(title, ImVec2(80 * DPI_SCALE, 0)))
+        if (ImGui::Button(title, ImVec2(80 * globalEngine->dpiScale, 0)))
             result = compare;
         ImGui::SameLine();
         ImGui::EndDisabled();
@@ -142,7 +158,7 @@ ImVec2 UI::CenterTextWrap(const char *str, float maxWidth, float maxHeight) {
     return extent;
 }
 
-bool UI::OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &bgColor, const ImVec2 &tl, const ImVec2 &br) {
+bool UI::OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &bgColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
     ImGuiID id = ImGui::GetCurrentWindow()->IDStack.back();
     ImRect rect(tl, br);
     ImGui::ItemAdd(rect, id);
@@ -153,15 +169,15 @@ bool UI::OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorP
 
     ImColor bg = holding ? bgColor.active : (hovering ? bgColor.hovered : bgColor.regular);
 
-    OutlinedPanel(dl, borderColor, bg, tl, br);
+    OutlinedPanel(dl, borderColor, bg, tl, br, thickness);
 
     return clicked;
 }
 
-void UI::OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br) {
-    dl->AddRectFilled(tl, br, bgColor, BlackboardPanelButtonRounding * DPI_SCALE);
-    OutlinedPanelBorder(dl, borderColor, tl, br);
+void UI::OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
+    dl->AddRectFilled(tl, br, bgColor, BlackboardPanelButtonRounding * globalEngine->dpiScale);
+    OutlinedPanelBorder(dl, borderColor, tl, br, thickness);
 }
-void UI::OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br) {
-    dl->AddRect(tl, br, borderColor, BlackboardPanelButtonRounding * DPI_SCALE, 0, 2 * DPI_SCALE);
+void UI::OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
+    dl->AddRect(tl, br, borderColor, BlackboardPanelButtonRounding * globalEngine->dpiScale, 0, thickness * globalEngine->dpiScale);
 }
