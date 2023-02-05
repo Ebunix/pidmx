@@ -12,6 +12,8 @@ namespace UI {
         PatchFixturesPanel() : Panel("Patch setup", PanelType_FixturePatch, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar) {}
         void Draw() override;
         void OnShow() override;
+
+        inline const std::set<Hash>& GetSelection() { return selectedFixtureIds; }
     private:
         std::set<Hash> selectedFixtureIds;
         std::set<Hash> selectedCollectionIds;

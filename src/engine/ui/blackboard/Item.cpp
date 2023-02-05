@@ -55,7 +55,7 @@ void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 botto
 
     float totalWidth = cellWidth * width;
     float totalHeight = cellHeight * height;
-    ImVec2 padding = ItemOuterPadding * globalEngine->dpiScale;
+    ImVec2 padding = ItemOuterPadding * Engine::Instance().dpiScale;
     ImVec2 itemSize((totalWidth - ((width + 1) * padding.x)) / width, (totalHeight - ((height + 1) * padding.y)) / height);
 
     for (int itemY = 0; itemY < height; itemY++) {
@@ -83,8 +83,8 @@ void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 botto
                 ImGui::PushFont(ImGui::fontRegularSmall);
                 Draw(list, itemTL, itemBR, index);
                 ImGui::PopFont();
-                ImGui::PushFont(ImGui::fontMonospaceSmall);
-                ImGui::SetCursorPos(itemTLLocal + ItemInnerPadding * globalEngine->dpiScale);
+                ImGui::PushFont(ImGui::fontPixel);
+                ImGui::SetCursorPos(itemTLLocal + ItemInnerPadding * Engine::Instance().dpiScale);
                 ImGui::PushStyleColor(ImGuiCol_Text, ColorTextTransparentLight);
                 ImGui::Text("%d", index + 1);
                 ImGui::PopStyleColor();
@@ -97,11 +97,11 @@ void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 botto
 
 void Blackboard::Item::RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight) {
     ImVec2 windowPos = ImGui::GetWindowPos();
-    static ImVec2 innerPadding = ItemInnerPadding * globalEngine->dpiScale;
+    static ImVec2 innerPadding = ItemInnerPadding * Engine::Instance().dpiScale;
     topLeft += innerPadding;
     bottomRight -= innerPadding;
     ImVec2 topLeftLocal = topLeft - windowPos;
-    ImVec2 headerBottomRight(bottomRight.x, topLeft.y + 32.0f * globalEngine->dpiScale);
+    ImVec2 headerBottomRight(bottomRight.x, topLeft.y + 32.0f * Engine::Instance().dpiScale);
     ImVec2 headerSize = headerBottomRight - topLeft;
 
     if (OutlinedButton(list, 0, ColorPresets[ColorPresetType_PanelItemMain], topLeft, headerBottomRight)) {
@@ -122,8 +122,8 @@ void Blackboard::Item::RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bot
     ImGui::PopStyleVar();
 }
 
-nbt::tag_compound Blackboard::Item::save() {
-    nbt::tag_compound cmp = ISerializable::save();
+nbt::tag_compound Blackboard::Item::Save() {
+    nbt::tag_compound cmp = ISerializable::Save();
     cmp.insert("pos", nbt::tag_compound{
             {"x", x},
             {"y", y},
@@ -134,8 +134,8 @@ nbt::tag_compound Blackboard::Item::save() {
     return cmp;
 }
 
-void Blackboard::Item::load(const nbt::tag_compound &pack) {
-    ISerializable::load(pack);
+void Blackboard::Item::Load(const nbt::tag_compound &pack) {
+    ISerializable::Load(pack);
     Hash blackboard = pack.at("blackboard").as<nbt::tag_long>().get();
     x = pack.at("pos").as<nbt::tag_compound>().at("x").as<nbt::tag_int>().get();
     y = pack.at("pos").as<nbt::tag_compound>().at("y").as<nbt::tag_int>().get();
@@ -169,7 +169,7 @@ void Blackboard::Item::Resize(int newW, int newH) {
 Blackboard::ItemInstance Blackboard::CreateItem(ItemType type) {
     switch (type) {
         case ItemType_Collections:
-            return std::make_shared<ItemCollection<ISerializable>>();
+            return std::make_shared<ItemCollection>();
         case ItemType_Groups:
             return std::make_shared<ItemGroups>();
         case ItemType_FixtureSheet:

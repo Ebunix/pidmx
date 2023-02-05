@@ -7,6 +7,8 @@
 #include <fstream>
 #include "engine/Console.h"
 #include <filesystem>
+#include <imgui_internal.h>
+
 #ifdef NBT_USE_ZLIB
 #include "io/izlibstream.h"
 #include "io/ozlibstream.h"
@@ -19,12 +21,12 @@ public:
     Hash id = INVALID_HASH;
     std::string name;
 
-    virtual void load(const nbt::tag_compound &pack) {
+    virtual void Load(const nbt::tag_compound &pack) {
         id = pack.at("id").as<nbt::tag_long>().get();
         name = pack.at("name").as<nbt::tag_string>().get();
     }
 
-    virtual nbt::tag_compound save() {
+    virtual nbt::tag_compound Save() {
         return nbt::tag_compound{
                 {"id",   id},
                 {"name", name}
@@ -91,8 +93,7 @@ namespace nbt {
             nbt::io::write_tag("", comp, out);
             out.close();
 #endif
-        }
-        else {
+        } else {
             nbt::io::write_tag("", comp, out);
             out.close();
         }
@@ -123,3 +124,63 @@ NBT_SAVE_LOAD_SIMPLE(uint64_t, int64_t, tag_long, tag_type::Long)
 NBT_SAVE_LOAD_SIMPLE(float, float, tag_float, tag_type::Float)
 NBT_SAVE_LOAD_SIMPLE(double, double, tag_double, tag_type::Double)
 NBT_SAVE_LOAD_SIMPLE(std::string, std::string, tag_string, tag_type::String)
+
+
+namespace nbt {
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, const ImVec2 &value) {
+        tag_compound vec;
+        Save(vec, "x", value.x);
+        Save(vec, "y", value.y);
+        comp.insert(tag, std::move(vec));
+    }
+
+    inline ImVec2 Load(const nbt::tag_compound &comp, const std::string &tag, const ImVec2 &fallback) {
+        if (!comp.has_key(tag))
+            return fallback;
+        const auto &vec = comp.at(tag).as<tag_compound>();
+        return {Load(vec, "x", 0.0f), Load(vec, "y", 0.0f)};
+    }
+}
+NBT_SAVE_VEC(ImVec2)
+NBT_LOAD_VEC(ImVec2)
+
+
+namespace nbt {
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, const ImRect &value) {
+        tag_compound vec;
+        Save(vec, "min", value.Min);
+        Save(vec, "max", value.Max);
+        comp.insert(tag, std::move(vec));
+    }
+
+    inline ImRect Load(const nbt::tag_compound &comp, const std::string &tag, const ImRect &fallback) {
+        if (!comp.has_key(tag))
+            return fallback;
+        const auto &vec = comp.at(tag).as<tag_compound>();
+        return {Load(vec, "min", ImVec2(0, 0)), Load(vec, "max", ImVec2(0, 0))};
+    }
+}
+NBT_SAVE_VEC(ImRect)
+NBT_LOAD_VEC(ImRect)
+
+
+namespace nbt {
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, void* data, size_t dataLen) {
+        tag_byte_array bytes;
+        bytes.get().resize(dataLen);
+        memcpy(&bytes.get()[0], data, dataLen);
+        comp.insert(tag, std::move(bytes));
+    }
+
+    inline void* Load(const nbt::tag_compound &comp, const std::string &tag, void* fallback, size_t* length) {
+        if (!comp.has_key(tag)) {
+            *length = 0;
+            return fallback;
+        }
+        tag_byte_array bytes = comp.at(tag).as<tag_byte_array>();
+        *length = bytes.size();
+        void* data = malloc(*length);
+        memcpy(data, &bytes.get()[0], *length);
+        return data;
+    }
+}

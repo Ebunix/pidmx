@@ -100,31 +100,37 @@ void setImGuiStyle(float highDPIscaleFactor) {
     style.GrabRounding = 2.0f;
     // style.WindowTitleAlign.x = 0.50f;
     // style.FrameBorderSize = 0.0f;
-    style.WindowBorderSize = globalEngine->dpiScale;
+    style.WindowBorderSize = Engine::Instance().dpiScale;
 
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
     ImGui::fontRegular = io.Fonts->AddFontFromFileTTF(
             "resources/Roboto-Regular.ttf",
-            17.0f * globalEngine->dpiScale /* engine->displayScale */,
+            17.0f * Engine::Instance().dpiScale /* engine->displayScale */,
             NULL,
             NULL
     );
     ImGui::fontRegularSmall = io.Fonts->AddFontFromFileTTF(
             "resources/Roboto-Regular.ttf",
-            14.0f * globalEngine->dpiScale /* engine->displayScale */,
+            14.0f * Engine::Instance().dpiScale /* engine->displayScale */,
             NULL,
             NULL
     );
     ImGui::fontMonospace = io.Fonts->AddFontFromFileTTF(
             "resources/JetBrainsMono-Regular.ttf",
-            17.0f * globalEngine->dpiScale,
+            17.0f * Engine::Instance().dpiScale,
             NULL,
             NULL
     );
-    ImGui::fontMonospaceSmall = io.Fonts->AddFontFromFileTTF(
+    ImGui::fontPixel = io.Fonts->AddFontFromFileTTF(
             "resources/ponderosa.regular.ttf",
-            9.0f * globalEngine->dpiScale,
+            9.0f * Engine::Instance().dpiScale,
+            NULL,
+            NULL
+    );
+    ImGui::fontPixelGigantic = io.Fonts->AddFontFromFileTTF(
+            "resources/ponderosa.regular.ttf",
+            180.0f * Engine::Instance().dpiScale,
             NULL,
             NULL
     );
@@ -210,6 +216,7 @@ bool initImGui() {
     (void) io;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 //	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.IniFilename = nullptr;
 
     if (!ImGui_ImplGlfw_InitForOpenGL(glfwWindow, true)) {
         LogMessage(LogMessageType_Error, "Couldn't initialize ImGui for GLFW");
@@ -239,14 +246,12 @@ int main(int argc, char *argv[]) {
     }
     v8::HandleScope scope(js::global::isolate);
 #endif
-    bool openDemoWindow = true;
-//    ImGui::ScaleWindowsInViewport(, globalEngine->dpiScale);
-
+    bool openDemoWindow = false;
 
     Engine engine(argc, argv);
     currentShow = new Show();
 
-    setImGuiStyle(globalEngine->dpiScale);
+    setImGuiStyle(Engine::Instance().dpiScale);
 #ifdef PIDMX_ENABLE_JAVASCRIPT
     js::exec("let fixtures = [];"
              "for (let i = 0; i < 30; i++) fixtures.push({name: 'Fixture A', fixtureId: 201 + i, channel: 0, universe: 0});"
@@ -256,20 +261,32 @@ int main(int argc, char *argv[]) {
     LogMessage(LogMessageType_Warn, "This build does not include Javascript support");
 #endif
 
+    char versionInfo[20];
+    FORMAT_VERSION(versionInfo, sizeof(versionInfo), Engine::Instance().VERSION);
     while (!glfwWindowShouldClose(glfwWindow)) {
-        glClearColor(0.025, 0.025, 0.025, 1.0);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImVec2 workSize = ImGui::GetMainViewport()->WorkSize;
+
+        static ImVec2 bgTextSize = ImGui::fontPixelGigantic->CalcTextSizeA(ImGui::fontPixelGigantic->FontSize, FLT_MAX, 0.0f, "PiDMX");
+        static ImVec2 verTextSize = ImGui::fontPixelGigantic->CalcTextSizeA(ImGui::fontPixelGigantic->FontSize / 8, FLT_MAX, 0.0f, versionInfo);
+        ImVec2 bgTextPos = (workSize - bgTextSize) / 2;
+        ImVec2 verTextPos = (workSize - verTextSize) / 2;
+        verTextPos.y += ImGui::fontPixelGigantic->FontSize / 2;
+        ImDrawList* bgDrawList = ImGui::GetBackgroundDrawList();
+        bgDrawList->AddText(ImGui::fontPixelGigantic, ImGui::fontPixelGigantic->FontSize, bgTextPos, (ImColor)UI::ColorOutlineHint, "PiDMX");
+        bgDrawList->AddText(ImGui::fontPixelGigantic, ImGui::fontPixelGigantic->FontSize / 8, verTextPos, (ImColor)UI::ColorOutlineHint, versionInfo);
 
         if (openDemoWindow) {
             ImGui::ShowDemoWindow(&openDemoWindow);
         }
 
-        UI::DrawMainPanel(engine);
-        engine.DrawPanels();
+        UI::DrawMainPanel();
+        currentShow->RenderPanels();
 
         /*
         if (ImGui::Begin("Debug")) {
@@ -286,7 +303,7 @@ int main(int argc, char *argv[]) {
         glfwSwapBuffers(glfwWindow);
         glfwPollEvents();
         currentShow->commandHistory.Transfer();
-        engine.ProcessHotkeys();
+        Engine::Instance().ProcessHotkeys();
     }
 
     return 0;

@@ -1,5 +1,11 @@
 #pragma once
 
+#include "Panel.h"
+
 namespace UI {
-	void DrawConsolePanel();
+    class PanelConsole: public Panel {
+    public:
+        PanelConsole() : Panel("Console", PanelType_Console) {}
+        void Draw() override;
+    };
 }

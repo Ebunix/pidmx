@@ -27,8 +27,8 @@ namespace Blackboard {
 
         Item(std::string name, ItemType type);
 
-        void load(const nbt::tag_compound& pack) override;
-        nbt::tag_compound save() override;
+        void Load(const nbt::tag_compound& pack) override;
+        nbt::tag_compound Save() override;
         void afterLoad() override;
 
         void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);

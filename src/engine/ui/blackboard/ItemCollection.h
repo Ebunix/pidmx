@@ -3,20 +3,20 @@
 #include "engine/ui/Tools.h"
 
 namespace Blackboard {
-    template <typename T>
     class ItemCollection : public Item {
     public:
         explicit ItemCollection(const std::string& name = "Collections", ItemType type = ItemType_Collections) : Item(name, type) {}
 
         void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override {
-            ImVec2 size = bottomRight - topLeft;
             ImGui::PushID(itemIndex);
 
             if (!HasItemAt(itemIndex)) {
-                DrawButtonUnassigned(list, topLeft, bottomRight, itemIndex);
+                if (DrawButtonUnassigned(list, topLeft, bottomRight, itemIndex)) {
+                    OnClick(itemIndex);
+                }
             }
-            else {
-                UI::OutlinedButton(list, 0, UI::ColorPresets[UI::ColorPresetType_ButtonBlackboardItemFull], topLeft, bottomRight);
+            else if (UI::OutlinedButton(list, 0, UI::ColorPresets[UI::ColorPresetType_ButtonBlackboardItemFull], topLeft, bottomRight)) {
+                OnClick(itemIndex);
             }
 
             ImGui::PopID();
@@ -28,11 +28,13 @@ namespace Blackboard {
             }
         }
 
+        virtual void OnClick(int index) {}
+
         bool HasItemAt(int index) {
-            return (index < collection.size() && collection[index] != nullptr);
+            return (index < collection.size() && collection[index] != INVALID_HASH);
         }
 
-        void AssignAt(int i, std::shared_ptr<T> value) {
+        void AssignAt(int i, Hash value) {
             if (i == 0) {
                 LogMessage(LogMessageType_Error, "AssignAt needs to be called with 1-based index!");
                 return;
@@ -40,26 +42,36 @@ namespace Blackboard {
             if (collection.size() <= i) {
                 collection.resize(i);
             }
-            if (!collection[i - 1] && value) {
+            if (!collection[i - 1] && value != INVALID_HASH) {
                 assignedCount++;
             }
-            else if (collection[i - 1] && !value) {
+            else if (collection[i - 1] && value == INVALID_HASH) {
                 assignedCount--;
             }
             collection[i - 1] = value;
         }
 
+        nbt::tag_compound Save() override {
+            nbt::tag_compound comp = Item::Save();
+            nbt::Save(comp, "collection", collection);
+            return comp;
+        }
+
+        void Load(const nbt::tag_compound &comp) override {
+            Item::Load(comp);
+            collection = nbt::Load(comp, "collection", std::vector<Hash>());
+        }
+
     protected:
-        std::vector<std::shared_ptr<T>> collection;
+        std::vector<Hash> collection;
         int assignedCount = 0;
 
     private:
-        void DrawButtonUnassigned(ImDrawList* list, const ImVec2 &tl, const ImVec2 &br, int index) {
+        bool DrawButtonUnassigned(ImDrawList* list, const ImVec2 &tl, const ImVec2 &br, int index) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-            if (UI::OutlinedButton(list, UI::ColorOutlineHint, UI::ColorPresets[UI::ColorPresetType_ButtonBlackboardItemEmpty], tl, br)) {
-                // Todo: Handle store collections
-            }
+            bool result = UI::OutlinedButton(list, UI::ColorOutlineHint, UI::ColorPresets[UI::ColorPresetType_ButtonBlackboardItemEmpty], tl, br);
             ImGui::PopStyleColor();
+            return result;
         }
     };
 }

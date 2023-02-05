@@ -9,11 +9,11 @@
 #include <filesystem>
 
 namespace fs = std::filesystem;
-#if PIDMX_ENABLE_JAVASCRIPT
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 using namespace v8;
 #endif
 
-Engine* globalEngine;
+Engine* engineInstance;
 
 bool eatParam(int argc, char* argv[], int* index, char* name, size_t nameLen, char* value, size_t valueLen) {
     if (*index >= argc) {
@@ -35,8 +35,11 @@ bool eatParam(int argc, char* argv[], int* index, char* name, size_t nameLen, ch
 
 Engine::Engine(int argc, char* argv[])
 {
+    engineInstance = this;
+
     char varName[32], varValue[32];
     int argIndex = 1;
+    dpiScale = 1.0f;
     while (eatParam(argc, argv, &argIndex, varName, sizeof(varName), varValue, sizeof(varValue))) {
         if (strcmp(varName, "dpi") == 0) {
             dpiScale = std::stof(varValue);
@@ -45,9 +48,8 @@ Engine::Engine(int argc, char* argv[])
             LogMessage(LogMessageType_Warn, "Unrecognized command line parameter '%s'", varName);
         }
     }
-    globalEngine = this;
 
-#if PIDMX_ENABLE_JAVASCRIPT
+#ifdef PIDMX_ENABLE_JAVASCRIPT
     js::ObjectTemplate fixtures;
     Local<ObjectTemplate> fixturesTemplate = fixtures.Begin()
         ->Function("patch", Fixture::Patch)
@@ -105,15 +107,13 @@ void Engine::Redo() {
     currentShow->commandHistory.Redo();
 }
 
-void Engine::DrawPanels() {
-    currentShow->panelBlackboard->Render();
-    currentShow->panelPatchFixtures->Render();
-}
-
 void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
     for (const auto & entry : fs::directory_iterator(dir)) {
         auto root = nbt::LoadFromFile(entry.path().string());
         auto vec = nbt::Load(*root, "fixturePresets", std::vector<FixturePreset>{});
+        for (Hash i = 0; i < vec.size(); i++) {
+            vec[i].id = fixturePresets.size() + i + 1;
+        }
         fixturePresets.insert(fixturePresets.end(), vec.begin(), vec.end());
     }
 
@@ -127,3 +127,36 @@ void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
     nbt::Save(root, "fixturePresets", fixturePresets);
     nbt::SaveToFile(root, "resources/fixtures/fixtures.bundle1", true);
 }
+
+void Engine::SetAction(EngineAction action) {
+    this->action = action;
+}
+
+void Engine::Clear() {
+    if (action != EngineAction_None) {
+        SetAction(EngineAction_None);
+    }
+    else {
+        activeFixtures.clear();
+        activeGroups.clear();
+    }
+}
+
+void Engine::SetActiveFixtures(const std::set<Hash> &fixtures) {
+    activeFixtures = fixtures;
+    UpdateAvailableParameters();
+}
+
+void Engine::UpdateAvailableParameters() {
+    availableParametersOnFixtures.clear();
+    for (const auto& fixtureId : activeFixtures) {
+        const auto& fixture = currentShow->fixtures.Get(fixtureId);
+        const auto& preset = currentShow->fixturePresets.Get(fixture->presetId);
+        for (const auto& param : preset->parameters) {
+            availableParametersOnFixtures.insert(param.type);
+        }
+    }
+
+}
+
+

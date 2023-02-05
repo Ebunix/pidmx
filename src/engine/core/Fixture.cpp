@@ -3,7 +3,7 @@
 #include "Show.h"
 #include <engine/command/CommandFixture.h>
 
-#if PIDMX_ENABLE_JAVASCRIPT
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 using namespace v8;
 #endif
 
@@ -17,22 +17,22 @@ FixtureInstance Fixture::New(const FixtureData &data) {
     return fix;
 }
 
-void Fixture::load(const nbt::tag_compound &pack) {
-    ISerializable::load(pack);
+void Fixture::Load(const nbt::tag_compound &pack) {
+    ISerializable::Load(pack);
     presetId = pack.at("preset").as<nbt::tag_long>().get();
     universe = pack.at("universe").as<nbt::tag_int>().get();
     channel = pack.at("channel").as<nbt::tag_int>().get();
 }
 
-nbt::tag_compound Fixture::save() {
-    nbt::tag_compound comp = ISerializable::save();
+nbt::tag_compound Fixture::Save() {
+    nbt::tag_compound comp = ISerializable::Save();
     comp.insert("preset", presetId);
     comp.insert("universe", universe);
     comp.insert("channel", channel);
     return comp;
 }
 
-#if PIDMX_ENABLE_JAVASCRIPT
+#ifdef PIDMX_ENABLE_JAVASCRIPT
 void Fixture::Patch(const v8::FunctionCallbackInfo<v8::Value> &info) {
     std::vector<FixtureData> data;
     Local<Context> ctx = info.GetIsolate()->GetCurrentContext();

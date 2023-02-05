@@ -12,6 +12,14 @@ enum FixtureParameterType {
 	FixtureParameterType_ColorB,
 };
 
+static const char* FixtureParameterTypeNames[] = {
+        "Unassigned",
+        "Dim",
+        "Red",
+        "Green",
+        "Blue"
+};
+
 struct FixtureParameter {
 	std::string name;
 	int channelCoarse = -1;
@@ -23,10 +31,14 @@ struct FixtureParameter {
 };
 
 struct FixturePreset {
+    Hash id;
+    std::string name;
     std::string manufacturer;
     int footprint = 0;
     std::vector<FixtureParameter> parameters;
 };
+
+typedef std::shared_ptr<FixturePreset> FixturePresetInstance;
 
 NBT_SAVE_LOAD_SIMPLE(FixtureParameterType, int32_t, tag_int, tag_type::Int)
 
@@ -57,6 +69,7 @@ NBT_LOAD_VEC(FixtureParameter)
 
 NBT_SAVE(FixturePreset, {
     FixturePreset defaultValues;
+    NBT_SAVE_MEMBER(name);
     NBT_SAVE_MEMBER_COND(manufacturer, value.manufacturer != defaultValues.manufacturer);
     NBT_SAVE_MEMBER_COND(footprint, value.footprint != defaultValues.footprint);
     NBT_SAVE_MEMBER(parameters);
@@ -64,6 +77,7 @@ NBT_SAVE(FixturePreset, {
 NBT_SAVE_VEC(FixturePreset)
 NBT_LOAD(FixturePreset, {
     FixturePreset value;
+    NBT_LOAD_MEMBER(name);
     NBT_LOAD_MEMBER(manufacturer);
     NBT_LOAD_MEMBER(footprint);
     NBT_LOAD_MEMBER(parameters);

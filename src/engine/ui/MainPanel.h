@@ -4,6 +4,6 @@
 #include "engine/core/Engine.h"
 
 namespace UI {
-	void DrawMainPanel(Engine &engine);
+	void DrawMainPanel();
 }
 

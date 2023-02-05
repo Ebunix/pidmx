@@ -36,8 +36,8 @@ public:
 
 	static std::shared_ptr<Fixture> New(const FixtureData& data);
 
-	void load(const nbt::tag_compound& pack) override;
-	nbt::tag_compound save() override;
+	void Load(const nbt::tag_compound& pack) override;
+	nbt::tag_compound Save() override;
 
 };
 typedef std::shared_ptr<Fixture> FixtureInstance;

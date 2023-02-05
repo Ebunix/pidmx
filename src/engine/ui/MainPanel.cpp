@@ -19,27 +19,27 @@ void DrawMainMenuPanel()
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 		
 	ImGui::Text("Patch setup");
-	if (ImGui::Button("Fixtures & Patch", buttonLarge * globalEngine->dpiScale)) {
+	if (ImGui::Button("Fixtures & Patch", buttonLarge * Engine::Instance().dpiScale)) {
 		mainPanelMode = MainPanelMode::FixturesPatch;
 	}
 
 	ImGui::PopStyleVar(1);
 }
 
-void UI::DrawMainPanel(Engine &engine)
+void UI::DrawMainPanel()
 {
 	if (UI::BeginMainMenuBar()) {
         ImGuiIO &io = ImGui::GetIO();
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New", "Ctrl+N") || (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_N))) {
-                engine.NewShow();
+                Engine::Instance().NewShow();
 			}
 			if (ImGui::MenuItem("Save", "Ctrl+S") || (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S))) {
-				engine.SaveShow("show.pidmxs");
+				Engine::Instance().SaveShow("show.pidmxs");
 			}
 			ImGui::MenuItem("Save as...", "Ctrl+Shift+S");
 			if (ImGui::MenuItem("Load", "Ctrl+O") || (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O))) {
-                engine.LoadShow("show.pidmxs");
+                Engine::Instance().LoadShow("show.pidmxs");
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", "Alt+F4")) {
@@ -49,15 +49,15 @@ void UI::DrawMainPanel(Engine &engine)
 		}
         if (ImGui::BeginMenu("Edit")) {
             if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
-                engine.Undo();
+                Engine::Instance().Undo();
             }
             if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
-                engine.Redo();
+                Engine::Instance().Redo();
             }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Windows")) {
-
+            currentShow->RenderWindowMenu();
             ImGui::EndMenu();
         }
 		UI::EndMainMenuBar();
@@ -70,7 +70,7 @@ void UI::DrawMainPanel(Engine &engine)
     ImVec2 workPos = vp->WorkPos;
 
 
-	float leftPanelWidth = 75 * globalEngine->dpiScale;
+	float leftPanelWidth = 75 * Engine::Instance().dpiScale;
 	// ImVec2 sideAreaPos = ImVec2(0, vp->WorkPos.y);
     // ImVec2 mainAreaPos = ImVec2(vp->WorkPos.x + leftPanelWidth, vp->WorkPos.y);
     // ImVec2 mainAreaSize = ImVec2(workArea.x - leftPanelWidth, workArea.y);
@@ -84,10 +84,10 @@ void UI::DrawMainPanel(Engine &engine)
 
     /*
 	ImGui::SetNextWindowPos(sideAreaPos, ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(leftPanelWidth - globalEngine->dpiScale, workArea.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(leftPanelWidth - Engine::Instance().dpiScale, workArea.y), ImGuiCond_Always);
 	ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-	if (ImGui::Button("Setup", ImVec2(leftPanelWidth - globalEngine->dpiScale, 48 * globalEngine->dpiScale))) {
+	if (ImGui::Button("Setup", ImVec2(leftPanelWidth - Engine::Instance().dpiScale, 48 * Engine::Instance().dpiScale))) {
 		windowSetup = !windowSetup;
 	}
 
@@ -114,7 +114,7 @@ void UI::DrawMainPanel(Engine &engine)
     ImGui::PopStyleVar(3);
 
 	if (windowSetup) {
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16 * globalEngine->dpiScale, 16 * globalEngine->dpiScale));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16 * Engine::Instance().dpiScale, 16 * Engine::Instance().dpiScale));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 		ImGui::SetNextWindowPos(mainAreaPos);
@@ -131,6 +131,4 @@ void UI::DrawMainPanel(Engine &engine)
 		ImGui::PopStyleVar(3);
 		ImGui::End();
 	}
-
-    UI::DrawConsolePanel();
 }

@@ -7,7 +7,7 @@ find_package(OpenGL REQUIRED)
 option(NBT_BUILD_TESTS "" OFF)
 option(GLFW_BUILD_TESTS "" OFF)
 option(GLFW_BUILD_EXAMPLES "" OFF)
-option(PIDMX_ENABLE_JAVASCRIPT "Enbale the V8 Javascript engine" OFF)
+option(PIDMX_ENABLE_JAVASCRIPT "Enbale the V8 Javascript engine" ON)
 add_subdirectory(libnbtplusplus)
 add_subdirectory(glfw)
 
@@ -67,6 +67,7 @@ if(PIDMX_ENABLE_JAVASCRIPT)
 	target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/src/js/libv8/x64.debug/libv8_monolith.a)
 	target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/src/js/libv8/x64.debug/libv8_libbase.a)
 	target_link_libraries(js ${CMAKE_HOME_DIRECTORY}/src/js/libv8/x64.debug/libv8_libplatform.a)
+	target_compile_definitions(js PRIVATE -DPIDMX_ENABLE_JAVASCRIPT=${PIDMX_ENABLE_JAVASCRIPT})
 else()
 	add_library(js INTERFACE)
 endif()
@@ -74,7 +75,6 @@ endif()
 add_executable(pidmx 
 	main.cpp
 	src/pidmx_utils.cpp
-
 	src/engine/command/CommandBuffer.cpp
 
         src/engine/core/Engine.cpp
@@ -88,9 +88,10 @@ add_executable(pidmx
 	src/engine/ui/PanelConsole.cpp
 
 	src/engine/Console.cpp
-	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h)
+	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h src/engine/ui/PanelFixturePresetEditor.cpp src/engine/ui/PanelFixturePresetEditor.h src/engine/ui/PanelOperators.cpp src/engine/ui/PanelOperators.h)
 
 target_include_directories(pidmx PUBLIC src)
+target_compile_definitions(pidmx PRIVATE -DPIDMX_ENABLE_JAVASCRIPT=${PIDMX_ENABLE_JAVASCRIPT})
 
 target_link_libraries(pidmx glfw)
 target_link_libraries(pidmx glad)

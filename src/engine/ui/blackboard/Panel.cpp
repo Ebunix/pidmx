@@ -29,11 +29,17 @@ void Blackboard::Panel::Draw() {
     ImVec2 windowPos = ImGui::GetWindowPos();
     ImVec2 avail = ImGui::GetContentRegionAvail();
 
-    float elementSpacing = cellSize * globalEngine->dpiScale;
+    float elementSpacing = cellSize * Engine::Instance().dpiScale;
     int elementsHorizontal = (int) (avail.x / elementSpacing);
     float elementWidth = !exactFit ? elementSpacing : avail.x / elementsHorizontal;
     int elementsVertical = (int) (avail.y / elementSpacing);
     float elementHeight = !exactFit ? elementSpacing : avail.y / elementsVertical;
+
+    if (elementsHorizontal == 0 || elementsVertical == 0) {
+        ImGui::Text("Too small!");
+        ImGui::PopID();
+        return;
+    }
 
     ImVec2 topLeft(startPos.x, startPos.y);
 
@@ -46,6 +52,7 @@ void Blackboard::Panel::Draw() {
     ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_FrameBg]);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_FrameBgHovered]);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, style.Colors[ImGuiCol_FrameBgActive]);
+
 
     int targetX = -1;
     int targetY = -1;
@@ -118,11 +125,11 @@ void Blackboard::Panel::Draw() {
             ImVec2 br = tl + ImVec2(elementWidth, elementHeight);
 
             if (x == 0 || y == 0) {
-                draw->AddCircleFilled(tl, 4 * globalEngine->dpiScale, ImColor(0x0bffffff), 8);
-                draw->AddCircleFilled(tl, 2 * globalEngine->dpiScale, ImColor(0x10ffffff), 8);
+                draw->AddCircleFilled(tl, 4 * Engine::Instance().dpiScale, ImColor(0x0bffffff), 8);
+                draw->AddCircleFilled(tl, 2 * Engine::Instance().dpiScale, ImColor(0x10ffffff), 8);
             }
-            draw->AddCircleFilled(br, 4 * globalEngine->dpiScale, ImColor(0x0bffffff), 8);
-            draw->AddCircleFilled(br, 2 * globalEngine->dpiScale, ImColor(0x10ffffff), 8);
+            draw->AddCircleFilled(br, 4 * Engine::Instance().dpiScale, ImColor(0x0bffffff), 8);
+            draw->AddCircleFilled(br, 2 * Engine::Instance().dpiScale, ImColor(0x10ffffff), 8);
 
             if (IsOccupied(x, y) || x >= elementsHorizontal || y >= elementsVertical) {
                 continue;

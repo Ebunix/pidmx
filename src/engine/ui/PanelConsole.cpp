@@ -38,10 +38,10 @@ static int HandleHistoryCallback(ImGuiInputTextCallbackData* data) {
 	return 0;
 }
 
-void UI::DrawConsolePanel() {
-	static bool lastActive = false;
-	static size_t lastLogSize = 0;
-	static bool commandSent = false;
+void UI::PanelConsole::Draw() {
+    static bool lastActive = false;
+    static size_t lastLogSize = 0;
+    static bool commandSent = false;
     static float commandLineHeight = 0;
 
     if (ImGui::Begin("Console")) {

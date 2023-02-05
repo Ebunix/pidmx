@@ -24,7 +24,8 @@ namespace UI {
 		ColorPresetType_ButtonRed,
 		ColorPresetType_PanelItemMain,
 		ColorPresetType_ButtonBlackboardItemEmpty,
-		ColorPresetType_ButtonBlackboardItemFull,
+        ColorPresetType_ButtonBlackboardItemFull,
+        ColorPresetType_ButtonOperatorActive,
 		ColorPresetType_Count_
 	};
 

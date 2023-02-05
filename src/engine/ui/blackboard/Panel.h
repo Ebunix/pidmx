@@ -17,12 +17,12 @@ namespace Blackboard {
 
         void Draw() override;
 
-        void load(const nbt::tag_compound& pack) override {
-            ISerializable::load(pack);
+        void Load(const nbt::tag_compound& pack) override {
+            UI::Panel::Load(pack);
             exactFit = nbt::Load(pack, "exactFit", false);
         }
-        nbt::tag_compound save() override {
-            nbt::tag_compound cmp = ISerializable::save();
+        nbt::tag_compound Save() override {
+            nbt::tag_compound cmp = UI::Panel::Save();
             nbt::Save(cmp, "exactFit", exactFit);
             return cmp;
         }

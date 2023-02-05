@@ -47,13 +47,13 @@ public:
 
     void undo() override {
         auto item = Blackboard::CreateItem(type);
-        item->load(data);
+        item->Load(data);
         parent->PlaceInstance(item, item->x, item->y, item->width, item->height);
     }
 
     void redo() override {
         auto item = currentShow->blackboardItems.Get(id);
-        data = item->save();
+        data = item->Save();
         type = item->type;
         parent = item->parent;
         parent->FreeInstanceArea(id);

@@ -12,16 +12,21 @@ namespace UI {
         PanelType_None,
         PanelType_FixturePatch,
         PanelType_Console,
-        PanelType_Blackboard
+        PanelType_Blackboard,
+        PanelType_PresetEditor,
+        PanelType_Operators,
     };
 
     class Panel: public ISerializable {
     public:
-        bool open = true;
+        bool open = false;
         bool drawWindowFrame = true;
         PanelType type = PanelType_None;
 
         explicit Panel(std::string title, PanelType type, ImGuiWindowFlags flags = ImGuiWindowFlags_None);
+
+        nbt::tag_compound Save() override;
+        void Load(const nbt::tag_compound& comp) override;
 
         virtual void Draw() = 0;
         virtual void OnHide() {}
@@ -30,12 +35,6 @@ namespace UI {
             if (!drawWindowFrame) {
                 Draw();
                 return;
-            }
-            if (open) {
-                if (ImGui::Begin(name.c_str(), &open, flags)) {
-                    Draw();
-                }
-                ImGui::End();
             }
             if (open != wasOpen) {
                 if (open) {
@@ -46,10 +45,26 @@ namespace UI {
                 }
                 wasOpen = open;
             }
+            if (open) {
+                if (wasLoaded) {
+                    wasLoaded = false;
+                    ImGui::SetNextWindowPos(position);
+                    ImGui::SetNextWindowSize(size);
+                }
+                if (ImGui::Begin(name.c_str(), &open, flags)) {
+                    position = ImGui::GetWindowPos();
+                    size = ImGui::GetWindowSize();
+                    Draw();
+                }
+                ImGui::End();
+            }
         }
     private:
         bool wasOpen = false;
         ImGuiWindowFlags flags;
+        bool wasLoaded = false;
+        ImVec2 position;
+        ImVec2 size;
     };
     typedef std::shared_ptr<Panel> PanelInstance;
 
