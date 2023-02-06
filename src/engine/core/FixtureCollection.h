@@ -1,13 +1,22 @@
 #pragma once 
 #include "ISerializable.h"
 
-class FixtureCollection : public ISerializable {
-public:
-	std::vector<Hash> assignedFixtures;
-
-	static std::shared_ptr<FixtureCollection> New(Hash id, const std::string& name);
-
-	void Load(const nbt::tag_compound& pack) override;
-	nbt::tag_compound Save() override;
+struct FixtureCollection {
+    Hash id;
+    std::string name;
+	std::set<Hash> assignedFixtures;
 };
 typedef std::shared_ptr<FixtureCollection> FixtureCollectionInstance;
+
+NBT_SAVE(FixtureCollectionInstance, {
+    NBT_SAVE_MEMBER_PTR(id);
+    NBT_SAVE_MEMBER_PTR(name);
+    NBT_SAVE_MEMBER_PTR(assignedFixtures);
+})
+NBT_LOAD(FixtureCollectionInstance, {
+    FixtureCollectionInstance value = std::make_shared<FixtureCollection>();
+    NBT_LOAD_MEMBER_PTR(id);
+    NBT_LOAD_MEMBER_PTR(name);
+    NBT_LOAD_MEMBER_PTR(assignedFixtures);
+    return value;
+})

@@ -9,15 +9,6 @@ const int32_t SHOW_VERSION = VERSION_CODE(0, 1, 0);
 Show* currentShow = nullptr;
 
 template<typename T>
-void SerializeCollection(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
-    LogMessage(LogMessageType_Debug, "Serialize %s", tag.c_str());
-    nbt::tag_list list;
-    for (const auto& item : collection.items) {
-        list.push_back(item->Save());
-    }
-    container.insert(tag, std::move(list));
-}
-template<typename T>
 void SerializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
     LogMessage(LogMessageType_Debug, "Serialize raw %s", tag.c_str());
     nbt::tag_list list;
@@ -38,19 +29,6 @@ void SerializeCollectionTyped(nbt::tag_compound& container, const std::string& t
         list.push_back(std::move(comp));
     }
     container.insert(tag, std::move(list));
-}
-template<typename T>
-void DeserializeCollection(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection) {
-    LogMessage(LogMessageType_Debug, "Deserialize %s", tag.c_str());
-    nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
-    for (auto& item : list) {
-        std::shared_ptr<T> instance = std::make_shared<T>();
-        instance->Load(item.as<nbt::tag_compound>());
-        collection.Add(instance);
-    }
-    for (auto& item : collection.items) {
-        item->afterLoad();
-    }
 }
 template<typename T>
 void DeserializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection) {
@@ -91,8 +69,8 @@ void Show::Save(const std::string &path)
 	nbt::tag_compound rootCompound;
 	rootCompound.insert("VERSION", SHOW_VERSION);
 
-    SerializeCollection(rootCompound, "fixtures", fixtures);
-    SerializeCollection(rootCompound, "fixtureCollections", fixtureCollections);
+    SerializeCollectionRaw(rootCompound, "fixtures", fixtures);
+    SerializeCollectionRaw(rootCompound, "fixtureCollections", fixtureCollections);
     SerializeCollectionRaw(rootCompound, "groups", groups);
     SerializeCollectionTyped(rootCompound, "blackboardItems", blackboardItems);
     nbt::tag_compound panelsRoot;
@@ -116,8 +94,8 @@ void Show::Load(const std::string &path)
 {
     auto rootCompound = nbt::LoadFromFile(path);
 
-    DeserializeCollection(*rootCompound, "fixtures", fixtures);
-    DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections);
+    DeserializeCollectionRaw(*rootCompound, "fixtures", fixtures);
+    DeserializeCollectionRaw(*rootCompound, "fixtureCollections", fixtureCollections);
     DeserializeCollectionRaw(*rootCompound, "groups", groups);
     DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, Blackboard::CreateItem);
     const nbt::tag_compound& panelsRoot = rootCompound->at("panels").as<nbt::tag_compound>();

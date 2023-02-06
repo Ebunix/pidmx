@@ -148,7 +148,7 @@ void Engine::UpdateAvailableParameters() {
     availableParametersOnFixtures.clear();
     for (const auto& fixtureId : activeFixtures) {
         const auto& fixture = currentShow->fixtures.Get(fixtureId);
-        const auto& preset = currentShow->fixturePresets.Get(fixture->presetId);
+        const auto& preset = currentShow->fixturePresets.Get(fixture->data.presetId);
         for (const auto& param : preset->parameters) {
             availableParametersOnFixtures.insert(param.type);
         }

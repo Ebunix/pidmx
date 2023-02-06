@@ -13,9 +13,9 @@ public:
 
     void execute() override { redo(); }
 
-    void undo() override { currentShow->fixtureCollections.Remove(id); }
+    void undo() override {} // { currentShow->fixtureCollections.Remove(id); }
 
-    void redo() override { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
+    void redo() override {} // { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
 
 private:
     Hash id;
@@ -30,9 +30,9 @@ public:
 
     void execute() override { redo(); }
 
-    void undo() override { currentShow->fixtureCollections.Remove(id); }
+    void undo() override {} // { currentShow->fixtureCollections.Remove(id); }
 
-    void redo() override { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
+    void redo() override {} // { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
 
 private:
     Hash id;
@@ -48,17 +48,19 @@ public:
     void execute() override { redo(); }
 
     void undo() override {
+        /*
         auto collection = currentShow->fixtureCollections.Get(id);
         std::remove_if(collection->assignedFixtures.begin(), collection->assignedFixtures.end(), [&](Hash val) {
             return fixtureIds.find(val) != fixtureIds.end();
-        });
+        });*/
     }
 
     void redo() override {
+        /*
         auto collection = currentShow->fixtureCollections.Get(id);
         for (auto val : fixtureIds) {
             collection->assignedFixtures.push_back(val);
-        }
+        }*/
     }
 
 private:

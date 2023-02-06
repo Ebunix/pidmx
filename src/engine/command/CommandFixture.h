@@ -20,9 +20,9 @@ public:
 
     void execute() override { redo(); }
 
-    void undo() override { currentShow->fixtures.Remove(data.fixtureId); }
+    void undo() override {} // { currentShow->fixtures.Remove(data.fixtureId); }
 
-    void redo() override { currentShow->fixtures.Add(Fixture::New(data)); }
+    void redo() override {} // { currentShow->fixtures.Add(Fixture::New(data)); }
 
 private:
     FixtureData data;
@@ -43,15 +43,17 @@ public:
 
     void execute() override { redo(); }
 
-    void undo() override { currentShow->fixtures.Add(Fixture::New(data)); }
+    void undo() override {} // { currentShow->fixtures.Add(Fixture::New(data)); }
 
     void redo() override {
+        /*
         FixtureInstance removed = currentShow->fixtures.Remove(id);
         data.fixtureId = removed->id;
         data.name = removed->name;
         data.universe = removed->universe;
         data.channel = removed->channel;
         data.presetId = removed->presetId;
+         */
     }
 
 private:
