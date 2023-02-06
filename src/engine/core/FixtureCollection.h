@@ -1,22 +1,21 @@
-#pragma once 
-#include "ISerializable.h"
+#pragma once
 
-struct FixtureCollection {
-    Hash id;
+#include "NbtFileIO.h"
+#include "IIdentifiable.h"
+
+struct FixtureCollection : IIdentifiable {
     std::string name;
-	IDSet assignedFixtures;
-};
-typedef std::shared_ptr<FixtureCollection> FixtureCollectionInstance;
+    IDSet assignedFixtures;
 
-NBT_SAVE(FixtureCollectionInstance, {
-    NBT_SAVE_MEMBER_PTR(id);
-    NBT_SAVE_MEMBER_PTR(name);
-    NBT_SAVE_MEMBER_PTR(assignedFixtures);
-})
-NBT_LOAD(FixtureCollectionInstance, {
-    FixtureCollectionInstance value = std::make_shared<FixtureCollection>();
-    NBT_LOAD_MEMBER_PTR(id);
-    NBT_LOAD_MEMBER_PTR(name);
-    NBT_LOAD_MEMBER_PTR(assignedFixtures);
-    return value;
-})
+    FixtureCollection() = default;
+
+    FixtureCollection(Hash id, const std::string &name): name(name) {
+        this->id = id;
+    }
+
+    nbt::tag_compound Save() override;
+
+    void Load(const nbt::tag_compound &data) override;
+};
+
+typedef std::shared_ptr<FixtureCollection> FixtureCollectionInstance;

@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "Fixture.h"
 #include "imgui.h"
-#include "Show.h"
+#include "ShowData.h"
 #include <js/js.h>
 #include "engine/ui/blackboard/Panel.h"
 #include <string>
@@ -47,15 +47,15 @@ Engine::Engine(int argc, char* argv[])
     }
 
 #ifdef PIDMX_ENABLE_JAVASCRIPT
-    js::ObjectTemplate fixtures;
-    v8::Local<v8::ObjectTemplate> fixturesTemplate = fixtures.Begin()
-        ->Function("patch", Fixture::Patch)
-        ->Build();
+    //js::ObjectTemplate fixtures;
+    //v8::Local<v8::ObjectTemplate> fixturesTemplate = fixtures.Begin()
+    //    ->Function("patch", Fixture::Patch)
+    //    ->Build();
 
-    js::ObjectTemplate engine;
-    engine.Begin()
-        ->Object("fixtures", fixturesTemplate)
-        ->BuildGlobal("engine");
+    //js::ObjectTemplate engine;
+    //engine.Begin()
+    //    ->Object("fixtures", fixturesTemplate)
+    //    ->BuildGlobal("engine");
 #endif
 
     LoadFixturePresetsFromDirectory("resources/fixtures");
@@ -83,12 +83,14 @@ void Engine::ProcessHotkeys() {
 
 void Engine::NewShow() {
     delete currentShow;
-    currentShow = new Show();
+    currentShow = new ShowData();
+    currentShow->Register();
 }
 
 void Engine::LoadShow(const std::string &path) {
     delete currentShow;
-    currentShow = new Show();
+    currentShow = new ShowData();
+    currentShow->Register();
     currentShow->Load(path);
 }
 
@@ -105,11 +107,11 @@ void Engine::Redo() {
 }
 
 void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
-    for (const auto & entry : fs::directory_iterator(dir)) {
-        auto root = nbt::LoadFromFile(entry.path().string());
-        auto vec = nbt::Load(*root, "fixturePresets", nullptr, Set<FixturePreset>{});
-        fixturePresets.insert(vec.begin(), vec.end());
-    }
+    //for (const auto & entry : fs::directory_iterator(dir)) {
+    //    auto root = nbt::LoadFromFile(entry.path().string());
+    //    auto vec = nbt::Load(*root, "fixturePresets", nullptr, Set<FixturePreset>{});
+    //    fixturePresets.insert(vec.begin(), vec.end());
+    //}
 
     FixturePreset pres;
     pres.footprint = (int)fixturePresets.size();

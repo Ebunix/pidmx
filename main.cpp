@@ -10,7 +10,7 @@
 #include <engine/ui/ImGuiExt.h>
 
 #include <js/js.h>
-#include <engine/core/Show.h>
+#include <engine/core/ShowData.h>
 #include <engine/command/CommandFixture.h>
 #include <engine/ui/MainPanel.h>
 #include "engine/core/Engine.h"
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     bool openDemoWindow = false;
 
     Engine engine(argc, argv);
-    currentShow = new Show();
+    engine.NewShow();
 
     setImGuiStyle(Engine::Instance().dpiScale);
 #ifdef PIDMX_ENABLE_JAVASCRIPT
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
         }
 
         UI::DrawMainPanel();
-        currentShow->RenderPanels();
+        engine.Show().RenderPanels();
 
         /*
         if (ImGui::Begin("Debug")) {
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
 
         glfwSwapBuffers(glfwWindow);
         glfwPollEvents();
-        currentShow->commandHistory.Transfer();
+        engine.Show().commandHistory.Transfer();
         Engine::Instance().ProcessHotkeys();
     }
 

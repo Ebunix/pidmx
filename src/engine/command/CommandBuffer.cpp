@@ -1,5 +1,6 @@
 #include "CommandBuffer.h"
-
+#include "engine/Console.h"
+#include <stdarg.h>
 #include <utility>
 
 void CommandBuffer::MoveTo(size_t index) {
@@ -22,16 +23,12 @@ void CommandBuffer::MoveTo(size_t index) {
     }
 }
 
-void CommandBuffer::Push(const std::string &name, CommandInstance command) {
-    auto start = buffer.begin() + current;
-    buffer.erase(start, buffer.end());
-    internalBuffer.push_back({std::vector<CommandInstance>({std::move(command)}), name});
-}
-
-void CommandBuffer::Push(const std::string &name, const std::vector<CommandInstance> &commands) {
-    auto start = buffer.begin() + current;
-    buffer.erase(start, buffer.end());
-    internalBuffer.push_back({commands, name});
+void CommandBuffer::Push(CommandInstance command) {
+    if (!inEntry) {
+        LogMessage(LogMessageType_Error, "Can't push to undo/redo stack outside of BeginEntry()/EndEntry()!");
+        return;
+    }
+    buildingEntry.steps.push_back(command);
 }
 
 void CommandBuffer::Transfer() {
@@ -43,4 +40,25 @@ void CommandBuffer::Transfer() {
         current++;
     }
     internalBuffer.clear();
+}
+
+void CommandBuffer::BeginEntry(const char *fmt, ...) {
+    char* title;
+    va_list va;
+    va_start(va, fmt);
+    vasprintf(&title, fmt, va);
+    va_end(va);
+
+    LogMessage(LogMessageType_Debug, "Push undo: %s", title);
+
+    inEntry = true;
+    buildingEntry.name = title;
+    buildingEntry.steps.clear();
+    auto start = buffer.begin() + current;
+    buffer.erase(start, buffer.end());
+}
+
+void CommandBuffer::EndEntry() {
+    inEntry = false;
+    internalBuffer.push_back(buildingEntry);
 }

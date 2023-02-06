@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <algorithm>
 
-class Show {
+class ShowData {
 public:
 	CommandBuffer commandHistory;
 
@@ -36,7 +36,7 @@ public:
     std::shared_ptr<UI::PatchFixturesPanel> panelPatchFixtures;
     std::shared_ptr<UI::PanelOperators> panelOperators;
 
-    Show();
+    void Register();
 
 	void Save(const std::string& path);
 	void Load(const std::string& path);
@@ -45,7 +45,24 @@ public:
 
     void RenderWindowMenu();
 
+    Hash GetID() {
+        Hash id = RandomHash();
+        int iter = 0;
+        if (globalIds.size() > 0) {
+            while (globalIds.contains(id)) {
+                id = RandomHash();
+                if (iter++ > 20) {
+                    LogMessage(LogMessageType_Error, "Failed to find a free ID after 20 attempts, random function broken?");
+                    break;
+                }
+            }
+        }
+        globalIds.insert(id);
+        return id;
+    }
+
 private:
+    IDSet globalIds;
     std::vector<std::shared_ptr<UI::Panel>> registeredPanels;
     template<typename T>
     inline std::shared_ptr<T> RegisterUIPanel(std::shared_ptr<T> panel) {
@@ -53,5 +70,3 @@ private:
         return panel;
     }
 };
-
-extern Show* currentShow;

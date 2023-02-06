@@ -4,7 +4,7 @@
 
 #include "PanelFixturePresetEditor.h"
 #include "ImGuiExt.h"
-#include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 
 namespace UI {
     void PanelFixturePresetEditor::Draw() {

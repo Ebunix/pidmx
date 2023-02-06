@@ -3,7 +3,7 @@
 //
 
 #include "Panel.h"
-#include "engine/core/Show.h"
+#include "engine/core/ShowData.h"
 #include "engine/ui/ImGuiExt.h"
 #include "engine/command/CommandBlackboard.h"
 #include "engine/ui/Tools.h"
@@ -48,6 +48,7 @@ void Blackboard::Panel::Draw() {
     //dl->PushClipRect(clipStart, clipEnd);
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle &style = ImGui::GetStyle();
+    ShowData &show = Engine::Instance().Show();
 
     ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_FrameBg]);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_FrameBgHovered]);
@@ -61,7 +62,7 @@ void Blackboard::Panel::Draw() {
     bool isIntersecting = false;
     bool isEditing = currentPlacingSelectSize || editingItem != nullptr;
 
-    ImDrawList* draw = ImGui::GetWindowDrawList();
+    ImDrawList *draw = ImGui::GetWindowDrawList();
 
     if (isEditing) {
         if (ImGui::IsKeyDown(ImGuiKey_Escape)) {
@@ -152,8 +153,7 @@ void Blackboard::Panel::Draw() {
                     if (isIntersecting) {
                         ImGui::PushStyleColor(ImGuiCol_Button, ColorPresets[ColorPresetType_ButtonRed].active);
                         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColorPresets[ColorPresetType_ButtonRed].hovered);
-                    }
-                    else {
+                    } else {
                         ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_ButtonActive]);
                         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_ButtonHovered]);
                     }
@@ -163,12 +163,14 @@ void Blackboard::Panel::Draw() {
                 if (ImGui::Button("##v", br - tl - ItemOuterPadding * 2) && !isIntersecting) {
                     if (currentPlacingSelectSize) {
                         currentPlacingSelectSize = false;
-                        currentShow->commandHistory.Push("Add blackboard item",
-                                                         CommandBlackboardAddItem::New(currentPlacingItem, this, targetX, targetY, targetWidth + 1, targetHeight + 1));
+                        show.commandHistory.BeginEntry("Place panel");
+                        show.commandHistory.Push(std::make_shared<CommandBlackboardAddItem>(currentPlacingItem, this, targetX, targetY, targetWidth + 1, targetHeight + 1));
+                        show.commandHistory.EndEntry();
                         currentPlacingItem = ItemType_None;
                     } else if (editingType == BlackboardItemEditType_Move) {
-                        currentShow->commandHistory.Push("Move blackboard item",
-                                                         CommandBlackboardMoveItem::New(editingItem->id, targetX, targetY));
+                        show.commandHistory.BeginEntry("Move panel");
+                        show.commandHistory.Push(std::make_shared<CommandBlackboardMoveItem>(editingItem->id, targetX, targetY));
+                        show.commandHistory.EndEntry();
                         EditItem(nullptr, BlackboardItemEditType_None);
                     }
                 }
@@ -207,7 +209,7 @@ void Blackboard::Panel::Draw() {
 
     ImGui::PopStyleColor(3);
 
-    for (const auto &item: currentShow->blackboardItems) {
+    for (const auto &item: show.blackboardItems) {
         float xOff = item.second->x * elementWidth;
         float yOff = item.second->y * elementHeight;
         ImVec2 tlLocalSpace(topLeft.x + xOff, topLeft.y + yOff);
@@ -225,16 +227,18 @@ void Blackboard::Panel::Draw() {
 }
 
 void Blackboard::Panel::PlaceInstance(const Blackboard::ItemInstance &instance, int x, int y, int width, int height, bool skipAddToShow) {
-    instance->parent = currentShow->panelBlackboard;
+    ShowData &show = Engine::Instance().Show();
+    instance->parent = show.panelBlackboard;
     if (!skipAddToShow) {
-        currentShow->blackboardItems.insert_or_assign(instance->id, instance);
+        show.blackboardItems.insert_or_assign(instance->id, instance);
     }
     instance->Move(x, y);
     instance->Resize(width, height);
 }
 
 void Blackboard::Panel::OccupyInstanceArea(Hash id) {
-    OccupyInstanceArea(currentShow->blackboardItems.at(id));
+    ShowData &show = Engine::Instance().Show();
+    OccupyInstanceArea(show.blackboardItems.at(id));
 }
 
 void Blackboard::Panel::OccupyInstanceArea(ItemInstance instance) {
@@ -249,7 +253,8 @@ void Blackboard::Panel::OccupyInstanceArea(ItemInstance instance) {
 }
 
 void Blackboard::Panel::FreeInstanceArea(Hash id) {
-    const auto &instance = currentShow->blackboardItems.at(id);
+    ShowData &show = Engine::Instance().Show();
+    const auto &instance = show.blackboardItems.at(id);
     if (!instance) {
         return;
     }

@@ -9,6 +9,17 @@ namespace Blackboard {
 
         ItemCollection() : Item("Collections", ItemType_Collections) {}
 
+        nbt::tag_compound Save() override {
+            nbt::tag_compound c = Item::Save();
+            c.insert("collection", nbt::Serialize(collection.begin(), collection.end()));
+            return c;
+        }
+
+        void Load(const nbt::tag_compound &c) override {
+            Item::Load(c);
+            collection = nbt::Deserialize(c, "collection", Map<int, Hash>());
+        }
+
         void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override {
             ImGui::PushID(itemIndex);
 
@@ -50,4 +61,5 @@ namespace Blackboard {
             return result;
         }
     };
+
 }

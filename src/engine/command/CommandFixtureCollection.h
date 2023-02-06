@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ICommand.h"
-#include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 #include <engine/core/Fixture.h>
 #include <utility>
 
@@ -9,13 +9,11 @@ class CommandFixtureCollectionAdd : public ICommand {
 public:
     CommandFixtureCollectionAdd(Hash id, std::string name) : id(id), name(std::move(name)) {}
 
-    static CommandInstance New(Hash id, const std::string &name) { return std::make_shared<CommandFixtureCollectionAdd>(id, name); }
-
     void execute() override { redo(); }
 
-    void undo() override {} // { currentShow->fixtureCollections.Remove(id); }
+    void undo() override { Engine::Instance().Show().fixtureCollections.erase(id); }
 
-    void redo() override {} // { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
+    void redo() override { Engine::Instance().Show().fixtureCollections.insert_or_assign(id, std::make_shared<FixtureCollection>(id, name)); }
 
 private:
     Hash id;
@@ -26,13 +24,11 @@ class CommandFixtureCollectionRemove : public ICommand {
 public:
     CommandFixtureCollectionRemove(Hash id, std::string name) : id(id), name(std::move(name)) {}
 
-    static CommandInstance New(Hash id, const std::string &name) { return std::make_shared<CommandFixtureCollectionAdd>(id, name); }
-
     void execute() override { redo(); }
 
-    void undo() override {} // { currentShow->fixtureCollections.Remove(id); }
+    void undo() override { Engine::Instance().Show().fixtureCollections.erase(id); }
 
-    void redo() override {} // { currentShow->fixtureCollections.Add(FixtureCollection::New(id, name)); }
+    void redo() override { Engine::Instance().Show().fixtureCollections.insert_or_assign(id, std::make_shared<FixtureCollection>(id, name)); }
 
 private:
     Hash id;
@@ -43,24 +39,20 @@ class CommandFixtureCollectionAssignFixtures : public ICommand {
 public:
     CommandFixtureCollectionAssignFixtures(Hash id, const IDSet &fixtures) : id(id), fixtureIds(fixtures) {}
 
-    static CommandInstance New(Hash id, const IDSet &fixtures) { return std::make_shared<CommandFixtureCollectionAssignFixtures>(id, fixtures); }
-
     void execute() override { redo(); }
 
     void undo() override {
-        /*
-        auto collection = currentShow->fixtureCollections.Get(id);
-        std::remove_if(collection->assignedFixtures.begin(), collection->assignedFixtures.end(), [&](Hash val) {
-            return fixtureIds.find(val) != fixtureIds.end();
-        });*/
+        auto collection = Engine::Instance().Show().fixtureCollections.at(id);
+        for (const auto& val : fixtureIds) {
+            collection->assignedFixtures.erase(val);
+        }
     }
 
     void redo() override {
-        /*
-        auto collection = currentShow->fixtureCollections.Get(id);
+        auto collection = Engine::Instance().Show().fixtureCollections.at(id);
         for (auto val : fixtureIds) {
-            collection->assignedFixtures.push_back(val);
-        }*/
+            collection->assignedFixtures.insert(val);
+        }
     }
 
 private:

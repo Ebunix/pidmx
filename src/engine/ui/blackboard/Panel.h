@@ -17,16 +17,6 @@ namespace Blackboard {
 
         void Draw() override;
 
-        void Load(const nbt::tag_compound& pack) override {
-            UI::Panel::Load(pack);
-            exactFit = nbt::Load(pack, "exactFit", nullptr, false);
-        }
-        nbt::tag_compound Save() override {
-            nbt::tag_compound cmp = UI::Panel::Save();
-            nbt::Save(cmp, "exactFit", exactFit);
-            return cmp;
-        }
-
         void PlaceInstance(const ItemInstance& instance, int x, int y, int width, int height, bool skipAddToShow = false);
 
         void FreeInstanceArea(Hash id);

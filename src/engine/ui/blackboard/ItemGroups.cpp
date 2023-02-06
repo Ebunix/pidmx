@@ -4,19 +4,32 @@
 
 #include "ItemGroups.h"
 #include "engine/core/Engine.h"
-#include "engine/core/Show.h"
+#include "engine/core/ShowData.h"
 #include "../ImGuiExt.h"
 
-void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) {
-    ItemCollection::Draw(list, tl, br, itemIndex + 1);
+nbt::tag_compound Blackboard::GroupData::Save() {
+    nbt::tag_compound c = IIdentifiable::Save();
+    c.insert("name", nbt::Serialize(name));
+    c.insert("fixtures", nbt::Serialize(fixtures.begin(), fixtures.end()));
+    return c;
+}
 
-    int groupIndex = itemIndex + 1;
-    if (!HasItemAt(groupIndex)) {
+void Blackboard::GroupData::Load(const nbt::tag_compound &c) {
+    IIdentifiable::Load(c);
+    name = nbt::Deserialize(c, "name", std::string(""));
+    fixtures = nbt::Deserialize(c, "fixtures", IDSet());
+}
+
+
+void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) {
+    ItemCollection::Draw(list, tl, br, itemIndex);
+
+    if (!HasItemAt(itemIndex)) {
         return;
     }
 
-    Engine& engine = Engine::Instance();
-    const auto &item = currentShow->groups.at(GetAt(groupIndex));
+    Engine &engine = Engine::Instance();
+    const auto &item = Engine::Instance().Show().groups.at(GetAt(itemIndex));
 
     static ImVec2 fixtureCountTextPos = (ItemInnerPadding + ImVec2(0, 14)) * Engine::Instance().dpiScale;
 
@@ -51,15 +64,15 @@ Blackboard::ItemGroups::ItemGroups() : Item("Fixture Groups", ItemType_Groups) {
 }
 
 void Blackboard::ItemGroups::OnClick(int itemIdOneBased) {
-    Engine& engine = Engine::Instance();
+    Engine &engine = Engine::Instance();
+    ShowData &show = engine.Show();
     switch (engine.action) {
         case EngineAction_Store: {
-            const auto &selection = currentShow->panelPatchFixtures->GetSelection();
+            const auto &selection = show.panelPatchFixtures->GetSelection();
             GroupData store;
-            store.id = (Hash)currentShow->groups.size() + 1;
             store.name = "New group";
             store.fixtures = selection;
-            currentShow->groups.insert_or_assign(store.id, std::make_shared<GroupData>(store));
+            show.groups.insert_or_assign(store.id, std::make_shared<GroupData>(store));
             AssignAt(itemIdOneBased, store.id);
             engine.SetAction(EngineAction_None);
             break;
@@ -76,5 +89,4 @@ void Blackboard::ItemGroups::OnClick(int itemIdOneBased) {
             break;
     }
 }
-
 

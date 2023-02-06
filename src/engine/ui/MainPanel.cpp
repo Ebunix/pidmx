@@ -3,7 +3,7 @@
 #include "PatchFixturesPanel.h"
 #include "PanelConsole.h"
 #include <string.h>
-#include <engine/core/Show.h>
+#include <engine/core/ShowData.h>
 
 enum class MainPanelMode {
 	MainMenu,
@@ -57,7 +57,7 @@ void UI::DrawMainPanel()
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Windows")) {
-            currentShow->RenderWindowMenu();
+            Engine::Instance().Show().RenderWindowMenu();
             ImGui::EndMenu();
         }
 		UI::EndMainMenuBar();

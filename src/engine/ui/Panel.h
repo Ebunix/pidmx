@@ -2,7 +2,8 @@
 #include <string>
 #include <utility>
 #include <imgui.h>
-#include "engine/core/ISerializable.h"
+#include "engine/core/NbtFileIO.h"
+#include "engine/core/IIdentifiable.h"
 //
 // Created by ebu on 30.01.23.
 //
@@ -17,16 +18,29 @@ namespace UI {
         PanelType_Operators,
     };
 
-    class Panel: public ISerializable {
+    class Panel: public IIdentifiable {
     public:
+        std::string name;
         bool open = false;
         bool drawWindowFrame = true;
         PanelType type = PanelType_None;
 
         explicit Panel(std::string title, PanelType type, ImGuiWindowFlags flags = ImGuiWindowFlags_None);
 
-        nbt::tag_compound Save() override;
-        void Load(const nbt::tag_compound& comp) override;
+        nbt::tag_compound Save() override {
+            nbt::tag_compound c = IIdentifiable::Save();
+            c.insert("name", nbt::Serialize(name));
+            c.insert("open", nbt::Serialize(open));
+            c.insert("type", nbt::Serialize(type));
+            return c;
+        }
+        void Load(const nbt::tag_compound &c) override {
+            IIdentifiable::Load(c);
+            name = nbt::Deserialize(c, "name", std::string("Panel"));
+            open = nbt::Deserialize(c, "open", false);
+            type = (PanelType)nbt::Deserialize(c, "type", PanelType_None);
+        }
+
 
         virtual void Draw() = 0;
         virtual void OnHide() {}

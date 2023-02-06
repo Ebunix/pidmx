@@ -4,14 +4,10 @@
 #include "engine/core/Fixture.h"
 #include "engine/ui/blackboard/Item.h"
 #include "engine/ui/blackboard/Panel.h"
-#include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 
 class CommandBlackboardAddItem : public ICommand {
 public:
-    static CommandInstance New(Blackboard::ItemType type, Blackboard::Panel *parent, int x, int y, int w, int h) {
-        return std::make_shared<CommandBlackboardAddItem>(type, parent, x, y, w, h);
-    }
-
     explicit CommandBlackboardAddItem(Blackboard::ItemType type, Blackboard::Panel *parent, int x, int y, int w, int h) :
             type(type), parent(parent), x(x), y(y), w(w), h(h) {}
 
@@ -19,7 +15,7 @@ public:
 
     void undo() override {
         parent->FreeInstanceArea(id);
-        currentShow->blackboardItems.erase(id);
+        Engine::Instance().Show().blackboardItems.erase(id);
     }
 
     void redo() override {
@@ -37,10 +33,6 @@ private:
 
 class CommandBlackboardRemoveItem : public ICommand {
 public:
-    static CommandInstance New(Hash id) {
-        return std::make_shared<CommandBlackboardRemoveItem>(id);
-    }
-
     explicit CommandBlackboardRemoveItem(Hash id) : id(id) {}
 
     void execute() override { redo(); }
@@ -51,11 +43,12 @@ public:
     }
 
     void redo() override {
-        auto item = currentShow->blackboardItems.at(id);
+        auto items = Engine::Instance().Show().blackboardItems;
+        auto item = items.at(id);
         type = item->type;
         parent = item->parent;
         parent->FreeInstanceArea(id);
-        currentShow->blackboardItems.erase(id);
+        items.erase(id);
     }
 
 private:
@@ -68,12 +61,9 @@ private:
 
 class CommandBlackboardMoveItem : public ICommand {
 public:
-    static CommandInstance New(Hash id, int x, int y) {
-        return std::make_shared<CommandBlackboardMoveItem>(id, x, y);
-    }
-
     explicit CommandBlackboardMoveItem(Hash id, int x, int y) : id(id), x(x), y(y) {
-        auto item = currentShow->blackboardItems.at(id);
+        auto items = Engine::Instance().Show().blackboardItems;
+        auto item = items.at(id);
         oldX = item->x;
         oldY = item->y;
     }
@@ -81,12 +71,14 @@ public:
     void execute() override { redo(); }
 
     void undo() override {
-        auto item = currentShow->blackboardItems.at(id);
+        auto items = Engine::Instance().Show().blackboardItems;
+        auto item = items.at(id);
         item->Move(oldX, oldY);
     }
 
     void redo() override {
-        auto item = currentShow->blackboardItems.at(id);
+        auto items = Engine::Instance().Show().blackboardItems;
+        auto item = items.at(id);
         item->Move(x, y);
     }
 

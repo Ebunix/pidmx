@@ -5,7 +5,7 @@
 #include <cmath>
 #include "Item.h"
 #include "Panel.h"
-#include "engine/core/Show.h"
+#include "engine/core/ShowData.h"
 #include "engine/core/Engine.h"
 #include "engine/command/CommandBlackboard.h"
 #include "ItemCollection.h"
@@ -17,7 +17,29 @@ using namespace UI;
 
 Blackboard::Item::Item(std::string name, ItemType type) : type(type) {
     this->name = std::move(name);
-    id = currentShow->blackboardItems.size() + 1;
+    id = Engine::Instance().Show().blackboardItems.size() + 1;
+}
+
+nbt::tag_compound Blackboard::Item::Save() {
+    nbt::tag_compound c = IIdentifiable::Save();
+    c.insert("x", nbt::Serialize(x));
+    c.insert("y", nbt::Serialize(y));
+    c.insert("width", nbt::Serialize(width));
+    c.insert("height", nbt::Serialize(height));
+    c.insert("name", nbt::Serialize(name));
+    c.insert("type", nbt::Serialize(type));
+    return c;
+}
+
+void Blackboard::Item::Load(const nbt::tag_compound &c) {
+    IIdentifiable::Load(c);
+
+    x = nbt::Deserialize(c, "x", 0);
+    y = nbt::Deserialize(c, "y", 0);
+    width = nbt::Deserialize(c, "width", 1);
+    height = nbt::Deserialize(c, "height", 1);
+    name = nbt::Deserialize(c, "name", std::string(""));
+    type = (ItemType)nbt::Deserialize(c, "type", ItemType_None);
 }
 
 void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
@@ -37,12 +59,16 @@ void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRig
     ImColor borderColor = ColorPresets[ColorPresetType_PanelItemMain].regular;
     UI::OutlinedPanelBorder(list, borderColor, topLeft, bottomRight);
 
+    ShowData &show = Engine::Instance().Show();
+
     if (ImGui::BeginPopup("Options")) {
         if (ImGui::MenuItem("Move")) {
-            parent->EditItem(currentShow->blackboardItems.at(id), BlackboardItemEditType_Move);
+            parent->EditItem(show.blackboardItems.at(id), BlackboardItemEditType_Move);
         }
         if (ImGui::MenuItem("Delete")) {
-            currentShow->commandHistory.Push("Delete blackboard item", CommandBlackboardRemoveItem::New(id));
+            show.commandHistory.BeginEntry("Remove panel");
+            show.commandHistory.Push(std::make_shared<CommandBlackboardRemoveItem>(id));
+            show.commandHistory.EndEntry();
         }
         ImGui::EndPopup();
     }
@@ -122,9 +148,10 @@ void Blackboard::Item::RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bot
     ImGui::PopStyleVar();
 }
 
-//void Blackboard::Item::afterLoad() {
-//    parent->PlaceInstance(currentShow->blackboardItems.at(id), x, y, width, height, true);
-//}
+void Blackboard::Item::AfterLoad() {
+    ShowData &show = Engine::Instance().Show();
+    parent->PlaceInstance(show.blackboardItems.at(id), x, y, width, height, true);
+}
 
 void Blackboard::Item::Move(int newX, int newY) {
     parent->FreeInstanceArea(id);

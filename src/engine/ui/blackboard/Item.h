@@ -2,7 +2,8 @@
 
 #include "imgui.h"
 #include <string>
-#include "engine/core/ISerializable.h"
+#include "engine/core/NbtFileIO.h"
+#include "engine/core/IIdentifiable.h"
 
 namespace Blackboard {
     class Panel;
@@ -18,9 +19,8 @@ namespace Blackboard {
         ItemType_Count_,
     };
 
-    class Item {
+    class Item : public IIdentifiable {
     public:
-        Hash id;
         std::string name;
         int x = 0, y = 0;
         int width = 1, height = 1;
@@ -28,6 +28,9 @@ namespace Blackboard {
         std::shared_ptr<Panel> parent;
 
         Item(std::string name = "", ItemType type = ItemType_None);
+
+        nbt::tag_compound Save() override;
+        void Load(const nbt::tag_compound &c) override;
 
         void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
 
@@ -37,6 +40,7 @@ namespace Blackboard {
         virtual void Draw(ImDrawList *list, ImVec2 screenTL, ImVec2 screenBR, int itemIndex) {}
         virtual void OnResize(int newW, int newH) {}
         virtual void OnMove(int newX, int newY) {}
+        virtual void AfterLoad();
 
     private:
         void RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
@@ -50,4 +54,20 @@ namespace Blackboard {
 
     typedef std::shared_ptr<Item> ItemInstance;
     ItemInstance CreateItem(ItemType type);
+}
+
+namespace nbt {
+    template<> std::shared_ptr<Blackboard::Item> Deserialize(const value &input, const std::shared_ptr<Blackboard::Item> &fallback) {
+        bool valid = input.get_type() == tag_type::Compound;
+        if (!valid) {
+            return fallback;
+        }
+        const tag_compound &comp = input.as<tag_compound>();
+        if (!comp.has_key("id") || !comp.has_key("type")) {
+            return fallback;
+        }
+        auto ptr = Blackboard::CreateItem((Blackboard::ItemType)input.at("type").as<tag_int>().get());
+        ptr->Load(comp);
+        return ptr;
+    }
 }

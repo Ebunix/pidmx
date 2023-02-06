@@ -10,17 +10,16 @@
 #define VERSION_REV(ver) ((ver) & 0xffff)
 #define FORMAT_VERSION(buffer, bufferLen, version) snprintf((buffer), (bufferLen), "Version %i.%02i.%04i", VERSION_MAJOR(version), VERSION_MINOR(version), VERSION_REV(version))
 
-#define INVALID_HASH 0
+#define INVALID_HASH ((Hash)(0ull))
 typedef int64_t Hash;
-inline const Hash HashString(const std::string& str) {
-    Hash value = 0x792fb382bafe973cL;
-    const char* cstr = str.c_str();
-    for (int i = 0; i < str.length(); i++) {
-        value <<= (cstr[i] & 0b00000111);
-        value ^= cstr[i];
-        value ^= value > 2;
-    }
-    return value | 1;
+
+inline const Hash RandomHash() {
+    static Hash value = 0x792fb382bafe973cL;
+    value <<= (value & 0b00000111);
+    value ^= (value >> 32);
+    value ^= (value >> 2);
+    value ^= ((42069 + (value % 0xfff)) << 32);
+    return value;
 }
 
 inline bool VerifyTextNumeric(char* str) {

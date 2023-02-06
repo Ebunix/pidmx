@@ -1,27 +1,31 @@
 #include "Fixture.h"
-#include <engine/Console.h>
-#include "Show.h"
-#include <engine/command/CommandFixture.h>
 
-#ifdef PIDMX_ENABLE_JAVASCRIPT
-using namespace v8;
-
-void Fixture::Patch(const v8::FunctionCallbackInfo<v8::Value> &info) {
-    std::vector<FixtureData> data;
-    Local<Context> ctx = info.GetIsolate()->GetCurrentContext();
-
-    if (info[0]->IsArray()) {
-        Local<Array> array = info[0].As<Array>();
-        for (uint32_t i = 0; i < array->Length(); i++) {
-            Local<Value> val;
-            if (array->Get(ctx, i).ToLocal(&val)) {
-                data.push_back(v8InteropObjectToFixtureData(ctx, val));
-            }
-        }
-    } else if (info[0]->IsObject()) {
-        data.push_back(v8InteropObjectToFixtureData(ctx, info[0]));
-    }
-
-    currentShow->commandHistory.Push("Patch fixtures", CommandFixtureAdd::New(data));
+nbt::tag_compound Fixture::Save() {
+    nbt::tag_compound c = IIdentifiable::Save();
+    c.insert("data", data.Save());
+    return c;
 }
-#endif
+
+void Fixture::Load(const nbt::tag_compound &c) {
+    IIdentifiable::Load(c);
+    data.Load(c.at("data").as<nbt::tag_compound>());
+}
+
+
+nbt::tag_compound FixtureData::Save() {
+    nbt::tag_compound data;
+    data.insert("name", nbt::Serialize(name));
+    data.insert("fixtureId", nbt::Serialize(fixtureId));
+    data.insert("presetId", nbt::Serialize(presetId));
+    data.insert("channel", nbt::Serialize(channel));
+    data.insert("universe", nbt::Serialize(universe));
+    return data;
+}
+
+void FixtureData::Load(const nbt::tag_compound &c) {
+    name = nbt::Deserialize(c, "name", std::string(""));
+    fixtureId = nbt::Deserialize(c, "fixtureId", INVALID_HASH);
+    presetId = nbt::Deserialize(c, "presetId", INVALID_HASH);
+    channel = nbt::Deserialize(c, "channel", 0);
+    universe = nbt::Deserialize(c, "universe", 0);
+}

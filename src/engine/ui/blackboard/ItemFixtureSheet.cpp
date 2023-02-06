@@ -5,10 +5,11 @@
 #include "ItemFixtureSheet.h"
 #include "engine/core/Engine.h"
 #include "engine/core/Fixture.h"
-#include "engine/core/Show.h"
+#include "engine/core/ShowData.h"
 
 void Blackboard::ItemFixtureSheet::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) {
     Engine& engine = Engine::Instance();
+    ShowData &show = engine.Show();
 
     if (ImGui::BeginTable("Fixture Sheet", engine.availableParametersOnFixtures.size() + 1)) {
         ImGui::TableSetupColumn("FixID");
@@ -19,7 +20,7 @@ void Blackboard::ItemFixtureSheet::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, 
         ImGui::TableHeadersRow();
 
         for (const auto& fixtureId : engine.activeFixtures) {
-            FixtureInstance fixture = currentShow->fixtures.at(fixtureId);
+            FixtureInstance fixture = show.fixtures.at(fixtureId);
 
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);

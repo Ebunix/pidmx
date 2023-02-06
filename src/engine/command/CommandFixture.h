@@ -1,59 +1,47 @@
 #pragma once
 
 #include "ICommand.h"
-#include "engine/core/Show.h"
+#include "engine/core/Engine.h"
 #include <engine/core/Fixture.h>
 #include <set>
 #include <utility>
 
 class CommandFixtureAdd : public ICommand {
 public:
-    static std::vector<CommandInstance> New(const std::vector<FixtureData> &data) {
-        std::vector<CommandInstance> commands;
-        for (const auto& d : data) {
-            commands.push_back(std::make_shared<CommandFixtureAdd>(d));
-        }
-        return commands;
-    }
-
     explicit CommandFixtureAdd(FixtureData data) : data(std::move(data)) {}
 
     void execute() override { redo(); }
 
-    void undo() override {} // { currentShow->fixtures.Remove(data.fixtureId); }
+    void undo() override { Engine::Instance().Show().fixtures.erase(id); }
 
-    void redo() override {} // { currentShow->fixtures.Add(Fixture::New(data)); }
+    void redo() override {
+        FixtureInstance fix = std::make_shared<Fixture>(data);
+        id = fix->id;
+        Engine::Instance().Show().fixtures.insert_or_assign(id, fix);
+    }
 
 private:
+    Hash id;
     FixtureData data;
 };
 
 
 class CommandFixtureRemove : public ICommand {
 public:
-    static std::vector<CommandInstance> New(const IDSet &ids) {
-        std::vector<CommandInstance> commands;
-        for (const auto& d : ids) {
-            commands.push_back(std::make_shared<CommandFixtureRemove>(d));
-        }
-        return commands;
-    }
-
     explicit CommandFixtureRemove(Hash id) : id(id) {}
 
     void execute() override { redo(); }
 
-    void undo() override {} // { currentShow->fixtures.Add(Fixture::New(data)); }
+    void undo() override {
+        FixtureInstance fix = std::make_shared<Fixture>(data);
+        fix->id = id;
+        Engine::Instance().Show().fixtures.insert_or_assign(id, fix);
+    }
 
     void redo() override {
-        /*
-        FixtureInstance removed = currentShow->fixtures.Remove(id);
-        data.fixtureId = removed->id;
-        data.name = removed->name;
-        data.universe = removed->universe;
-        data.channel = removed->channel;
-        data.presetId = removed->presetId;
-         */
+        ShowData& show = Engine::Instance().Show();
+        data = show.fixtures.at(id)->data;
+        show.fixtures.erase(id);
     }
 
 private:

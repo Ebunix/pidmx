@@ -4,10 +4,11 @@
 #include "engine/core/Fixture.h"
 
 namespace Blackboard {
-    struct GroupData {
-        Hash id;
+    struct GroupData: IIdentifiable {
         std::string name;
         IDSet fixtures;
+        nbt::tag_compound Save() override;
+        void Load(const nbt::tag_compound &c) override;
     };
     typedef std::shared_ptr<GroupData> GroupDataInstance;
 
@@ -24,16 +25,3 @@ namespace Blackboard {
         void OnClick(int itemIdOneBased) override;
     };
 }
-
-NBT_SAVE(Blackboard::GroupDataInstance, {
-    NBT_SAVE_MEMBER_PTR(id);
-    NBT_SAVE_MEMBER_PTR(name);
-    NBT_SAVE_MEMBER_PTR(fixtures);
-})
-NBT_LOAD(Blackboard::GroupDataInstance, {
-    Blackboard::GroupDataInstance value = std::make_shared<Blackboard::GroupData>();
-    NBT_LOAD_MEMBER_PTR(id);
-    NBT_LOAD_MEMBER_PTR(name);
-    NBT_LOAD_MEMBER_PTR(fixtures);
-    return value;
-})

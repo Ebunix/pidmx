@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include "ISerializable.h"
+#include "pidmx_utils.h"
 
 /*
 template<typename T>

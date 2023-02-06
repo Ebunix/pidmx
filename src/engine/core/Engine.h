@@ -1,14 +1,10 @@
 #pragma once
 
 #include "FixturePreset.h"
+#include "ShowData.h"
+#include "EngineAction.h"
 #include <vector>
 #include <set>
-
-enum EngineAction {
-    EngineAction_None,
-    EngineAction_Store,
-    EngineAction_Delete,
-};
 
 class Engine;
 
@@ -33,17 +29,17 @@ public:
 
     void LoadFixturePresetsFromDirectory(const std::string &dir);
 
-    static void ProcessHotkeys();
+    void ProcessHotkeys();
 
-    static void NewShow();
+    void NewShow();
 
-    static void LoadShow(const std::string &path);
+    void LoadShow(const std::string &path);
 
-    static void SaveShow(const std::string &path);
+    void SaveShow(const std::string &path);
 
-    static void Undo();
+    void Undo();
 
-    static void Redo();
+    void Redo();
 
     void SetAction(EngineAction action);
 
@@ -53,7 +49,10 @@ public:
 
     void AddActiveGroup(Hash id);
 
+    ShowData& Show() { return *currentShow; }
+
 private:
+    ShowData* currentShow = nullptr;
 
     void UpdateAvailableParameters();
 };

@@ -1,60 +1,41 @@
 #pragma once
+
 #include <pidmx_utils.h>
 #include <memory>
-#include "ISerializable.h"
+#include <utility>
+#include "IIdentifiable.h"
+#include "NbtFileIO.h"
 #include <js/js.h>
 
-struct FixtureData {
-	std::string name;
-	Hash presetId = 0;
-	int universe = 0;
-	int channel = 0;
+struct FixtureData: ISer {
+    std::string name;
+    Hash fixtureId = 0;
+    Hash presetId = 0;
+    int universe = 0;
+    int channel = 0;
+
+    FixtureData() = default;
+    FixtureData(std::string name, Hash fixtureId, Hash presetId, int universe, int channel):
+        name(std::move(name)), fixtureId(fixtureId), presetId(presetId), universe(universe), channel(channel) {}
+
+    nbt::tag_compound Save() override;
+    void Load(const nbt::tag_compound &data) override;
 };
 
-#ifdef PIDMX_ENABLE_JAVASCRIPT
-V8_INTEROP_CONVERT_FUNC(FixtureData, ObjectToFixtureData) {
-	V8_INTEROP_CONVERT_FUNC_PREAMBLE(FixtureData);
-	V8_INTEROP_CONVERT_FUNC_MEMBER_STRING(name)
-	V8_INTEROP_CONVERT_FUNC_MEMBER_NUMBER(Hash, presetId)
-	V8_INTEROP_CONVERT_FUNC_MEMBER_NUMBER(int, universe)
-	V8_INTEROP_CONVERT_FUNC_MEMBER_NUMBER(int, channel)
-	return result;
-}
-#endif
-
-class Fixture {
+class Fixture : public IIdentifiable {
 public:
-    Hash id = 0;
     FixtureData data;
+
+    Fixture() = default;
+    explicit Fixture(FixtureData data): data(std::move(data)) {}
+
+    nbt::tag_compound Save() override;
+    void Load(const nbt::tag_compound &data) override;
 
 #ifdef PIDMX_ENABLE_JAVASCRIPT
     static void Patch(const v8::FunctionCallbackInfo<v8::Value> &info);
 #endif
 
 };
-typedef std::shared_ptr<Fixture> FixtureInstance;
 
-NBT_SAVE(FixtureData, {
-    NBT_SAVE_MEMBER(name);
-    NBT_SAVE_MEMBER(presetId);
-    NBT_SAVE_MEMBER(universe);
-    NBT_SAVE_MEMBER(channel);
-})
-NBT_LOAD(FixtureData, {
-    FixtureData value;
-    NBT_LOAD_MEMBER(name);
-    NBT_LOAD_MEMBER(presetId);
-    NBT_LOAD_MEMBER(universe);
-    NBT_LOAD_MEMBER(channel);
-    return value;
-})
-NBT_SAVE(FixtureInstance, {
-    NBT_SAVE_MEMBER_PTR(id);
-    NBT_SAVE_MEMBER_PTR(data);
-})
-NBT_LOAD(FixtureInstance, {
-    FixtureInstance value = std::make_shared<Fixture>();
-    NBT_LOAD_MEMBER_PTR(id);
-    NBT_LOAD_MEMBER_PTR(data);
-    return value;
-})
+typedef std::shared_ptr<Fixture> FixtureInstance;
