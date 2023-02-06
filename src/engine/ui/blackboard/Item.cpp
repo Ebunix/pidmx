@@ -130,18 +130,22 @@ nbt::tag_compound Blackboard::Item::Save() {
             {"w", width},
             {"h", height}
     });
-    cmp.insert("blackboard", parent->id);
+    cmp.insert("data", SaveSpecifics());
     return cmp;
 }
 
 void Blackboard::Item::Load(const nbt::tag_compound &pack) {
     ISerializable::Load(pack);
-    Hash blackboard = pack.at("blackboard").as<nbt::tag_long>().get();
-    x = pack.at("pos").as<nbt::tag_compound>().at("x").as<nbt::tag_int>().get();
-    y = pack.at("pos").as<nbt::tag_compound>().at("y").as<nbt::tag_int>().get();
-    width = pack.at("pos").as<nbt::tag_compound>().at("w").as<nbt::tag_int>().get();
-    height = pack.at("pos").as<nbt::tag_compound>().at("h").as<nbt::tag_int>().get();
+    nbt::tag_compound pos = pack.at("pos").as<nbt::tag_compound>();
+    x = nbt::Load(pos, "x", 0);
+    y = nbt::Load(pos, "y", 0);
+    width = nbt::Load(pos, "w", 1);
+    height = nbt::Load(pos, "h", 1);
     parent = currentShow->panelBlackboard;
+    if (pack.has_key("data")) {
+        const auto& data = pack.at("data").as<nbt::tag_compound>();
+        LoadSpecifics(data);
+    }
 }
 
 void Blackboard::Item::afterLoad() {

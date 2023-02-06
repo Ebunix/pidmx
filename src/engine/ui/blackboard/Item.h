@@ -18,7 +18,7 @@ namespace Blackboard {
         ItemType_Count_,
     };
 
-    class Item : public ISerializable {
+    class Item : virtual public ISerializable {
     public:
         int x = 0, y = 0;
         int width = 1, height = 1;
@@ -30,6 +30,8 @@ namespace Blackboard {
         void Load(const nbt::tag_compound& pack) override;
         nbt::tag_compound Save() override;
         void afterLoad() override;
+        virtual void LoadSpecifics(const nbt::tag_compound& pack) = 0;
+        virtual nbt::tag_compound SaveSpecifics() = 0;
 
         void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
 

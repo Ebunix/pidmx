@@ -18,6 +18,17 @@ void SerializeCollection(nbt::tag_compound& container, const std::string& tag, S
     container.insert(tag, std::move(list));
 }
 template<typename T>
+void SerializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
+    LogMessage(LogMessageType_Debug, "Serialize raw %s", tag.c_str());
+    nbt::tag_list list;
+    for (const auto& item : collection.items) {
+        nbt::tag_compound data;
+        nbt::Save(data, "", item);
+        list.push_back(std::move(data));
+    }
+    container.insert(tag, std::move(list));
+}
+template<typename T>
 void SerializeCollectionTyped(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
     LogMessage(LogMessageType_Debug, "Serialize typed %s", tag.c_str());
     nbt::tag_list list;
@@ -29,16 +40,26 @@ void SerializeCollectionTyped(nbt::tag_compound& container, const std::string& t
     container.insert(tag, std::move(list));
 }
 template<typename T>
-void DeserializeCollection(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection, std::shared_ptr<T> (*creator)()) {
+void DeserializeCollection(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection) {
     LogMessage(LogMessageType_Debug, "Deserialize %s", tag.c_str());
     nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
     for (auto& item : list) {
-        std::shared_ptr<T> instance = creator();
+        std::shared_ptr<T> instance = std::make_shared<T>();
         instance->Load(item.as<nbt::tag_compound>());
         collection.Add(instance);
     }
     for (auto& item : collection.items) {
         item->afterLoad();
+    }
+}
+template<typename T>
+void DeserializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection) {
+    LogMessage(LogMessageType_Debug, "Deserialize raw %s", tag.c_str());
+    nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
+    for (auto& item : list) {
+        auto comp = item.as<nbt::tag_compound>();
+        std::shared_ptr<T> value = nbt::Load(comp, "", std::shared_ptr<T>());
+        collection.Add(value);
     }
 }
 template<typename T, typename V>
@@ -72,6 +93,7 @@ void Show::Save(const std::string &path)
 
     SerializeCollection(rootCompound, "fixtures", fixtures);
     SerializeCollection(rootCompound, "fixtureCollections", fixtureCollections);
+    SerializeCollectionRaw(rootCompound, "groups", groups);
     SerializeCollectionTyped(rootCompound, "blackboardItems", blackboardItems);
     nbt::tag_compound panelsRoot;
     for (const auto& panel : registeredPanels) {
@@ -94,8 +116,9 @@ void Show::Load(const std::string &path)
 {
     auto rootCompound = nbt::LoadFromFile(path);
 
-    DeserializeCollection(*rootCompound, "fixtures", fixtures, std::make_shared<Fixture>);
-    DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections, std::make_shared<FixtureCollection>);
+    DeserializeCollection(*rootCompound, "fixtures", fixtures);
+    DeserializeCollection(*rootCompound, "fixtureCollections", fixtureCollections);
+    DeserializeCollectionRaw(*rootCompound, "groups", groups);
     DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, Blackboard::CreateItem);
     const nbt::tag_compound& panelsRoot = rootCompound->at("panels").as<nbt::tag_compound>();
     for (const auto& panel : registeredPanels) {

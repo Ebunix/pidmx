@@ -46,7 +46,7 @@ void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int it
     UI::OutlinedPanelBorder(list, 0xff666666, tl, br, 1.0f);
 }
 
-Blackboard::ItemGroups::ItemGroups() : ItemCollection("Fixture Groups", ItemType_Groups) {
+Blackboard::ItemGroups::ItemGroups() : Item("Fixture Groups", ItemType_Groups) {
 }
 
 void Blackboard::ItemGroups::OnClick(int itemIndex) {

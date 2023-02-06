@@ -119,13 +119,10 @@ void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
 
     FixturePreset pres;
     pres.footprint = (int)fixturePresets.size();
+    pres.name = "Auto-generated";
     pres.manufacturer = "Auto-generated";
     pres.parameters.push_back(FixtureParameter{});
     fixturePresets.push_back(pres);
-
-    nbt::tag_compound root;
-    nbt::Save(root, "fixturePresets", fixturePresets);
-    nbt::SaveToFile(root, "resources/fixtures/fixtures.bundle1", true);
 }
 
 void Engine::SetAction(EngineAction action) {

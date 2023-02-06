@@ -124,7 +124,7 @@ void setImGuiStyle(float highDPIscaleFactor) {
     );
     ImGui::fontPixel = io.Fonts->AddFontFromFileTTF(
             "resources/ponderosa.regular.ttf",
-            9.0f * Engine::Instance().dpiScale,
+            10.0f * Engine::Instance().dpiScale,
             NULL,
             NULL
     );

@@ -8,6 +8,7 @@
 #include "engine/Console.h"
 #include <filesystem>
 #include <imgui_internal.h>
+#include <set>
 
 #ifdef NBT_USE_ZLIB
 #include "io/izlibstream.h"
@@ -39,8 +40,10 @@ public:
 #define NBT_SAVE(type, code) namespace nbt { inline void Save(nbt::tag_compound &comp, const std::string &tag, const type& value) code }
 #define NBT_LOAD(type, code) namespace nbt { inline type Load(const nbt::tag_compound &comp, const std::string &tag, const type& fallback) code }
 #define NBT_SAVE_MEMBER(member) Save(comp, #member, value.member)
+#define NBT_SAVE_MEMBER_PTR(member) Save(comp, #member, value->member)
 #define NBT_SAVE_MEMBER_COND(member, condition) if (condition) Save(comp, #member, value.member)
 #define NBT_LOAD_MEMBER(member) value.member = Load(comp, #member, value.member)
+#define NBT_LOAD_MEMBER_PTR(member) value->member = Load(comp, #member, value->member)
 #define NBT_SAVE_VEC(type) NBT_SAVE(std::vector<type>, { \
     tag_list list;                          \
     for (const auto& val : value) {         \
@@ -89,7 +92,8 @@ namespace nbt {
             nbt::io::write_tag("", comp, ogzs);
             ogzs.close();
 #else
-            LogMessage(LogMessageType_Warn, "Trying to save compressed NBT file, but zlib was disabled during build. Saving uncompressed file instead.");
+            LogMessage(LogMessageType_Warn,
+                       "Trying to save compressed NBT file, but zlib was disabled during build. Saving uncompressed file instead.");
             nbt::io::write_tag("", comp, out);
             out.close();
 #endif
@@ -105,11 +109,14 @@ namespace nbt {
     NBT_SAVE(std::vector<type>, { tag_list list; for (const auto& val : value) list.push_back(nbtTag((nbtType)val)); comp.insert(tag, std::move(list)); }) \
     NBT_LOAD(type, { return (type)((comp.has_key(tag) && comp.at(tag).get_type() == (nbtTagEnum)) ? comp.at(tag).as<nbtTag>().get() : fallback); })        \
     NBT_LOAD(std::vector<type>, { \
-        if (!comp.has_key(tag) || comp.at(tag).get_type() != tag_type::List) return fallback; \
+        if (!comp.has_key(tag) || comp.at(tag).get_type() != tag_type::List) \
+            return fallback; \
         tag_list list = comp.at(tag).as<tag_list>(); \
-        if (comp.at(tag).get_type() != (nbtTagEnum)) return fallback; \
+        if (list.el_type() != (nbtTagEnum)) \
+            return fallback; \
         std::vector<type> result; \
-        for (const auto& val : list) result.push_back((type)val.as<nbtTag>().get()); \
+        for (const auto& val : list) \
+            result.push_back((type)val.as<nbtTag>().get()); \
         return result; \
     })
 
@@ -165,22 +172,35 @@ NBT_LOAD_VEC(ImRect)
 
 
 namespace nbt {
-    inline void Save(nbt::tag_compound &comp, const std::string &tag, void* data, size_t dataLen) {
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, void *data, size_t dataLen) {
         tag_byte_array bytes;
         bytes.get().resize(dataLen);
         memcpy(&bytes.get()[0], data, dataLen);
         comp.insert(tag, std::move(bytes));
     }
 
-    inline void* Load(const nbt::tag_compound &comp, const std::string &tag, void* fallback, size_t* length) {
+    inline void *Load(const nbt::tag_compound &comp, const std::string &tag, void *fallback, size_t *length) {
         if (!comp.has_key(tag)) {
             *length = 0;
             return fallback;
         }
         tag_byte_array bytes = comp.at(tag).as<tag_byte_array>();
         *length = bytes.size();
-        void* data = malloc(*length);
+        void *data = malloc(*length);
         memcpy(data, &bytes.get()[0], *length);
         return data;
+    }
+
+    template<typename T>
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, std::set<T> set) {
+        std::vector<T> vec(set.begin(), set.end());
+        Save(comp, tag, vec);
+    }
+
+    template<typename T>
+    inline std::set<T> Load(const nbt::tag_compound &comp, const std::string &tag, std::set<T> fallback) {
+        std::vector<T> fb(fallback.begin(), fallback.end());
+        std::vector<T> result = Load(comp, tag, fb);
+        return std::set<T>(result.begin(), result.end());
     }
 }

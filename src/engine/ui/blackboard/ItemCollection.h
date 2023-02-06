@@ -3,9 +3,9 @@
 #include "engine/ui/Tools.h"
 
 namespace Blackboard {
-    class ItemCollection : public Item {
+    class ItemCollection : virtual public Item {
     public:
-        explicit ItemCollection(const std::string& name = "Collections", ItemType type = ItemType_Collections) : Item(name, type) {}
+        ItemCollection() : Item("Collections", ItemType_Collections) {}
 
         void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override {
             ImGui::PushID(itemIndex);
@@ -51,14 +51,13 @@ namespace Blackboard {
             collection[i - 1] = value;
         }
 
-        nbt::tag_compound Save() override {
-            nbt::tag_compound comp = Item::Save();
+        nbt::tag_compound SaveSpecifics() override {
+            nbt::tag_compound comp;
             nbt::Save(comp, "collection", collection);
             return comp;
         }
 
-        void Load(const nbt::tag_compound &comp) override {
-            Item::Load(comp);
+        void LoadSpecifics(const nbt::tag_compound &comp) override {
             collection = nbt::Load(comp, "collection", std::vector<Hash>());
         }
 
