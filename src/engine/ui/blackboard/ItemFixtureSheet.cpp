@@ -4,6 +4,8 @@
 
 #include "ItemFixtureSheet.h"
 #include "engine/core/Engine.h"
+#include "engine/core/Fixture.h"
+#include "engine/core/Show.h"
 
 void Blackboard::ItemFixtureSheet::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) {
     Engine& engine = Engine::Instance();
@@ -16,8 +18,13 @@ void Blackboard::ItemFixtureSheet::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, 
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
+        for (const auto& fixtureId : engine.activeFixtures) {
+            FixtureInstance fixture = currentShow->fixtures.at(fixtureId);
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Selectable(fixture->data.name.c_str(), false);
+        }
 
         ImGui::EndTable();
     }

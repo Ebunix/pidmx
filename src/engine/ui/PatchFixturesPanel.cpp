@@ -74,11 +74,11 @@ void UI::PatchFixturesPanel::DrawAddFixtureModal(bool openAddFixturesModal) {
 void UI::PatchFixturesPanel::DrawAddFixturesToCollectionModal(bool open) {
     static Hash selectedCollection = INVALID_HASH;
 
-    FixtureCollectionInstance instance = currentShow->fixtureCollections.Get(selectedCollection);
+    FixtureCollectionInstance instance = currentShow->fixtureCollections.at(selectedCollection);
     if (ImGui::BeginCombo("Collection", instance ? instance->name.c_str() : "Select a collection")) {
-        for (const auto &c: currentShow->fixtureCollections.items) {
-            if (ImGui::Selectable(c->name.c_str())) {
-                selectedCollection = c->id;
+        for (const auto &c: currentShow->fixtureCollections) {
+            if (ImGui::Selectable(c.second->name.c_str())) {
+                selectedCollection = c.second->id;
             }
         }
         ImGui::EndCombo();
@@ -114,14 +114,14 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
     ImGui::Text("All fixtures");
 
 
-    for (const auto &collection: currentShow->fixtureCollections.items) {
+    for (const auto &collection: currentShow->fixtureCollections) {
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PushFont(ImGui::fontMonospace);
-        snprintf(buffer, sizeof(buffer), "%li", collection->id);
+        snprintf(buffer, sizeof(buffer), "%li", collection.second->id);
 
-        bool selected = selectedCollectionIds.find(collection->id) != selectedCollectionIds.end();
+        bool selected = selectedCollectionIds.find(collection.second->id) != selectedCollectionIds.end();
         if (ImGui::Selectable(buffer, selected,
                               ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
             bool ctrl = ImGui::GetIO().KeyCtrl;
@@ -131,22 +131,22 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
             }
             if (shift && lastCollectionSelection != INVALID_HASH) {
                 selectedCollectionIds.clear();
-                bool greater = collection->id > lastCollectionSelection;
-                for (const auto &f: currentShow->fixtureCollections.items) {
-                    if ((greater && f->id >= lastCollectionSelection && f->id <= collection->id) ||
-                        (!greater && f->id <= lastCollectionSelection && f->id >= collection->id)) {
-                        selectedCollectionIds.insert(f->id);
+                bool greater = collection.second->id > lastCollectionSelection;
+                for (const auto &f: currentShow->fixtureCollections) {
+                    if ((greater && f.second->id >= lastCollectionSelection && f.second->id <= collection.second->id) ||
+                        (!greater && f.second->id <= lastCollectionSelection && f.second->id >= collection.second->id)) {
+                        selectedCollectionIds.insert(f.second->id);
                     }
                 }
             } else {
-                selectedCollectionIds.insert(collection->id);
-                lastCollectionSelection = collection->id;
+                selectedCollectionIds.insert(collection.second->id);
+                lastCollectionSelection = collection.second->id;
             }
             FilterForCurrentCollection();
         }
         ImGui::PopFont();
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%s", collection->name.c_str());
+        ImGui::Text("%s", collection.second->name.c_str());
     }
 
     ImGui::PopStyleVar();
@@ -167,12 +167,12 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
 
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
-    const auto &fixtureSrc = selectedCollectionIds.empty() ? currentShow->fixtures.items : filteredFixtures;
+    const auto &fixtureSrc = selectedCollectionIds.empty() ? currentShow->fixtures : filteredFixtures;
     for (const auto &fixture: fixtureSrc) {
-        bool selected = selectedFixtureIds.find(fixture->id) != selectedFixtureIds.end();
+        bool selected = selectedFixtureIds.find(fixture.second->id) != selectedFixtureIds.end();
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        snprintf(buffer, sizeof(buffer), "%li", fixture->id);
+        snprintf(buffer, sizeof(buffer), "%li", fixture.second->id);
         ImGui::PushFont(ImGui::fontMonospace);
         if (ImGui::Selectable(buffer, selected,
                               ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
@@ -183,33 +183,33 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
             }
             if (shift && lastFixtureSelection != INVALID_HASH) {
                 selectedFixtureIds.clear();
-                bool greater = fixture->id > lastFixtureSelection;
+                bool greater = fixture.second->id > lastFixtureSelection;
                 for (const auto &f: fixtureSrc) {
-                    if ((greater && f->id >= lastFixtureSelection && f->id <= fixture->id) ||
-                        (!greater && f->id <= lastFixtureSelection && f->id >= fixture->id)) {
-                        selectedFixtureIds.insert(f->id);
+                    if ((greater && f.second->id >= lastFixtureSelection && f.second->id <= fixture.second->id) ||
+                        (!greater && f.second->id <= lastFixtureSelection && f.second->id >= fixture.second->id)) {
+                        selectedFixtureIds.insert(f.second->id);
                     }
                 }
             } else {
-                selectedFixtureIds.insert(fixture->id);
-                lastFixtureSelection = fixture->id;
+                selectedFixtureIds.insert(fixture.second->id);
+                lastFixtureSelection = fixture.second->id;
             }
         }
         ImGui::PopFont();
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%s", fixture->data.name.c_str());
+        ImGui::Text("%s", fixture.second->data.name.c_str());
         ImGui::TableSetColumnIndex(2);
         ImGui::Text("Unknown fixture type");
         ImGui::TableSetColumnIndex(3);
         ImGui::PushFont(ImGui::fontMonospace);
-        if (fixture->data.universe == 0 && fixture->data.channel == 0) {
+        if (fixture.second->data.universe == 0 && fixture.second->data.channel == 0) {
             ImGui::Text("-.---");
-        } else if (fixture->data.channel != 0) {
-            ImGui::Text("-.%03i", fixture->data.channel);
-        } else if (fixture->data.universe != 0) {
-            ImGui::Text("%i.---", fixture->data.universe);
+        } else if (fixture.second->data.channel != 0) {
+            ImGui::Text("-.%03i", fixture.second->data.channel);
+        } else if (fixture.second->data.universe != 0) {
+            ImGui::Text("%i.---", fixture.second->data.universe);
         } else {
-            ImGui::Text("%i.%03i", fixture->data.universe, fixture->data.channel);
+            ImGui::Text("%i.%03i", fixture.second->data.universe, fixture.second->data.channel);
         }
         ImGui::PopFont();
     }
@@ -261,7 +261,7 @@ void UI::PatchFixturesPanel::Draw() {
         ImGui::PopID();
         if (UI::EndPopupDialog(DialogOption_Cancel | DialogOption_OK, result) == DialogOption_OK) {
             currentShow->commandHistory.Push("Create collection", CommandFixtureCollectionAdd::New(
-                    (Hash) currentShow->fixtureCollections.items.size() + 1, collectionNameBuffer));
+                    (Hash) currentShow->fixtureCollections.size() + 1, collectionNameBuffer));
         }
     }
 
@@ -301,10 +301,10 @@ void UI::PatchFixturesPanel::FilterForCurrentCollection() {
     filteredFixtures.clear();
     std::set<Hash> availableInCollections;
     for (Hash id: selectedCollectionIds) {
-        auto collection = currentShow->fixtureCollections.Get(id);
+        auto collection = currentShow->fixtureCollections.at(id);
         availableInCollections.insert(collection->assignedFixtures.begin(), collection->assignedFixtures.end());
     }
-    Filter(currentShow->fixtures.items, filteredFixtures, [&availableInCollections](const FixtureInstance &param) {
-        return availableInCollections.find(param->id) != availableInCollections.end();
+    Filter(currentShow->fixtures, filteredFixtures, [&availableInCollections](const auto &param) {
+        return availableInCollections.find(param.second->id) != availableInCollections.end();
     });
 }

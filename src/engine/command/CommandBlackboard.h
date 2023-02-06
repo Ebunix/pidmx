@@ -19,7 +19,7 @@ public:
 
     void undo() override {
         parent->FreeInstanceArea(id);
-        currentShow->blackboardItems.Remove(id);
+        currentShow->blackboardItems.erase(id);
     }
 
     void redo() override {
@@ -47,17 +47,15 @@ public:
 
     void undo() override {
         auto item = Blackboard::CreateItem(type);
-        item->Load(data);
         parent->PlaceInstance(item, item->x, item->y, item->width, item->height);
     }
 
     void redo() override {
-        auto item = currentShow->blackboardItems.Get(id);
-        data = item->Save();
+        auto item = currentShow->blackboardItems.at(id);
         type = item->type;
         parent = item->parent;
         parent->FreeInstanceArea(id);
-        currentShow->blackboardItems.Remove(id);
+        currentShow->blackboardItems.erase(id);
     }
 
 private:
@@ -75,7 +73,7 @@ public:
     }
 
     explicit CommandBlackboardMoveItem(Hash id, int x, int y) : id(id), x(x), y(y) {
-        auto item = currentShow->blackboardItems.Get(id);
+        auto item = currentShow->blackboardItems.at(id);
         oldX = item->x;
         oldY = item->y;
     }
@@ -83,12 +81,12 @@ public:
     void execute() override { redo(); }
 
     void undo() override {
-        auto item = currentShow->blackboardItems.Get(id);
+        auto item = currentShow->blackboardItems.at(id);
         item->Move(oldX, oldY);
     }
 
     void redo() override {
-        auto item = currentShow->blackboardItems.Get(id);
+        auto item = currentShow->blackboardItems.at(id);
         item->Move(x, y);
     }
 

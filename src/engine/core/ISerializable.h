@@ -6,6 +6,7 @@
 #include <memory>
 #include <fstream>
 #include "engine/Console.h"
+#include "Collections.h"
 #include <filesystem>
 #include <imgui_internal.h>
 #include <set>
@@ -38,31 +39,31 @@ public:
 };
 
 #define NBT_SAVE(type, code) namespace nbt { inline void Save(nbt::tag_compound &comp, const std::string &tag, const type& value) code }
-#define NBT_LOAD(type, code) namespace nbt { inline type Load(const nbt::tag_compound &comp, const std::string &tag, const type& fallback) code }
+#define NBT_LOAD(type, code) namespace nbt { inline type Load(const nbt::tag_compound &comp, const std::string &tag, void* input, const type& fallback) code }
 #define NBT_SAVE_MEMBER(member) Save(comp, #member, value.member)
 #define NBT_SAVE_MEMBER_PTR(member) Save(comp, #member, value->member)
 #define NBT_SAVE_MEMBER_COND(member, condition) if (condition) Save(comp, #member, value.member)
-#define NBT_LOAD_MEMBER(member) value.member = Load(comp, #member, value.member)
-#define NBT_LOAD_MEMBER_PTR(member) value->member = Load(comp, #member, value->member)
-#define NBT_SAVE_VEC(type) NBT_SAVE(std::vector<type>, { \
-    tag_list list;                          \
-    for (const auto& val : value) {         \
-        tag_compound obj;                   \
-        Save(obj, "", val);                 \
-        list.push_back(std::move(obj));     \
-    }                                       \
-    comp.insert(tag, std::move(list));      \
-})
-#define NBT_LOAD_VEC(type) NBT_LOAD(std::vector<type>, { \
-    if (!comp.has_key(tag) || comp.at(tag).get_type() != tag_type::List) return fallback; \
-    tag_list list = comp.at(tag).as<tag_list>(); \
-    if (list.el_type() != tag_type::Compound) return fallback; \
-    std::vector<type> result;                            \
-    for (const auto& val : list) {                       \
-        result.push_back(Load(val.as<tag_compound>(), "", type {}));       \
-    }                                                    \
-    return result;                                       \
-})
+#define NBT_LOAD_MEMBER(member) value.member = Load(comp, #member, nullptr, value.member)
+#define NBT_LOAD_MEMBER_PTR(member) value->member = Load(comp, #member, nullptr, value->member)
+#define NBT_LOAD_MEMBER_INPUT(member, input) value.member = Load(comp, #member, input, value.member)
+#define NBT_LOAD_MEMBER_INPUT_PTR(member, input) value->member = Load(comp, #member, input, value->member)
+
+namespace nbt {
+    template<typename T>
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, std::shared_ptr<T> value) {
+        Save(comp, tag, *value);
+    }
+
+    template<typename T>
+    inline std::shared_ptr<T>
+    Load(const nbt::tag_compound &comp, const std::string &tag, void *input, const std::shared_ptr<T> &fallback) {
+        if (fallback) {
+            return Load(comp, tag, input, *fallback);
+        } else {
+            return Load(comp, tag, input, T());
+        }
+    }
+}
 
 namespace nbt {
     inline std::unique_ptr<tag_compound> LoadFromFile(const std::string &path) {
@@ -120,6 +121,8 @@ namespace nbt {
         return result; \
     })
 
+#define NBT_SAVE_LOAD_ENUM(enum) NBT_SAVE_LOAD_SIMPLE(enum, int32_t, tag_int, tag_type::Int)
+
 NBT_SAVE_LOAD_SIMPLE(int8_t, int8_t, tag_byte, tag_type::Byte)
 NBT_SAVE_LOAD_SIMPLE(int16_t, int16_t, tag_short, tag_type::Short)
 NBT_SAVE_LOAD_SIMPLE(int32_t, int32_t, tag_int, tag_type::Int)
@@ -131,8 +134,6 @@ NBT_SAVE_LOAD_SIMPLE(uint64_t, int64_t, tag_long, tag_type::Long)
 NBT_SAVE_LOAD_SIMPLE(float, float, tag_float, tag_type::Float)
 NBT_SAVE_LOAD_SIMPLE(double, double, tag_double, tag_type::Double)
 NBT_SAVE_LOAD_SIMPLE(std::string, std::string, tag_string, tag_type::String)
-
-
 namespace nbt {
     inline void Save(nbt::tag_compound &comp, const std::string &tag, const ImVec2 &value) {
         tag_compound vec;
@@ -141,17 +142,13 @@ namespace nbt {
         comp.insert(tag, std::move(vec));
     }
 
-    inline ImVec2 Load(const nbt::tag_compound &comp, const std::string &tag, const ImVec2 &fallback) {
+    inline ImVec2 Load(const nbt::tag_compound &comp, const std::string &tag, void *input, const ImVec2 &fallback) {
         if (!comp.has_key(tag))
             return fallback;
         const auto &vec = comp.at(tag).as<tag_compound>();
-        return {Load(vec, "x", 0.0f), Load(vec, "y", 0.0f)};
+        return {Load(vec, "x", nullptr, 0.0f), Load(vec, "y", nullptr, 0.0f)};
     }
 }
-NBT_SAVE_VEC(ImVec2)
-NBT_LOAD_VEC(ImVec2)
-
-
 namespace nbt {
     inline void Save(nbt::tag_compound &comp, const std::string &tag, const ImRect &value) {
         tag_compound vec;
@@ -160,17 +157,13 @@ namespace nbt {
         comp.insert(tag, std::move(vec));
     }
 
-    inline ImRect Load(const nbt::tag_compound &comp, const std::string &tag, const ImRect &fallback) {
+    inline ImRect Load(const nbt::tag_compound &comp, const std::string &tag, void* input, const ImRect &fallback) {
         if (!comp.has_key(tag))
             return fallback;
         const auto &vec = comp.at(tag).as<tag_compound>();
-        return {Load(vec, "min", ImVec2(0, 0)), Load(vec, "max", ImVec2(0, 0))};
+        return {Load(vec, "min", nullptr, ImVec2(0, 0)), Load(vec, "max", nullptr, ImVec2(0, 0))};
     }
 }
-NBT_SAVE_VEC(ImRect)
-NBT_LOAD_VEC(ImRect)
-
-
 namespace nbt {
     inline void Save(nbt::tag_compound &comp, const std::string &tag, void *data, size_t dataLen) {
         tag_byte_array bytes;
@@ -190,17 +183,56 @@ namespace nbt {
         memcpy(data, &bytes.get()[0], *length);
         return data;
     }
-
+}
+namespace nbt {
     template<typename T>
-    inline void Save(nbt::tag_compound &comp, const std::string &tag, std::set<T> set) {
-        std::vector<T> vec(set.begin(), set.end());
-        Save(comp, tag, vec);
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, Set<T> set) {
+        tag_list list;
+        for (const auto &val: set) {
+            tag_compound data;
+            Save(data, "", val);
+            list.push_back(std::move(data));
+        }
+        comp.insert(tag, std::move(list));
     }
 
     template<typename T>
-    inline std::set<T> Load(const nbt::tag_compound &comp, const std::string &tag, std::set<T> fallback) {
-        std::vector<T> fb(fallback.begin(), fallback.end());
-        std::vector<T> result = Load(comp, tag, fb);
-        return std::set<T>(result.begin(), result.end());
+    inline Set<T> Load(const nbt::tag_compound &comp, const std::string &tag, void* input, const Set<T> &fallback) {
+        if (!comp.has_key(tag))
+            return fallback;
+        const auto &list = comp.at(tag).as<tag_list>();
+        Set<T> set;
+        for (const auto &val: list) {
+            T value = Load(val.as<tag_compound>(), "", nullptr, T());
+            set.insert(std::move(value));
+        }
+        return set;
+    }
+}
+namespace nbt {
+    template<typename T, typename U>
+    inline void Save(nbt::tag_compound &comp, const std::string &tag, Map<T, U> map) {
+        tag_list list;
+        for (const auto &val: map) {
+            tag_compound data;
+            Save(data, "key", val.first);
+            Save(data, "value", val.second);
+            list.push_back(std::move(data));
+        }
+        comp.insert(tag, std::move(list));
+    }
+
+    template<typename T, typename U>
+    inline Map<T, U> Load(const nbt::tag_compound &comp, const std::string &tag, void* input, const Map<T, U> &fallback) {
+        if (!comp.has_key(tag))
+            return fallback;
+        const auto &list = comp.at(tag).as<tag_list>();
+        Map<T, U> map;
+        for (const auto &val: list) {
+            T key = Load(val.as<tag_compound>(), "key", nullptr, T());
+            U value = Load(val.as<tag_compound>(), "value", nullptr, U());
+            map.insert_or_assign(key, std::move(value));
+        }
+        return map;
     }
 }

@@ -19,12 +19,13 @@ public:
     static const uint32_t VERSION = VERSION_CODE(0, 0, 1);
     EngineAction action;
 
-    std::set<Hash> activeFixtures;
-    std::set<Hash> activeGroups;
-    std::set<FixtureParameterType> availableParametersOnFixtures;
-    float dpiScale;
+    IDSet activeFixtures;
+    IDSet activeGroups;
+    Set<FixtureParameterType> availableParametersOnFixtures;
 
-    std::vector<FixturePreset> fixturePresets;
+    Set<FixturePreset> fixturePresets;
+
+    float dpiScale;
 
     Engine(int argc, char *argv[]);
 
@@ -48,7 +49,9 @@ public:
 
     void Clear();
 
-    void SetActiveFixtures(const std::set<Hash> &fixtures);
+    void SetActiveFixtures(const IDSet &fixtures);
+
+    void AddActiveGroup(Hash id);
 
 private:
 

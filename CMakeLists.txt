@@ -10,6 +10,7 @@ option(GLFW_BUILD_EXAMPLES "" OFF)
 option(PIDMX_ENABLE_JAVASCRIPT "Enbale the V8 Javascript engine" ON)
 add_subdirectory(libnbtplusplus)
 add_subdirectory(glfw)
+add_subdirectory(unordered_dense)
 
 add_library(imgui STATIC)
 target_sources(imgui PRIVATE
@@ -88,7 +89,7 @@ add_executable(pidmx
 	src/engine/ui/PanelConsole.cpp
 
 	src/engine/Console.cpp
-	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h src/engine/ui/PanelFixturePresetEditor.cpp src/engine/ui/PanelFixturePresetEditor.h src/engine/ui/PanelOperators.cpp src/engine/ui/PanelOperators.h)
+	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h src/engine/ui/PanelFixturePresetEditor.cpp src/engine/ui/PanelFixturePresetEditor.h src/engine/ui/PanelOperators.cpp src/engine/ui/PanelOperators.h src/engine/core/Collections.h src/engine/ui/blackboard/ItemSaveLoad.h)
 
 target_include_directories(pidmx PUBLIC src)
 target_compile_definitions(pidmx PRIVATE -DPIDMX_ENABLE_JAVASCRIPT=${PIDMX_ENABLE_JAVASCRIPT})
@@ -99,3 +100,4 @@ target_link_libraries(pidmx js)
 target_link_libraries(pidmx imgui)
 target_link_libraries(pidmx OpenGL::GL)
 target_link_libraries(pidmx nbt++)
+target_link_libraries(pidmx unordered_dense)

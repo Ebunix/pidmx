@@ -3,6 +3,7 @@
 #include <memory>
 #include "js/v8ObjectInterface.h"
 #include "ISerializable.h"
+#include "Collections.h"
 
 enum FixtureParameterType {
 	FixtureParameterType_Unassigned,
@@ -11,6 +12,7 @@ enum FixtureParameterType {
 	FixtureParameterType_ColorG,
 	FixtureParameterType_ColorB,
 };
+NBT_SAVE_LOAD_SIMPLE(FixtureParameterType, int32_t, tag_int, tag_type::Int)
 
 static const char* FixtureParameterTypeNames[] = {
         "Unassigned",
@@ -21,6 +23,7 @@ static const char* FixtureParameterTypeNames[] = {
 };
 
 struct FixtureParameter {
+    Hash id = 0;
 	std::string name;
 	int channelCoarse = -1;
 	int channelFine = -1;
@@ -28,20 +31,12 @@ struct FixtureParameter {
 	int defaultValue = 0;
 	int highlightValue = -1;
 	FixtureParameterType type = FixtureParameterType_Unassigned;
+
+    bool operator==(const FixtureParameter& other) const {
+        return other.id == id;
+    }
 };
-
-struct FixturePreset {
-    Hash id;
-    std::string name;
-    std::string manufacturer;
-    int footprint = 0;
-    std::vector<FixtureParameter> parameters;
-};
-
-typedef std::shared_ptr<FixturePreset> FixturePresetInstance;
-
-NBT_SAVE_LOAD_SIMPLE(FixtureParameterType, int32_t, tag_int, tag_type::Int)
-
+ANKERL_HASH(FixtureParameter)
 NBT_SAVE(FixtureParameter, {
     FixtureParameter defaultValues;
     NBT_SAVE_MEMBER_COND(name, value.name != defaultValues.name);
@@ -52,8 +47,6 @@ NBT_SAVE(FixtureParameter, {
     NBT_SAVE_MEMBER_COND(highlightValue, value.highlightValue != defaultValues.highlightValue);
     NBT_SAVE_MEMBER_COND(type, value.type != defaultValues.type);
 })
-NBT_SAVE_VEC(FixtureParameter)
-
 NBT_LOAD(FixtureParameter, {
     FixtureParameter value;
     NBT_LOAD_MEMBER(name);
@@ -65,8 +58,20 @@ NBT_LOAD(FixtureParameter, {
     NBT_LOAD_MEMBER(type);
     return value;
 })
-NBT_LOAD_VEC(FixtureParameter)
 
+struct FixturePreset {
+    Hash id = 0;
+    std::string name;
+    std::string manufacturer;
+    int footprint = 0;
+    Set<FixtureParameter> parameters;
+
+    bool operator==(const FixturePreset& other) const {
+        return other.id == id;
+    }
+};
+typedef std::shared_ptr<FixturePreset> FixturePresetInstance;
+ANKERL_HASH(FixturePreset)
 NBT_SAVE(FixturePreset, {
     FixturePreset defaultValues;
     NBT_SAVE_MEMBER(name);
@@ -74,7 +79,6 @@ NBT_SAVE(FixturePreset, {
     NBT_SAVE_MEMBER_COND(footprint, value.footprint != defaultValues.footprint);
     NBT_SAVE_MEMBER(parameters);
 })
-NBT_SAVE_VEC(FixturePreset)
 NBT_LOAD(FixturePreset, {
     FixturePreset value;
     NBT_LOAD_MEMBER(name);
@@ -83,6 +87,5 @@ NBT_LOAD(FixturePreset, {
     NBT_LOAD_MEMBER(parameters);
     return value;
 })
-NBT_LOAD_VEC(FixturePreset)
 
 

@@ -7,7 +7,7 @@ namespace Blackboard {
     struct GroupData {
         Hash id;
         std::string name;
-        std::set<Hash> fixtures;
+        IDSet fixtures;
     };
     typedef std::shared_ptr<GroupData> GroupDataInstance;
 
@@ -21,12 +21,7 @@ namespace Blackboard {
 
         void Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) override;
 
-        void OnClick(int itemIndex) override;
-
-        nbt::tag_compound Save() override;
-
-        void Load(const nbt::tag_compound &comp) override;
-
+        void OnClick(int itemIdOneBased) override;
     };
 }
 

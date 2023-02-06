@@ -8,16 +8,17 @@
 #include "../ImGuiExt.h"
 
 void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) {
-    ItemCollection::Draw(list, tl, br, itemIndex);
-    if (!HasItemAt(itemIndex)) {
+    ItemCollection::Draw(list, tl, br, itemIndex + 1);
+
+    int groupIndex = itemIndex + 1;
+    if (!HasItemAt(groupIndex)) {
         return;
     }
 
     Engine& engine = Engine::Instance();
+    const auto &item = currentShow->groups.at(GetAt(groupIndex));
 
     static ImVec2 fixtureCountTextPos = (ItemInnerPadding + ImVec2(0, 14)) * Engine::Instance().dpiScale;
-
-    const auto &item = currentShow->groups.Get(collection[itemIndex]);
 
     ImVec2 size = br - tl;
     float halfHeight = size.y / 2;
@@ -28,7 +29,7 @@ void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int it
     ImVec2 rightHalf(br.x, tl.y + halfHeight);
     ImVec2 leftHalf(tl.x, tl.y + halfHeight);
 
-    bool highlight = engine.activeGroups.find(itemIndex) != engine.activeGroups.end();
+    bool highlight = engine.activeGroups.find(item->id) != engine.activeGroups.end();
     bool solo = highlight && engine.activeGroups.size() == 1;
     ImU32 indicatorColor = solo ? ColorGroupIndicatorSolo : highlight ? ColorGroupIndicatorMulti : ColorGroupIndicatorInactive;
 
@@ -49,38 +50,31 @@ void Blackboard::ItemGroups::Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int it
 Blackboard::ItemGroups::ItemGroups() : Item("Fixture Groups", ItemType_Groups) {
 }
 
-void Blackboard::ItemGroups::OnClick(int itemIndex) {
+void Blackboard::ItemGroups::OnClick(int itemIdOneBased) {
     Engine& engine = Engine::Instance();
     switch (engine.action) {
         case EngineAction_Store: {
             const auto &selection = currentShow->panelPatchFixtures->GetSelection();
             GroupData store;
-            store.id = (Hash)currentShow->groups.items.size() + 1;
+            store.id = (Hash)currentShow->groups.size() + 1;
             store.name = "New group";
             store.fixtures = selection;
-            currentShow->groups.Add(std::make_shared<GroupData>(store));
-            AssignAt(itemIndex + 1, store.id);
+            currentShow->groups.insert_or_assign(store.id, std::make_shared<GroupData>(store));
+            AssignAt(itemIdOneBased, store.id);
             engine.SetAction(EngineAction_None);
             break;
         }
         case EngineAction_Delete: {
-            AssignAt(itemIndex + 1, INVALID_HASH);
+            AssignAt(itemIdOneBased, INVALID_HASH);
             engine.SetAction(EngineAction_None);
             break;
         }
         default:
-            if (HasItemAt(itemIndex)) {
-                engine.activeGroups.insert(itemIndex);
+            if (HasItemAt(itemIdOneBased)) {
+                engine.AddActiveGroup(GetAt(itemIdOneBased));
             }
             break;
     }
 }
 
-nbt::tag_compound Blackboard::ItemGroups::Save() {
-    return Item::Save();
-}
-
-void Blackboard::ItemGroups::Load(const nbt::tag_compound &comp) {
-    Item::Load(comp);
-}
 

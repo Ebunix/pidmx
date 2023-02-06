@@ -5,6 +5,8 @@
 namespace Blackboard {
     class ItemCollection : virtual public Item {
     public:
+        Map<int, Hash> collection;
+
         ItemCollection() : Item("Collections", ItemType_Collections) {}
 
         void Draw(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, int itemIndex) override {
@@ -22,48 +24,23 @@ namespace Blackboard {
             ImGui::PopID();
         }
 
-        void OnResize(int w, int h) override {
-            if (w * h > collection.size()) {
-                collection.resize(w * h);
-            }
-        }
-
-        virtual void OnClick(int index) {}
+        virtual void OnClick(int itemIdOneBased) {}
 
         bool HasItemAt(int index) {
             return (index < collection.size() && collection[index] != INVALID_HASH);
         }
 
         void AssignAt(int i, Hash value) {
-            if (i == 0) {
-                LogMessage(LogMessageType_Error, "AssignAt needs to be called with 1-based index!");
-                return;
+            if (value == INVALID_HASH && collection.contains(i)) {
+                collection.erase(i);
             }
-            if (collection.size() <= i) {
-                collection.resize(i);
+            else if (value != INVALID_HASH) {
+                collection.insert_or_assign(i, value);
             }
-            if (!collection[i - 1] && value != INVALID_HASH) {
-                assignedCount++;
-            }
-            else if (collection[i - 1] && value == INVALID_HASH) {
-                assignedCount--;
-            }
-            collection[i - 1] = value;
         }
-
-        nbt::tag_compound SaveSpecifics() override {
-            nbt::tag_compound comp;
-            nbt::Save(comp, "collection", collection);
-            return comp;
+        Hash GetAt(int i) {
+            return collection.at(i);
         }
-
-        void LoadSpecifics(const nbt::tag_compound &comp) override {
-            collection = nbt::Load(comp, "collection", std::vector<Hash>());
-        }
-
-    protected:
-        std::vector<Hash> collection;
-        int assignedCount = 0;
 
     private:
         bool DrawButtonUnassigned(ImDrawList* list, const ImVec2 &tl, const ImVec2 &br, int index) {

@@ -15,9 +15,9 @@
 
 using namespace UI;
 
-Blackboard::Item::Item(std::string name, ItemType type) : ISerializable(), type(type) {
+Blackboard::Item::Item(std::string name, ItemType type) : type(type) {
     this->name = std::move(name);
-    id = currentShow->blackboardItems.GetAvailableID();
+    id = currentShow->blackboardItems.size() + 1;
 }
 
 void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
@@ -39,7 +39,7 @@ void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRig
 
     if (ImGui::BeginPopup("Options")) {
         if (ImGui::MenuItem("Move")) {
-            parent->EditItem(currentShow->blackboardItems.Get(id), BlackboardItemEditType_Move);
+            parent->EditItem(currentShow->blackboardItems.at(id), BlackboardItemEditType_Move);
         }
         if (ImGui::MenuItem("Delete")) {
             currentShow->commandHistory.Push("Delete blackboard item", CommandBlackboardRemoveItem::New(id));
@@ -122,35 +122,9 @@ void Blackboard::Item::RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bot
     ImGui::PopStyleVar();
 }
 
-nbt::tag_compound Blackboard::Item::Save() {
-    nbt::tag_compound cmp = ISerializable::Save();
-    cmp.insert("pos", nbt::tag_compound{
-            {"x", x},
-            {"y", y},
-            {"w", width},
-            {"h", height}
-    });
-    cmp.insert("data", SaveSpecifics());
-    return cmp;
-}
-
-void Blackboard::Item::Load(const nbt::tag_compound &pack) {
-    ISerializable::Load(pack);
-    nbt::tag_compound pos = pack.at("pos").as<nbt::tag_compound>();
-    x = nbt::Load(pos, "x", 0);
-    y = nbt::Load(pos, "y", 0);
-    width = nbt::Load(pos, "w", 1);
-    height = nbt::Load(pos, "h", 1);
-    parent = currentShow->panelBlackboard;
-    if (pack.has_key("data")) {
-        const auto& data = pack.at("data").as<nbt::tag_compound>();
-        LoadSpecifics(data);
-    }
-}
-
-void Blackboard::Item::afterLoad() {
-    parent->PlaceInstance(currentShow->blackboardItems.Get(id), x, y, width, height, true);
-}
+//void Blackboard::Item::afterLoad() {
+//    parent->PlaceInstance(currentShow->blackboardItems.at(id), x, y, width, height, true);
+//}
 
 void Blackboard::Item::Move(int newX, int newY) {
     parent->FreeInstanceArea(id);

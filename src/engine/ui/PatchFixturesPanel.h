@@ -13,12 +13,12 @@ namespace UI {
         void Draw() override;
         void OnShow() override;
 
-        inline const std::set<Hash>& GetSelection() { return selectedFixtureIds; }
+        inline const IDSet& GetSelection() { return selectedFixtureIds; }
     private:
-        std::set<Hash> selectedFixtureIds;
-        std::set<Hash> selectedCollectionIds;
+        IDSet selectedFixtureIds;
+        IDSet selectedCollectionIds;
 
-        std::vector<FixtureInstance> filteredFixtures;
+        Map<Hash, FixtureInstance> filteredFixtures;
         Hash lastFixtureSelection = INVALID_HASH;
         Hash lastCollectionSelection = INVALID_HASH;
 

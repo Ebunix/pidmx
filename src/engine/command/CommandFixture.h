@@ -31,7 +31,7 @@ private:
 
 class CommandFixtureRemove : public ICommand {
 public:
-    static std::vector<CommandInstance> New(const std::set<Hash> &ids) {
+    static std::vector<CommandInstance> New(const IDSet &ids) {
         std::vector<CommandInstance> commands;
         for (const auto& d : ids) {
             commands.push_back(std::make_shared<CommandFixtureRemove>(d));

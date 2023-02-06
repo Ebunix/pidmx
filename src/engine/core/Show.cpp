@@ -4,57 +4,10 @@
 #include "engine/ui/blackboard/Panel.h"
 #include "engine/ui/PatchFixturesPanel.h"
 #include <js/js.h>
+#include "engine/ui/blackboard/ItemSaveLoad.h"
 
 const int32_t SHOW_VERSION = VERSION_CODE(0, 1, 0);
 Show* currentShow = nullptr;
-
-template<typename T>
-void SerializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
-    LogMessage(LogMessageType_Debug, "Serialize raw %s", tag.c_str());
-    nbt::tag_list list;
-    for (const auto& item : collection.items) {
-        nbt::tag_compound data;
-        nbt::Save(data, "", item);
-        list.push_back(std::move(data));
-    }
-    container.insert(tag, std::move(list));
-}
-template<typename T>
-void SerializeCollectionTyped(nbt::tag_compound& container, const std::string& tag, ShowCollection<T>& collection) {
-    LogMessage(LogMessageType_Debug, "Serialize typed %s", tag.c_str());
-    nbt::tag_list list;
-    for (const auto& item : collection.items) {
-        auto comp = item->Save();
-        comp.insert("TYPE", item->type);
-        list.push_back(std::move(comp));
-    }
-    container.insert(tag, std::move(list));
-}
-template<typename T>
-void DeserializeCollectionRaw(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection) {
-    LogMessage(LogMessageType_Debug, "Deserialize raw %s", tag.c_str());
-    nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
-    for (auto& item : list) {
-        auto comp = item.as<nbt::tag_compound>();
-        std::shared_ptr<T> value = nbt::Load(comp, "", std::shared_ptr<T>());
-        collection.Add(value);
-    }
-}
-template<typename T, typename V>
-void DeserializeCollectionTyped(nbt::tag_compound& container, const std::string& tag, ShowCollection<std::shared_ptr<T>>& collection, std::shared_ptr<T> (*creator)(V type)) {
-    LogMessage(LogMessageType_Debug, "Deserialize typed %s", tag.c_str());
-    nbt::tag_list list = container.at(tag).as<nbt::tag_list>();
-    for (auto& item : list) {
-        auto comp = item.as<nbt::tag_compound>();
-        std::shared_ptr<T> instance = creator((V)comp.at("TYPE").as<nbt::tag_int>().get());
-        instance->Load(comp);
-        collection.Add(instance);
-    }
-    for (auto& item : collection.items) {
-        item->afterLoad();
-    }
-}
-
 
 Show::Show() {
     panelBlackboard = RegisterUIPanel(std::make_shared<Blackboard::Panel>());
@@ -69,10 +22,10 @@ void Show::Save(const std::string &path)
 	nbt::tag_compound rootCompound;
 	rootCompound.insert("VERSION", SHOW_VERSION);
 
-    SerializeCollectionRaw(rootCompound, "fixtures", fixtures);
-    SerializeCollectionRaw(rootCompound, "fixtureCollections", fixtureCollections);
-    SerializeCollectionRaw(rootCompound, "groups", groups);
-    SerializeCollectionTyped(rootCompound, "blackboardItems", blackboardItems);
+    nbt::Save(rootCompound, "fixtures", fixtures);
+    nbt::Save(rootCompound, "fixtureCollections", fixtureCollections);
+    nbt::Save(rootCompound, "groups", groups);
+    nbt::Save(rootCompound, "blackboardItems", blackboardItems);
     nbt::tag_compound panelsRoot;
     for (const auto& panel : registeredPanels) {
         panelsRoot.insert(panel->name, panel->Save());
@@ -94,10 +47,10 @@ void Show::Load(const std::string &path)
 {
     auto rootCompound = nbt::LoadFromFile(path);
 
-    DeserializeCollectionRaw(*rootCompound, "fixtures", fixtures);
-    DeserializeCollectionRaw(*rootCompound, "fixtureCollections", fixtureCollections);
-    DeserializeCollectionRaw(*rootCompound, "groups", groups);
-    DeserializeCollectionTyped(*rootCompound, "blackboardItems", blackboardItems, Blackboard::CreateItem);
+    nbt::Load(*rootCompound, "fixtures", nullptr, fixtures);
+    nbt::Load(*rootCompound, "fixtureCollections", nullptr, fixtureCollections);
+    nbt::Load(*rootCompound, "groups", nullptr, groups);
+    nbt::Load(*rootCompound, "blackboardItems", nullptr, blackboardItems);
     const nbt::tag_compound& panelsRoot = rootCompound->at("panels").as<nbt::tag_compound>();
     for (const auto& panel : registeredPanels) {
         if (panelsRoot.has_key(panel->name)) {

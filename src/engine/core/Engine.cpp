@@ -9,9 +9,6 @@
 #include <filesystem>
 
 namespace fs = std::filesystem;
-#ifdef PIDMX_ENABLE_JAVASCRIPT
-using namespace v8;
-#endif
 
 Engine* engineInstance;
 
@@ -51,7 +48,7 @@ Engine::Engine(int argc, char* argv[])
 
 #ifdef PIDMX_ENABLE_JAVASCRIPT
     js::ObjectTemplate fixtures;
-    Local<ObjectTemplate> fixturesTemplate = fixtures.Begin()
+    v8::Local<v8::ObjectTemplate> fixturesTemplate = fixtures.Begin()
         ->Function("patch", Fixture::Patch)
         ->Build();
 
@@ -110,19 +107,16 @@ void Engine::Redo() {
 void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
     for (const auto & entry : fs::directory_iterator(dir)) {
         auto root = nbt::LoadFromFile(entry.path().string());
-        auto vec = nbt::Load(*root, "fixturePresets", std::vector<FixturePreset>{});
-        for (Hash i = 0; i < vec.size(); i++) {
-            vec[i].id = fixturePresets.size() + i + 1;
-        }
-        fixturePresets.insert(fixturePresets.end(), vec.begin(), vec.end());
+        auto vec = nbt::Load(*root, "fixturePresets", nullptr, Set<FixturePreset>{});
+        fixturePresets.insert(vec.begin(), vec.end());
     }
 
     FixturePreset pres;
     pres.footprint = (int)fixturePresets.size();
     pres.name = "Auto-generated";
     pres.manufacturer = "Auto-generated";
-    pres.parameters.push_back(FixtureParameter{});
-    fixturePresets.push_back(pres);
+    pres.parameters.insert(FixtureParameter{});
+    fixturePresets.insert(pres);
 }
 
 void Engine::SetAction(EngineAction action) {
@@ -139,7 +133,7 @@ void Engine::Clear() {
     }
 }
 
-void Engine::SetActiveFixtures(const std::set<Hash> &fixtures) {
+void Engine::SetActiveFixtures(const IDSet &fixtures) {
     activeFixtures = fixtures;
     UpdateAvailableParameters();
 }
@@ -147,13 +141,19 @@ void Engine::SetActiveFixtures(const std::set<Hash> &fixtures) {
 void Engine::UpdateAvailableParameters() {
     availableParametersOnFixtures.clear();
     for (const auto& fixtureId : activeFixtures) {
-        const auto& fixture = currentShow->fixtures.Get(fixtureId);
-        const auto& preset = currentShow->fixturePresets.Get(fixture->data.presetId);
+        const auto& fixture = currentShow->fixtures.at(fixtureId);
+        const auto& preset = currentShow->fixturePresets.at(fixture->data.presetId);
         for (const auto& param : preset->parameters) {
             availableParametersOnFixtures.insert(param.type);
         }
     }
 
+}
+
+void Engine::AddActiveGroup(Hash id) {
+    const auto& group = currentShow->groups.at(id);
+    activeGroups.insert(group->id);
+    activeFixtures.insert(group->fixtures.begin(), group->fixtures.end());
 }
 
 

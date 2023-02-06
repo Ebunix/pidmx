@@ -19,7 +19,7 @@ namespace Blackboard {
 
         void Load(const nbt::tag_compound& pack) override {
             UI::Panel::Load(pack);
-            exactFit = nbt::Load(pack, "exactFit", false);
+            exactFit = nbt::Load(pack, "exactFit", nullptr, false);
         }
         nbt::tag_compound Save() override {
             nbt::tag_compound cmp = UI::Panel::Save();
@@ -51,4 +51,3 @@ namespace Blackboard {
 
     };
 }
-

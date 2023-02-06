@@ -41,9 +41,9 @@ private:
 
 class CommandFixtureCollectionAssignFixtures : public ICommand {
 public:
-    CommandFixtureCollectionAssignFixtures(Hash id, const std::set<Hash> &fixtures) : id(id), fixtureIds(fixtures) {}
+    CommandFixtureCollectionAssignFixtures(Hash id, const IDSet &fixtures) : id(id), fixtureIds(fixtures) {}
 
-    static CommandInstance New(Hash id, const std::set<Hash> &fixtures) { return std::make_shared<CommandFixtureCollectionAssignFixtures>(id, fixtures); }
+    static CommandInstance New(Hash id, const IDSet &fixtures) { return std::make_shared<CommandFixtureCollectionAssignFixtures>(id, fixtures); }
 
     void execute() override { redo(); }
 
@@ -65,5 +65,5 @@ public:
 
 private:
     Hash id;
-    std::set<Hash> fixtureIds;
+    IDSet fixtureIds;
 };

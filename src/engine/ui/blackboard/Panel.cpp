@@ -207,15 +207,15 @@ void Blackboard::Panel::Draw() {
 
     ImGui::PopStyleColor(3);
 
-    for (const auto &item: currentShow->blackboardItems.items) {
-        float xOff = item->x * elementWidth;
-        float yOff = item->y * elementHeight;
+    for (const auto &item: currentShow->blackboardItems) {
+        float xOff = item.second->x * elementWidth;
+        float yOff = item.second->y * elementHeight;
         ImVec2 tlLocalSpace(topLeft.x + xOff, topLeft.y + yOff);
         ImVec2 tlScreenSpace(topLeft.x + xOff + windowPos.x, topLeft.y + yOff + windowPos.y);
-        ImVec2 brScreenSpace(tlScreenSpace.x + elementWidth * item->width, tlScreenSpace.y + elementHeight * item->height);
+        ImVec2 brScreenSpace(tlScreenSpace.x + elementWidth * item.second->width, tlScreenSpace.y + elementHeight * item.second->height);
         //dl->PushClipRect(tlScreenSpace, brScreenSpace, true);
         ImGui::SetCursorPos(tlLocalSpace);
-        item->Render(dl, tlScreenSpace, brScreenSpace, elementWidth, elementHeight);
+        item.second->Render(dl, tlScreenSpace, brScreenSpace, elementWidth, elementHeight);
         //dl->PopClipRect();
     }
     //dl->PopClipRect();
@@ -227,14 +227,14 @@ void Blackboard::Panel::Draw() {
 void Blackboard::Panel::PlaceInstance(const Blackboard::ItemInstance &instance, int x, int y, int width, int height, bool skipAddToShow) {
     instance->parent = currentShow->panelBlackboard;
     if (!skipAddToShow) {
-        currentShow->blackboardItems.Add(instance);
+        currentShow->blackboardItems.insert_or_assign(instance->id, instance);
     }
     instance->Move(x, y);
     instance->Resize(width, height);
 }
 
 void Blackboard::Panel::OccupyInstanceArea(Hash id) {
-    OccupyInstanceArea(currentShow->blackboardItems.Get(id));
+    OccupyInstanceArea(currentShow->blackboardItems.at(id));
 }
 
 void Blackboard::Panel::OccupyInstanceArea(ItemInstance instance) {
@@ -249,7 +249,7 @@ void Blackboard::Panel::OccupyInstanceArea(ItemInstance instance) {
 }
 
 void Blackboard::Panel::FreeInstanceArea(Hash id) {
-    const auto &instance = currentShow->blackboardItems.Get(id);
+    const auto &instance = currentShow->blackboardItems.at(id);
     if (!instance) {
         return;
     }

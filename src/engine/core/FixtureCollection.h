@@ -4,7 +4,7 @@
 struct FixtureCollection {
     Hash id;
     std::string name;
-	std::set<Hash> assignedFixtures;
+	IDSet assignedFixtures;
 };
 typedef std::shared_ptr<FixtureCollection> FixtureCollectionInstance;
 

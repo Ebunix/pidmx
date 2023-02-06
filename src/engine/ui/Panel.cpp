@@ -12,7 +12,7 @@ UI::Panel::Panel(std::string title, PanelType type, ImGuiWindowFlags flags): fla
 }
 
 void UI::Panel::Load(const nbt::tag_compound &comp) {
-    open = nbt::Load(comp, "open", false);
+    open = nbt::Load(comp, "open", nullptr, false);
 
     // Handled by ImGui saving ini data to the show file instead
     // of manually restoring. Works better with any sort of docked

@@ -18,20 +18,16 @@ namespace Blackboard {
         ItemType_Count_,
     };
 
-    class Item : virtual public ISerializable {
+    class Item {
     public:
+        Hash id;
+        std::string name;
         int x = 0, y = 0;
         int width = 1, height = 1;
         ItemType type = ItemType_None;
         std::shared_ptr<Panel> parent;
 
-        Item(std::string name, ItemType type);
-
-        void Load(const nbt::tag_compound& pack) override;
-        nbt::tag_compound Save() override;
-        void afterLoad() override;
-        virtual void LoadSpecifics(const nbt::tag_compound& pack) = 0;
-        virtual nbt::tag_compound SaveSpecifics() = 0;
+        Item(std::string name = "", ItemType type = ItemType_None);
 
         void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
 
