@@ -13,7 +13,7 @@ struct FixtureCollection : IIdentifiable {
         this->id = id;
     }
 
-    nbt::tag_compound Save() override;
+    nbt::tag_compound Save() const override;
 
     void Load(const nbt::tag_compound &data) override;
 };

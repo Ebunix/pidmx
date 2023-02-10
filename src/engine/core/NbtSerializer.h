@@ -30,7 +30,9 @@ namespace nbt {
 
     static tag_string Serialize(const std::string &input) { return {input}; }
 
-    static tag_compound Serialize(const std::shared_ptr<ISer> &input) { return input->Save(); }
+    static tag_compound Serialize(const std::shared_ptr<ISer> &input) { return input ? input->Save() : tag_compound(); }
+
+    static tag_compound Serialize(const ISer &input) { return input.Save(); }
 
     static tag_byte_array Serialize(const signed char *data, size_t len) {
         tag_byte_array bytes;
@@ -109,6 +111,16 @@ namespace nbt {
         auto ptr = std::make_shared<T>();
         ptr->Load(input.as<tag_compound>());
         return ptr;
+    }
+    template<typename T>
+    static T Deserialize(const value &input, const T &fallback) {
+        bool valid = input.get_type() == tag_type::Compound && input.as<tag_compound>().has_key("id");
+        if (!valid) {
+            return fallback;
+        }
+        T val;
+        val.Load(input.as<tag_compound>());
+        return val;
     }
 
     static const signed char *Deserialize(const value &input, const signed char *fallback, size_t *len) {
@@ -276,3 +288,13 @@ namespace nbt {
     }
 
 }
+
+#define NBT_ENUM_SERIALIZER_IMPL(type) namespace nbt { \
+    static tag_int Serialize(const type &input) { return {(int)input}; } \
+    static type Deserialize(const value &input, const type &fallback) { \
+        bool valid = input.get_type() == tag_type::Int; \
+        return (valid ? (type)input.as<tag_int>().get() : fallback); \
+    } \
+}
+
+

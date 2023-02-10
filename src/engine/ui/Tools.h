@@ -3,6 +3,7 @@
 #include <set>
 #include "imgui_internal.h"
 #include "engine/ui/blackboard/Panel.h"
+#include "engine/core/FixturePreset.h"
 
 extern ImVec2 buttonSmall;
 extern ImVec2 buttonLarge;
@@ -32,6 +33,13 @@ namespace UI {
 	extern ColorPreset ColorPresets[ColorPresetType_Count_];
     const ImVec4 ColorOutlineHint(1.0f, 1.0f, 1.0f, 0.08f);
     const ImVec4 ColorTextTransparentLight(1.0f, 1.0f, 1.0f, 0.17f);
+    const ImVec4 ColorOutputValue(0.8f, 0.8f, 0.8f, 1.0f);
+    const ImVec4 ColorDivergedValue(0.3f, 1.0f, 0.3f, 1.0f);
+    const ImVec4 ColorRecordingValue(1.0f, 0.3f, 0.3f, 1.0f);
+
+    const ImU32 ColorGroupIndicatorInactive = 0xff888888;
+    const ImU32 ColorGroupIndicatorGreen = 0xff88ff88;
+    const ImU32 ColorGroupIndicatorYellow = 0xff88ffff;
 
 	bool BeginMenuBar();
 	bool BeginMainMenuBar();
@@ -52,4 +60,9 @@ namespace UI {
     bool OutlinedButton(ImDrawList *dl, const ImColor &borderColor, const ColorPreset &frameBgColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
     void OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor &bgColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
     void OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br, float thickness = 2.0f);
+
+    bool BeginPresetList(const ImVec2 &size = {0, 0});
+    inline static void EndPresetList() { ImGui::EndTable(); }
+    bool DrawPresetTableEntry(const FixturePresetInstance& preset, bool selected = false);
+    void DrawCollectionActiveButton(const ImVec2 &tl, const ImVec2 &br, const char* name, ImU32 indicatorColor = ColorGroupIndicatorInactive);
 }

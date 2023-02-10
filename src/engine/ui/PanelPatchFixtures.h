@@ -7,9 +7,9 @@
 #include <vector>
 
 namespace UI {
-    class PatchFixturesPanel : public Panel {
+    class PanelPatchFixtures : public Panel {
     public:
-        PatchFixturesPanel() : Panel("Patch setup", PanelType_FixturePatch, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar) {}
+        PanelPatchFixtures() : Panel("Patch setup", PanelType_FixturePatch, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar) {}
         void Draw() override;
         void OnShow() override;
 

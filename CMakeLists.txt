@@ -85,11 +85,11 @@ add_executable(pidmx
 
 	src/engine/ui/Tools.cpp
 	src/engine/ui/MainPanel.cpp
-        src/engine/ui/PatchFixturesPanel.cpp
+        src/engine/ui/PanelPatchFixtures.cpp
 	src/engine/ui/PanelConsole.cpp
 
 	src/engine/Console.cpp
-	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h src/engine/ui/PanelFixturePresetEditor.cpp src/engine/ui/PanelFixturePresetEditor.h src/engine/ui/PanelOperators.cpp src/engine/ui/PanelOperators.h src/engine/core/Collections.h src/engine/core/IIdentifiable.h src/engine/core/IIdentifiable.cpp src/engine/core/NbtSerializer.h src/engine/core/ISer.h src/engine/core/EngineAction.h)
+	src/engine/ui/ImGuiExt.cpp src/engine/ui/ImGuiExt.h src/engine/ui/Panel.h src/engine/core/Utils.h src/engine/ui/blackboard/Panel.cpp src/engine/ui/blackboard/Panel.h src/engine/ui/blackboard/Item.cpp src/engine/ui/blackboard/Item.h src/engine/ui/Panel.cpp src/engine/command/CommandBlackboard.h src/engine/ui/blackboard/ItemCollection.h src/engine/core/FixturePreset.cpp src/engine/ui/blackboard/ItemGroups.cpp src/engine/ui/blackboard/ItemGroups.h src/engine/ui/blackboard/ItemFixtureSheet.cpp src/engine/ui/blackboard/ItemFixtureSheet.h src/engine/ui/PanelFixturePresetEditor.cpp src/engine/ui/PanelFixturePresetEditor.h src/engine/ui/PanelOperators.cpp src/engine/ui/PanelOperators.h src/engine/core/Collections.h src/engine/core/IIdentifiable.h src/engine/core/IIdentifiable.cpp src/engine/core/NbtSerializer.h src/engine/core/ISer.h src/engine/core/EngineAction.h src/engine/core/Programmer.cpp src/engine/core/Programmer.h src/engine/ui/blackboard/ItemParameters.cpp src/engine/ui/blackboard/ItemParameters.h src/engine/ui/blackboard/ItemPresets.cpp src/engine/ui/blackboard/ItemPresets.h src/engine/core/CallablePreset.h src/engine/ui/blackboard/ItemCollection.cpp)
 
 target_include_directories(pidmx PUBLIC src)
 target_compile_definitions(pidmx PRIVATE -DPIDMX_ENABLE_JAVASCRIPT=${PIDMX_ENABLE_JAVASCRIPT})

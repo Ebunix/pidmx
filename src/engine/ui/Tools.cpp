@@ -188,3 +188,57 @@ void UI::OutlinedPanel(ImDrawList *dl, const ImColor &borderColor, const ImColor
 void UI::OutlinedPanelBorder(ImDrawList *dl, const ImColor &borderColor, const ImVec2 &tl, const ImVec2 &br, float thickness) {
     dl->AddRect(tl, br, borderColor, Blackboard::PanelButtonRounding * Engine::Instance().dpiScale, 0, thickness * Engine::Instance().dpiScale);
 }
+
+bool UI::BeginPresetList(const ImVec2 &size) {
+    if (ImGui::BeginTable("table1", 4, ImGui::tableFlagsPidmxSortable, size)) {
+        ImGui::TableSetupColumn("Fixture");
+        ImGui::TableSetupColumn("Manufacturer");
+        ImGui::TableSetupColumn("Mode");
+        ImGui::TableSetupColumn("Footprint");
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+        return true;
+    }
+    return false;
+}
+
+bool UI::DrawPresetTableEntry(const FixturePresetInstance &preset, bool selected) {
+    ImGui::PushID((int)preset->id);
+    ImGui::TableNextRow();
+
+    ImGui::TableSetColumnIndex(0);
+    bool result = ImGui::Selectable(preset->name.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+    ImGui::TableSetColumnIndex(1);
+    ImGui::Text("%s", preset->manufacturer.c_str());
+
+    ImGui::TableSetColumnIndex(2);
+    ImGui::Text("Mode 1");
+
+    ImGui::TableSetColumnIndex(3);
+    ImGui::Text("%i", preset->footprint  );
+    ImGui::PopID();
+
+    return result;
+}
+
+void UI::DrawCollectionActiveButton(const ImVec2 &tl, const ImVec2 &br, const char* name, ImU32 indicatorColor) {
+    ImDrawList* list = ImGui::GetWindowDrawList();
+
+    ImVec2 size = br - tl;
+    float halfHeight = size.y / 2;
+
+    ImVec2 cursorPos = ImGui::GetCursorPos();
+    ImVec2 cursorLeftHalf = cursorPos + ImVec2(0, halfHeight);
+
+    ImVec2 rightHalf(br.x, tl.y + halfHeight);
+    ImVec2 leftHalf(tl.x, tl.y + halfHeight);
+
+    list->AddRectFilled(tl, rightHalf, 0xff000000, Blackboard::PanelButtonRounding * Engine::Instance().dpiScale);
+    list->AddLine(leftHalf, rightHalf, indicatorColor, 4.0f * Engine::Instance().dpiScale);
+
+    ImGui::SetCursorPos(cursorLeftHalf);
+    UI::CenterTextWrap(name, br.x - tl.x, halfHeight);
+    ImGui::SetCursorPos(cursorPos);
+
+    UI::OutlinedPanelBorder(list, 0xff666666, tl, br, 1.0f);
+}

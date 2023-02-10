@@ -1,6 +1,6 @@
 #include "MainPanel.h"
 #include "Tools.h"
-#include "PatchFixturesPanel.h"
+#include "PanelPatchFixtures.h"
 #include "PanelConsole.h"
 #include <string.h>
 #include <engine/core/ShowData.h>

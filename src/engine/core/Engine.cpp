@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Fixture.h"
 #include "imgui.h"
 #include "ShowData.h"
 #include <js/js.h>
@@ -33,6 +32,7 @@ bool eatParam(int argc, char* argv[], int* index, char* name, size_t nameLen, ch
 Engine::Engine(int argc, char* argv[])
 {
     engineInstance = this;
+    NewShow();
 
     char varName[32], varValue[32];
     int argIndex = 1;
@@ -107,18 +107,15 @@ void Engine::Redo() {
 }
 
 void Engine::LoadFixturePresetsFromDirectory(const std::string &dir) {
-    //for (const auto & entry : fs::directory_iterator(dir)) {
-    //    auto root = nbt::LoadFromFile(entry.path().string());
-    //    auto vec = nbt::Load(*root, "fixturePresets", nullptr, Set<FixturePreset>{});
-    //    fixturePresets.insert(vec.begin(), vec.end());
-    //}
+    for (const auto & entry : fs::directory_iterator(dir)) {
+        auto root = nbt::LoadFromFile(entry.path().string());
+        auto vec = nbt::Deserialize(*root, "fixturePresets", Set<FixturePresetInstance>());
+        fixturePresets.insert(vec.begin(), vec.end());
+    }
 
-    FixturePreset pres;
-    pres.footprint = (int)fixturePresets.size();
-    pres.name = "Auto-generated";
-    pres.manufacturer = "Auto-generated";
-    pres.parameters.insert(FixtureParameter{});
-    fixturePresets.insert(pres);
+    nbt::tag_compound root;
+    root.insert("fixturePresets", nbt::Serialize(fixturePresets.begin(), fixturePresets.end()));
+    nbt::SaveToFile(root, "fixturePresets.bundle", true);
 }
 
 void Engine::SetAction(EngineAction action) {
@@ -129,9 +126,28 @@ void Engine::Clear() {
     if (action != EngineAction_None) {
         SetAction(EngineAction_None);
     }
+    else if (programmer.IsTrackingAnything()) {
+        programmer.Clear();
+    }
     else {
-        activeFixtures.clear();
-        activeGroups.clear();
+        bool isAnyOutputDiverged = false;
+        for (const auto& fix : currentShow->fixtures) {
+            if (fix.second->IsAnyOutputDiverged()) {
+                isAnyOutputDiverged = true;
+                break;
+            }
+        }
+        if (isAnyOutputDiverged) {
+            for (const auto &fix: currentShow->fixtures) {
+                fix.second->ResetOutputToCalled();
+            }
+            activePreset = INVALID_HASH;
+        }
+        else {
+            activePreset = INVALID_HASH;
+            activeFixtures.clear();
+            activeGroups.clear();
+        }
     }
 }
 
@@ -144,9 +160,12 @@ void Engine::UpdateAvailableParameters() {
     availableParametersOnFixtures.clear();
     for (const auto& fixtureId : activeFixtures) {
         const auto& fixture = currentShow->fixtures.at(fixtureId);
+        if (fixture->data.presetId == INVALID_HASH) {
+            continue;
+        }
         const auto& preset = currentShow->fixturePresets.at(fixture->data.presetId);
         for (const auto& param : preset->parameters) {
-            availableParametersOnFixtures.insert(param.type);
+            availableParametersOnFixtures.insert(param->type);
         }
     }
 
@@ -154,8 +173,20 @@ void Engine::UpdateAvailableParameters() {
 
 void Engine::AddActiveGroup(Hash id) {
     const auto& group = currentShow->groups.at(id);
-    activeGroups.insert(group->id);
-    activeFixtures.insert(group->fixtures.begin(), group->fixtures.end());
+    activeGroups.insert(group.id);
+    activeFixtures.insert(group.fixtures.begin(), group.fixtures.end());
+    UpdateAvailableParameters();
+}
+
+void Engine::ActivatePreset(Hash presetId) {
+    for (const auto& pres : currentShow->presets.at(presetId).callables) {
+        for (const auto& val : pres.values) {
+            FixtureInstance &fix = currentShow->fixtures.at(pres.fixtureId);
+            fix->SetParamValue(val.first, val.second);
+            fix->SetParamValue(val.first, val.second, activePreset != presetId);
+        }
+    }
+    activePreset = presetId;
 }
 
 

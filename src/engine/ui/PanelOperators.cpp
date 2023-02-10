@@ -18,6 +18,10 @@ namespace UI {
             engine.SetAction(EngineAction_Delete);
         }
         ImGui::NewLine();
+        if (ActionButton("Edit", EngineAction_Edit)) {
+            engine.SetAction(EngineAction_Edit);
+        }
+        ImGui::NewLine();
         if (ImGui::Button("Clear", buttonSize)) {
             engine.Clear();
         }

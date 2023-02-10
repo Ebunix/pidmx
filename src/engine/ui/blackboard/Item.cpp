@@ -12,6 +12,8 @@
 #include "engine/ui/ImGuiExt.h"
 #include "ItemGroups.h"
 #include "ItemFixtureSheet.h"
+#include "ItemParameters.h"
+#include "ItemPresets.h"
 
 using namespace UI;
 
@@ -20,7 +22,7 @@ Blackboard::Item::Item(std::string name, ItemType type) : type(type) {
     id = Engine::Instance().Show().blackboardItems.size() + 1;
 }
 
-nbt::tag_compound Blackboard::Item::Save() {
+nbt::tag_compound Blackboard::Item::Save() const {
     nbt::tag_compound c = IIdentifiable::Save();
     c.insert("x", nbt::Serialize(x));
     c.insert("y", nbt::Serialize(y));
@@ -45,9 +47,9 @@ void Blackboard::Item::Load(const nbt::tag_compound &c) {
 void Blackboard::Item::Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight) {
     ImGui::PushID((int) id);
 
-    ImColor frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
+    ImColor windowBgColor = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
 
-    OutlinedPanel(list, 0, frameBgColor, topLeft, bottomRight);
+    OutlinedPanel(list, 0, windowBgColor, topLeft, bottomRight);
 
     if (UseGridLayout()) {
         RenderGrid(list, topLeft, bottomRight, cellWidth, cellHeight);
@@ -88,7 +90,7 @@ void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 botto
         for (int itemX = 0; itemX < width; itemX++) {
             ImVec2 itemTL = ImVec2(topLeft.x + itemSize.x * itemX + ((itemX + 1) * padding.x), topLeft.y + itemSize.y * itemY + ((itemY + 1) * padding.y));
             ImVec2 itemBR = itemTL + itemSize;
-           
+
             ImVec2 itemTLLocal = itemTL - windowPos;
             ImGui::SetCursorPos(itemTLLocal);
             
@@ -105,14 +107,14 @@ void Blackboard::Item::RenderGrid(ImDrawList *list, ImVec2 topLeft, ImVec2 botto
                 ImGui::PopFont();
 
             } else {
-                int index = itemX + itemY * width - 1;
+                int index = itemX + itemY * width;
                 ImGui::PushFont(ImGui::fontRegularSmall);
                 Draw(list, itemTL, itemBR, index);
                 ImGui::PopFont();
                 ImGui::PushFont(ImGui::fontPixel);
                 ImGui::SetCursorPos(itemTLLocal + ItemInnerPadding * Engine::Instance().dpiScale);
                 ImGui::PushStyleColor(ImGuiCol_Text, ColorTextTransparentLight);
-                ImGui::Text("%d", index + 1);
+                ImGui::Text("%d", index);
                 ImGui::PopStyleColor();
                 ImGui::PopFont();
             }
@@ -179,6 +181,10 @@ Blackboard::ItemInstance Blackboard::CreateItem(ItemType type) {
             return std::make_shared<ItemGroups>();
         case ItemType_FixtureSheet:
             return std::make_shared<ItemFixtureSheet>();
+        case ItemType_Parameters:
+            return std::make_shared<ItemParameters>();
+        case ItemType_Presets:
+            return std::make_shared<ItemPresets>();
         case ItemType_None:
         default:
             LogMessage(LogMessageType_Error, "Unknown type %i in %s", type, __FUNCTION__);

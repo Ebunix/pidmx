@@ -1,6 +1,6 @@
 #include "FixtureCollection.h"
 
-nbt::tag_compound FixtureCollection::Save() {
+nbt::tag_compound FixtureCollection::Save() const {
     auto c = IIdentifiable::Save();
     c.insert("assignedFixtures", nbt::Serialize(assignedFixtures.begin(), assignedFixtures.end()));
     return c;

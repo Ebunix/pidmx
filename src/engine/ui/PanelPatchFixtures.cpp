@@ -1,4 +1,4 @@
-#include "PatchFixturesPanel.h"
+#include "PanelPatchFixtures.h"
 #include "ImGuiExt.h"
 #include "engine/core/Utils.h"
 #include <engine/command/CommandFixtureCollection.h>
@@ -6,8 +6,131 @@
 #include <engine/core/ShowData.h>
 #include <set>
 
+void UI::PanelPatchFixtures::DrawAddFixtureModal(bool openAddFixturesModal) {
+    static char fixtureNameBuffer[100];
+    static int fixtureId;
+    static int fixtureQuantity;
+    static char fixturePatchBuffer[8];
+    static FixturePresetInstance selectedPreset;
 
-void UI::PatchFixturesPanel::DrawAddFixtureModal(bool openAddFixturesModal) {
+    if (openAddFixturesModal) {
+        strcpy(fixturePatchBuffer, "1.001");
+    }
+
+    DialogOption result = DialogOption_None;
+    int universe, channel;
+    bool errors = false;
+    bool openImportPresetModal = false;
+    ImGuiStyle &style = ImGui::GetStyle();
+    Engine &engine = Engine::Instance();
+    ShowData &show = engine.Show();
+
+    ImVec2 availableArea = ImGui::GetContentRegionAvail();
+    ImVec2 halfSize(availableArea.x / 2 - style.FramePadding.x, availableArea.y - style.FramePadding.y - 35 * engine.dpiScale);
+
+    if (ImGui::BeginChildFrame(ImGui::GetID("left"), halfSize, ImGuiWindowFlags_NoBackground)) {
+        if (openAddFixturesModal) {
+            fixtureNameBuffer[0] = 0;
+        }
+
+        if (ImGui::InputText("Fixture name", fixtureNameBuffer, sizeof(fixtureNameBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+            result = DialogOption_OK;
+        }
+        ImGui::InputInt("Fixture ID", &fixtureId, 1, 1);
+        ImGui::InputInt("Quantity", &fixtureQuantity, 1, 1);
+        if (ImGui::InputText("Patch", fixturePatchBuffer, sizeof(fixturePatchBuffer), ImGuiInputTextFlags_EnterReturnsTrue)) {
+            result = DialogOption_OK;
+        }
+
+        fixtureId = fmin(999999, fmax(1, fixtureId));
+        fixtureQuantity = fmin(999999, fmax(1, fixtureQuantity));
+
+        if (!FixturePatchStringToUniverseChannel(fixturePatchBuffer, sizeof(fixturePatchBuffer), &universe, &channel)) {
+            ImGui::TextWrapped("Patch: <%s> is not a valid patch", fixturePatchBuffer);
+            errors = true;
+        }
+        else {
+            ImGui::TextWrapped("Target: %d.%03d is not a valid patch", universe, channel);
+        }
+
+    }
+    ImGui::EndChildFrame();
+
+    ImGui::SameLine();
+
+    if (ImGui::BeginChildFrame(ImGui::GetID("right"), halfSize)) {
+        ImGui::Text("Imported presets");
+        if (ImGui::BeginTable("preset list", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Sortable)) {
+            ImGui::TableSetupColumn("Fixture");
+            ImGui::TableSetupColumn("Manufacturer");
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableHeadersRow();
+
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            openImportPresetModal = ImGui::Selectable("Import fixture preset", false, ImGuiSelectableFlags_SpanAllColumns);
+
+            for (const auto &preset: show.fixturePresets) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                if (ImGui::Selectable(preset.second->name.c_str(), selectedPreset && selectedPreset->id == preset.second->id, ImGuiSelectableFlags_SpanAllColumns)) {
+                    selectedPreset = preset.second;
+                    strncpy(fixtureNameBuffer, selectedPreset->name.c_str(), sizeof(fixtureNameBuffer));
+                    strncat(fixtureNameBuffer, " 1", sizeof(fixtureNameBuffer) - strlen(fixtureNameBuffer) - 1);
+                }
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("%s", preset.second->manufacturer.c_str());
+            }
+
+            ImGui::EndTable();
+        }
+    }
+    ImGui::EndChildFrame();
+
+    ImVec2 halfVp = ImGui::GetMainViewport()->WorkSize / 2;
+    ImGui::SetNextWindowSize(halfVp);
+    ImGui::SetNextWindowPos(halfVp / 2, ImGuiCond_Appearing);
+    if (UI::BeginPopupDialog(openImportPresetModal, "Import preset")) {
+        static FixturePresetInstance importSelectedPreset;
+        if (openImportPresetModal) {
+            importSelectedPreset = nullptr;
+        }
+
+        ImVec2 contentArea = ImGui::GetContentRegionAvail();
+        ImVec2 halfHeight(contentArea.x, (contentArea.y - style.FramePadding.y - 40 * engine.dpiScale) / 2);
+        if (UI::BeginPresetList(halfHeight)) {
+            for (const auto &preset: engine.fixturePresets) {
+                if (!preset) {
+                    continue;
+                }
+                if (UI::DrawPresetTableEntry(preset, importSelectedPreset && importSelectedPreset->id == preset->id)) {
+                    importSelectedPreset = preset;
+                }
+            }
+            UI::EndPresetList();
+            if (ImGui::BeginChildFrame(ImGui::GetID("description"), halfHeight)) {
+
+            }
+            ImGui::EndChildFrame();
+        }
+
+        if (UI::EndPopupDialog(DialogOption_Cancel | DialogOption_OK, result, importSelectedPreset ? DialogOption_None : DialogOption_OK) == DialogOption_OK) {
+            show.fixturePresets.insert_or_assign(importSelectedPreset->id, importSelectedPreset);
+        }
+    }
+
+    if (UI::EndPopupDialog(DialogOption_Cancel | DialogOption_OK, result, errors ? DialogOption_OK : DialogOption_None) == DialogOption_OK && !errors) {
+        show.commandHistory.BeginEntry("Patch %d fixtures", fixtureQuantity);
+        for (int i = 0; i < fixtureQuantity; i++) {
+            Hash presetId = selectedPreset ? selectedPreset->id : INVALID_HASH;
+            int targetChannel = channel + (selectedPreset ? selectedPreset->footprint * i : 0);
+            show.commandHistory.Push(std::make_shared<CommandFixtureAdd>(FixtureData(fixtureNameBuffer, fixtureId + i, presetId, universe, targetChannel)));
+        }
+        show.commandHistory.EndEntry();
+    }
+
+
+    /*
     static char fixtureNameBuffer[100];
     static char fixtureIdBuffer[6];
     static char fixtureQuantityBuffer[6];
@@ -71,11 +194,12 @@ void UI::PatchFixturesPanel::DrawAddFixtureModal(bool openAddFixturesModal) {
         }
         show.commandHistory.EndEntry();
     }
+     */
 }
 
-void UI::PatchFixturesPanel::DrawAddFixturesToCollectionModal(bool open) {
+void UI::PanelPatchFixtures::DrawAddFixturesToCollectionModal(bool open) {
     static Hash selectedCollection = INVALID_HASH;
-    ShowData& show = Engine::Instance().Show();
+    ShowData &show = Engine::Instance().Show();
 
     FixtureCollectionInstance instance = selectedCollection != INVALID_HASH ? show.fixtureCollections.at(selectedCollection) : nullptr;
     if (ImGui::BeginCombo("Collection", instance ? instance->name.c_str() : "Select a collection")) {
@@ -95,7 +219,7 @@ void UI::PatchFixturesPanel::DrawAddFixturesToCollectionModal(bool open) {
     }
 }
 
-void UI::PatchFixturesPanel::DrawCollectionTable() {
+void UI::PanelPatchFixtures::DrawCollectionTable() {
     static char buffer[16];
 
     ImGui::TableSetupColumn("ID");
@@ -159,7 +283,7 @@ void UI::PatchFixturesPanel::DrawCollectionTable() {
 }
 
 
-void UI::PatchFixturesPanel::DrawFixtureTable() {
+void UI::PanelPatchFixtures::DrawFixtureTable() {
     ImGui::TableSetupColumn("ID");
     ImGui::TableSetupColumn("Name");
     ImGui::TableSetupColumn("Type");
@@ -209,12 +333,12 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
         ImGui::PushFont(ImGui::fontMonospace);
         if (fixture.second->data.universe == 0 && fixture.second->data.channel == 0) {
             ImGui::Text("-.---");
-        } else if (fixture.second->data.channel != 0) {
-            ImGui::Text("-.%03i", fixture.second->data.channel);
+        } else if (fixture.second->data.universe != 0 && fixture.second->data.channel != 0) {
+            ImGui::Text("%i.%03i", fixture.second->data.universe, fixture.second->data.channel);
         } else if (fixture.second->data.universe != 0) {
             ImGui::Text("%i.---", fixture.second->data.universe);
         } else {
-            ImGui::Text("%i.%03i", fixture.second->data.universe, fixture.second->data.channel);
+            ImGui::Text("-.%03i", fixture.second->data.channel);
         }
         ImGui::PopFont();
     }
@@ -224,7 +348,7 @@ void UI::PatchFixturesPanel::DrawFixtureTable() {
     ImGui::EndTable();
 }
 
-void UI::PatchFixturesPanel::Draw() {
+void UI::PanelPatchFixtures::Draw() {
     bool openAddCollectionModal = false;
     bool openAddFixturesModal = false;
     bool openAssignFixturesModal = false;
@@ -279,9 +403,13 @@ void UI::PatchFixturesPanel::Draw() {
         }
     }
 
+    ImVec2 halfVp = ImGui::GetMainViewport()->WorkSize / 2;
+    ImGui::SetNextWindowSize(halfVp);
+    ImGui::SetNextWindowPos(halfVp / 2, ImGuiCond_Appearing);
     if (UI::BeginPopupDialog(openAddFixturesModal, "Add fixtures")) {
         DrawAddFixtureModal(openAddFixturesModal);
     }
+
     if (UI::BeginPopupDialog(openAssignFixturesModal, "Assign to collections")) {
         DrawAddFixturesToCollectionModal(openAssignFixturesModal);
     }
@@ -307,11 +435,11 @@ void UI::PatchFixturesPanel::Draw() {
     }
 }
 
-void UI::PatchFixturesPanel::OnShow() {
+void UI::PanelPatchFixtures::OnShow() {
     FilterForCurrentCollection();
 }
 
-void UI::PatchFixturesPanel::FilterForCurrentCollection() {
+void UI::PanelPatchFixtures::FilterForCurrentCollection() {
     ShowData &show = Engine::Instance().Show();
     filteredFixtures.clear();
     std::set<Hash> availableInCollections;

@@ -195,6 +195,10 @@ void Blackboard::Panel::Draw() {
                 if (ImGui::Button("Collections")) { currentPlacingItem = ItemType_Collections; }
                 if (ImGui::Button("Fixture Groups")) { currentPlacingItem = ItemType_Groups; }
                 if (ImGui::Button("Fixture Sheet")) { currentPlacingItem = ItemType_FixtureSheet; }
+                if (ImGui::Button("Parameters")) { currentPlacingItem = ItemType_Parameters; }
+                if (ImGui::Button("Presets")) {
+                    currentPlacingItem = ItemType_Presets;
+                }
                 if (currentPlacingItem != ItemType_None) {
                     ImGui::CloseCurrentPopup();
                     currentPlacingItemX = x;

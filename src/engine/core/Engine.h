@@ -3,6 +3,7 @@
 #include "FixturePreset.h"
 #include "ShowData.h"
 #include "EngineAction.h"
+#include "Programmer.h"
 #include <vector>
 #include <set>
 
@@ -14,12 +15,13 @@ class Engine {
 public:
     static const uint32_t VERSION = VERSION_CODE(0, 0, 1);
     EngineAction action;
+    Programmer programmer;
 
     IDSet activeFixtures;
     IDSet activeGroups;
     Set<FixtureParameterType> availableParametersOnFixtures;
 
-    Set<FixturePreset> fixturePresets;
+    Set<FixturePresetInstance> fixturePresets;
 
     float dpiScale;
 
@@ -49,10 +51,14 @@ public:
 
     void AddActiveGroup(Hash id);
 
+    void ActivatePreset(Hash presetId);
+    inline bool IsPresetActive(Hash presetId) { return presetId == activePreset; }
+
     ShowData& Show() { return *currentShow; }
 
 private:
     ShowData* currentShow = nullptr;
+    Hash activePreset = INVALID_HASH;
 
     void UpdateAvailableParameters();
 };

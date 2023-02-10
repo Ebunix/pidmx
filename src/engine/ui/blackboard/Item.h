@@ -16,6 +16,8 @@ namespace Blackboard {
         ItemType_Collections,
         ItemType_Groups,
         ItemType_FixtureSheet,
+        ItemType_Parameters,
+        ItemType_Presets,
         ItemType_Count_,
     };
 
@@ -29,7 +31,7 @@ namespace Blackboard {
 
         Item(std::string name = "", ItemType type = ItemType_None);
 
-        nbt::tag_compound Save() override;
+        nbt::tag_compound Save() const override;
         void Load(const nbt::tag_compound &c) override;
 
         void Render(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight, float cellWidth, float cellHeight);
@@ -47,7 +49,7 @@ namespace Blackboard {
         void RenderWindow(ImDrawList *list, ImVec2 topLeft, ImVec2 bottomRight);
 
         inline bool UseGridLayout() {
-            return type == ItemType_Collections || type == ItemType_Groups;
+            return type == ItemType_Collections || type == ItemType_Groups || type == ItemType_Presets;
         }
     };
 
@@ -67,6 +69,9 @@ namespace nbt {
             return fallback;
         }
         auto ptr = Blackboard::CreateItem((Blackboard::ItemType)input.at("type").as<tag_int>().get());
+        if (!ptr) {
+            return fallback;
+        }
         ptr->Load(comp);
         return ptr;
     }

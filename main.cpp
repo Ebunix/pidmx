@@ -15,7 +15,7 @@
 #include <engine/ui/MainPanel.h>
 #include "engine/core/Engine.h"
 #include "engine/ui/Panel.h"
-#include "engine/ui/PatchFixturesPanel.h"
+#include "engine/ui/PanelPatchFixtures.h"
 #include "engine/ui/blackboard/Panel.h"
 
 GLFWwindow *glfwWindow = nullptr;
@@ -35,7 +35,7 @@ void setImGuiStyle(float highDPIscaleFactor) {
     colors[ImGuiCol_PopupBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
     colors[ImGuiCol_Border] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
     colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_FrameBg] = ImVec4(0.09f, 0.09f, 0.09f, 1.00f);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.03f, 0.03f, 0.03f, 0.30f);
     colors[ImGuiCol_FrameBgHovered] = ImVec4(0.33f, 0.34f, 0.34f, 1.00f);
     colors[ImGuiCol_FrameBgActive] = ImVec4(0.18f, 0.18f, 0.18f, 0.67f);
     colors[ImGuiCol_TitleBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);

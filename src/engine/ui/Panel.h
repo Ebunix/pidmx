@@ -27,7 +27,7 @@ namespace UI {
 
         explicit Panel(std::string title, PanelType type, ImGuiWindowFlags flags = ImGuiWindowFlags_None);
 
-        nbt::tag_compound Save() override {
+        nbt::tag_compound Save() const override {
             nbt::tag_compound c = IIdentifiable::Save();
             c.insert("name", nbt::Serialize(name));
             c.insert("open", nbt::Serialize(open));

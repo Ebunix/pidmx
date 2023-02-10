@@ -2,14 +2,14 @@
 #include "NbtSerializer.h"
 #include <fstream>
 #include "engine/ui/blackboard/Panel.h"
-#include "engine/ui/PatchFixturesPanel.h"
+#include "engine/ui/PanelPatchFixtures.h"
 
 const int32_t SHOW_VERSION = VERSION_CODE(0, 1, 0);
 ShowData *currentShow = nullptr;
 
 void ShowData::Register() {
     panelBlackboard = RegisterUIPanel(std::make_shared<Blackboard::Panel>());
-    panelPatchFixtures = RegisterUIPanel(std::make_shared<UI::PatchFixturesPanel>());
+    panelPatchFixtures = RegisterUIPanel(std::make_shared<UI::PanelPatchFixtures>());
     panelFixturePresetEditor = RegisterUIPanel(std::make_shared<UI::PanelFixturePresetEditor>());
     panelConsole = RegisterUIPanel(std::make_shared<UI::PanelConsole>());
     panelOperators = RegisterUIPanel(std::make_shared<UI::PanelOperators>());
@@ -19,9 +19,13 @@ void ShowData::Save(const std::string &path) {
     nbt::tag_compound rootCompound;
     rootCompound.insert("VERSION", SHOW_VERSION);
 
+    rootCompound.insert("importedFixturePresets", nbt::Serialize(fixturePresets.begin(), fixturePresets.end()));
     rootCompound.insert("fixtures", nbt::Serialize(fixtures.begin(), fixtures.end()));
-    rootCompound.insert("fixtureCollections", nbt::Serialize(fixtureCollections.begin(), fixtureCollections.end()));
+
     rootCompound.insert("groups", nbt::Serialize(groups.begin(), groups.end()));
+    rootCompound.insert("presets", nbt::Serialize(presets.begin(), presets.end()));
+
+    rootCompound.insert("fixtureCollections", nbt::Serialize(fixtureCollections.begin(), fixtureCollections.end()));
     rootCompound.insert("blackboardItems", nbt::Serialize(blackboardItems.begin(), blackboardItems.end()));
     nbt::tag_compound panelsRoot;
     for (const auto &panel: registeredPanels) {
@@ -45,9 +49,14 @@ void ShowData::Load(const std::string &path) {
     auto rootCompound = nbt::LoadFromFile(path);
 
     auto a = nbt::Deserialize(*rootCompound, "", FixtureInstance());
+
+    fixturePresets = nbt::Deserialize(*rootCompound, "importedFixturePresets", Map<Hash, FixturePresetInstance>());
     fixtures = nbt::Deserialize(*rootCompound, "fixtures", Map<Hash, FixtureInstance>());
+
+    groups = nbt::Deserialize(*rootCompound, "groups", Map<Hash, Blackboard::GroupData>());
+    presets = nbt::Deserialize(*rootCompound, "presets", Map<Hash, Blackboard::PresetData>());
+
     fixtureCollections = nbt::Deserialize(*rootCompound, "fixtureCollections", Map<Hash, FixtureCollectionInstance>());
-    groups = nbt::Deserialize(*rootCompound, "groups", Map<Hash, Blackboard::GroupDataInstance>());
     blackboardItems = nbt::Deserialize(*rootCompound, "blackboardItems", Map<Hash, Blackboard::ItemInstance>());
     if (rootCompound->has_key("panels")) {
         const nbt::tag_compound &panelsRoot = rootCompound->at("panels").as<nbt::tag_compound>();
@@ -65,19 +74,28 @@ void ShowData::Load(const std::string &path) {
     }
 
     for (const auto &panel: blackboardItems) {
-        panel.second->AfterLoad();
+        if (panel.second) {
+            panel.second->AfterLoad();
+        }
+        else {
+            LogMessage(LogMessageType_Warn, "Blackboard panel failed to load");
+        }
     }
 }
 
 void ShowData::RenderPanels() {
     for (const auto &panel: registeredPanels) {
-        panel->Render();
+        if (panel) {
+            panel->Render();
+        }
     }
 }
 
 void ShowData::RenderWindowMenu() {
     for (const auto &panel: registeredPanels) {
-        ImGui::MenuItem(panel->name.c_str(), nullptr, &panel->open);
+        if (panel) {
+            ImGui::MenuItem(panel->name.c_str(), nullptr, &panel->open);
+        }
     }
 }
 

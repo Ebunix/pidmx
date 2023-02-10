@@ -7,21 +7,18 @@ namespace Blackboard {
     struct GroupData: IIdentifiable {
         std::string name;
         IDSet fixtures;
-        nbt::tag_compound Save() override;
+        nbt::tag_compound Save() const override;
         void Load(const nbt::tag_compound &c) override;
     };
-    typedef std::shared_ptr<GroupData> GroupDataInstance;
 
     class ItemGroups : public ItemCollection {
     public:
-        const ImU32 ColorGroupIndicatorInactive = 0xff888888;
-        const ImU32 ColorGroupIndicatorSolo = 0xff88ff88;
-        const ImU32 ColorGroupIndicatorMulti = 0xff88ffff;
 
         ItemGroups();
 
         void Draw(ImDrawList *list, ImVec2 tl, ImVec2 br, int itemIndex) override;
+        void DrawEdit(bool justOpened) override;
 
-        void OnClick(int itemIdOneBased) override;
+        void OnClick(int itemId) override;
     };
 }
